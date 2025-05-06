@@ -1,0 +1,257 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Malla Curricular - ITM (Estudiante)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f3f4f6;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+    }
+    .filters {
+      width: 25%;
+      padding: 2rem;
+      background: #f9fafb;
+      border-right: 1px solid #d1d5db;
+    }
+    .courses {
+      width: 75%;
+      padding: 2rem;
+    }
+    .header {
+      background: #1e40af;
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .semester-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .semester {
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .filters img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 1.5rem;
+            }
+    .semester h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .course {
+      background: white;
+      border-left: 4px solid transparent;
+      border-radius: 6px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .course-green { border-left-color: #10b981; }
+    .course-blue { border-left-color: #3b82f6; }
+    .course-purple { border-left-color: #8b5cf6; }
+    .course-red { border-left-color: #ef4444; }
+    .course-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .course-code {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+    .course-prerequisite {
+      font-size: 0.7rem;
+      color: #dc2626;
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .filters,
+      .courses {
+        width: 100%;
+      }
+      .semester-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<!-- ... head y estilos se mantienen sin cambios ... -->
+
+<body>
+    <div class="container">
+      <div class="filters">
+        <img src="https://www.redttu.edu.co/es/wp-content/uploads/2015/12/13.-ITM.png" alt="ITM Logo"/>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
+        <div class="error-message" id="error-message"></div>
+  
+        <!-- Selector de Malla -->
+        <div class="filter-group">
+          <label class="filter-label">Malla Curricular</label>
+          <select class="filter-select" id="malla-select" onchange="fetchCoursesByMalla()">
+            <option value="">Seleccione una malla</option>
+          </select>
+        </div>
+  
+        <!-- Semestre -->
+        <div class="filter-group">
+          <label class="filter-label">Semestre</label>
+          <select class="filter-select" id="semester-filter">
+            <option value="all">Todos los Semestres</option>
+            ${[...Array(10)].map((_, i) => `<option value="${i + 1}">Semestre ${i + 1}</option>`).join('')}
+          </select>
+        </div>
+  
+        <!-- Mostrar prerrequisitos -->
+        <div class="filter-group">
+          <label class="filter-label">Opciones</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input type="checkbox" id="show-prerequisites" class="mr-2 rounded text-blue-600" />
+              Mostrar Prerrequisitos
+            </label>
+          </div>
+        </div>
+  
+        <button class="apply-btn w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onclick="applyFilters()">Aplicar Filtros</button>
+      </div>
+  
+      <div class="courses">
+        <div class="header">
+          <h1>Malla Curricular - ITM</h1>
+        </div>
+        <div class="semester-grid" id="semester-grid"></div>
+      </div>
+    </div>
+  
+    <script>
+      let courses = {};
+      const addedCourses = new Map();
+  
+      async function fetchMallas() {
+        const mallaSelect = document.getElementById('malla-select');
+        try {
+          const res = await fetch('http://localhost:49513/api/mallas');
+          if (!res.ok) throw new Error('No se pudieron cargar las mallas.');
+          const mallas = await res.json();
+          mallas.forEach(malla => {
+            const option = document.createElement('option');
+            option.value = malla.Id;
+            option.textContent = malla.Nombre || `Malla ${malla.Id}`;
+            mallaSelect.appendChild(option);
+          });
+        } catch (err) {
+          document.getElementById('error-message').textContent = err.message;
+          document.getElementById('error-message').style.display = 'block';
+          console.error(err);
+        }
+      }
+  
+      async function fetchCoursesByMalla() {
+        const mallaId = document.getElementById('malla-select').value;
+        const grid = document.getElementById("semester-grid");
+        grid.innerHTML = '<p class="text-center">Cargando cursos...</p>';
+        document.getElementById('error-message').style.display = 'none';
+  
+        if (!mallaId) {
+          grid.innerHTML = '<p class="text-center text-red-500">Seleccione una malla.</p>';
+          return;
+        }
+  
+        try {
+          const res = await fetch(`http://localhost:49513/api/cursos?mallaId=${mallaId}`);
+          if (!res.ok) throw new Error('No se pudieron cargar los cursos.');
+          const data = await res.json();
+  
+          courses = {};
+          addedCourses.clear();
+          data.forEach(course => {
+            courses[course.Codigo] = {
+              code: course.Codigo,
+              name: course.Asignatura,
+              prerequisite: course.Prerequisito || '',
+              color: course.Color,
+              semester: course.Semestre
+            };
+            addedCourses.set(course.Codigo, course.Semestre);
+          });
+  
+          renderSemesters();
+        } catch (err) {
+          grid.innerHTML = `<p class="text-center text-red-600">${err.message}</p>`;
+          console.error(err);
+        }
+      }
+  
+      function renderSemesters() {
+        const grid = document.getElementById('semester-grid');
+        grid.innerHTML = '';
+        for (let i = 1; i <= 10; i++) {
+          const semester = document.createElement('div');
+          semester.className = 'semester';
+          semester.setAttribute('data-semester', i);
+          semester.innerHTML = `<h3>Semestre ${i}</h3><div id="courses-semester-${i}"></div>`;
+          grid.appendChild(semester);
+        }
+  
+        addedCourses.forEach((semester, code) => {
+          const course = courses[code];
+          if (course) {
+            const container = document.getElementById(`courses-semester-${semester}`);
+            const courseDiv = document.createElement('div');
+            courseDiv.className = `course ${course.color}`;
+            courseDiv.innerHTML = `
+              <div class="course-title">${course.name}</div>
+              <div class="course-code">${course.code}</div>
+              <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
+            `;
+            container.appendChild(courseDiv);
+          }
+        });
+  
+        applyFilters();
+      }
+  
+      function applyFilters() {
+        const semesterFilter = document.getElementById("semester-filter").value;
+        const showPrerequisites = document.getElementById("show-prerequisites").checked;
+  
+        document.querySelectorAll(".semester").forEach(s => {
+          const num = s.getAttribute("data-semester");
+          s.style.display = semesterFilter === "all" || semesterFilter === num ? "block" : "none";
+        });
+  
+        document.querySelectorAll(".course-prerequisite").forEach(p => {
+          p.style.display = showPrerequisites ? "block" : "none";
+        });
+      }
+  
+      window.onload = fetchMallas;
+    </script>
+  </body>  
+</html>

@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="MallaDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Cursos">
+          <Key>
+            <PropertyRef Name="Codigo" />
+          </Key>
+          <Property Name="Codigo" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Asignatura" Type="nvarchar" MaxLength="100" />
+          <Property Name="Prerequisito" Type="nvarchar" MaxLength="100" />
+          <Property Name="Color" Type="varchar" MaxLength="50" />
+          <Property Name="Semestre" Type="int" />
+          <Property Name="Creditos" Type="int" />
+        </EntityType>
+        <EntityType Name="MallaCursos">
+          <Key>
+            <PropertyRef Name="MallaId" />
+            <PropertyRef Name="CursoCodigo" />
+          </Key>
+          <Property Name="MallaId" Type="int" Nullable="false" />
+          <Property Name="CursoCodigo" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Semestre" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Mallas">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="100" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
+        <Association Name="FK__Cursos__Prerequi__38996AB5" />-->
+        <Association Name="FK__MallaCurs__Curso__412EB0B6">
+          <End Role="Cursos" Type="Self.Cursos" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="MallaCursos" Type="Self.MallaCursos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cursos">
+              <PropertyRef Name="Codigo" />
+            </Principal>
+            <Dependent Role="MallaCursos">
+              <PropertyRef Name="CursoCodigo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__MallaCurs__Malla__403A8C7D">
+          <End Role="Mallas" Type="Self.Mallas" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="MallaCursos" Type="Self.MallaCursos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Mallas">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="MallaCursos">
+              <PropertyRef Name="MallaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="MallaDBModelStoreContainer">
+          <EntitySet Name="Cursos" EntityType="Self.Cursos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MallaCursos" EntityType="Self.MallaCursos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Mallas" EntityType="Self.Mallas" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__MallaCurs__Curso__412EB0B6" Association="Self.FK__MallaCurs__Curso__412EB0B6">
+            <End Role="Cursos" EntitySet="Cursos" />
+            <End Role="MallaCursos" EntitySet="MallaCursos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__MallaCurs__Malla__403A8C7D" Association="Self.FK__MallaCurs__Malla__403A8C7D">
+            <End Role="Mallas" EntitySet="Mallas" />
+            <End Role="MallaCursos" EntitySet="MallaCursos" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="MallaDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Curso">
+          <Key>
+            <PropertyRef Name="Codigo" />
+          </Key>
+          <Property Name="Codigo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Asignatura" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Prerequisito" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Color" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Semestre" Type="Int32" />
+          <Property Name="Creditos" Type="Int32" />
+          <NavigationProperty Name="MallaCursos" Relationship="Self.FK__MallaCurs__Curso__412EB0B6" FromRole="Cursos" ToRole="MallaCursos" />
+        </EntityType>
+        <EntityType Name="MallaCurso">
+          <Key>
+            <PropertyRef Name="MallaId" />
+            <PropertyRef Name="CursoCodigo" />
+          </Key>
+          <Property Name="MallaId" Type="Int32" Nullable="false" />
+          <Property Name="CursoCodigo" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Semestre" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Curso" Relationship="Self.FK__MallaCurs__Curso__412EB0B6" FromRole="MallaCursos" ToRole="Cursos" />
+          <NavigationProperty Name="Malla" Relationship="Self.FK__MallaCurs__Malla__403A8C7D" FromRole="MallaCursos" ToRole="Mallas" />
+        </EntityType>
+        <EntityType Name="Malla">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="MallaCursos" Relationship="Self.FK__MallaCurs__Malla__403A8C7D" FromRole="Mallas" ToRole="MallaCursos" />
+        </EntityType>
+        <Association Name="FK__MallaCurs__Curso__412EB0B6">
+          <End Role="Cursos" Type="Self.Curso" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="MallaCursos" Type="Self.MallaCurso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cursos">
+              <PropertyRef Name="Codigo" />
+            </Principal>
+            <Dependent Role="MallaCursos">
+              <PropertyRef Name="CursoCodigo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__MallaCurs__Malla__403A8C7D">
+          <End Role="Mallas" Type="Self.Malla" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="MallaCursos" Type="Self.MallaCurso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Mallas">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="MallaCursos">
+              <PropertyRef Name="MallaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="MallaDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Cursos" EntityType="Self.Curso" />
+          <EntitySet Name="MallaCursos" EntityType="Self.MallaCurso" />
+          <EntitySet Name="Mallas" EntityType="Self.Malla" />
+          <AssociationSet Name="FK__MallaCurs__Curso__412EB0B6" Association="Self.FK__MallaCurs__Curso__412EB0B6">
+            <End Role="Cursos" EntitySet="Cursos" />
+            <End Role="MallaCursos" EntitySet="MallaCursos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__MallaCurs__Malla__403A8C7D" Association="Self.FK__MallaCurs__Malla__403A8C7D">
+            <End Role="Mallas" EntitySet="Mallas" />
+            <End Role="MallaCursos" EntitySet="MallaCursos" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="MallaDBModelStoreContainer" CdmEntityContainer="MallaDBEntities">
+          <EntitySetMapping Name="Cursos">
+            <EntityTypeMapping TypeName="MallaDBModel.Curso">
+              <MappingFragment StoreEntitySet="Cursos">
+                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
+                <ScalarProperty Name="Asignatura" ColumnName="Asignatura" />
+                <ScalarProperty Name="Prerequisito" ColumnName="Prerequisito" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="Semestre" ColumnName="Semestre" />
+                <ScalarProperty Name="Creditos" ColumnName="Creditos" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MallaCursos">
+            <EntityTypeMapping TypeName="MallaDBModel.MallaCurso">
+              <MappingFragment StoreEntitySet="MallaCursos">
+                <ScalarProperty Name="MallaId" ColumnName="MallaId" />
+                <ScalarProperty Name="CursoCodigo" ColumnName="CursoCodigo" />
+                <ScalarProperty Name="Semestre" ColumnName="Semestre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Mallas">
+            <EntityTypeMapping TypeName="MallaDBModel.Malla">
+              <MappingFragment StoreEntitySet="Mallas">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
