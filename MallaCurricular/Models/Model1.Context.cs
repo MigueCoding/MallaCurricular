@@ -13,10 +13,10 @@ namespace MallaCurricular.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class MallaDBEntities : DbContext
+    public partial class MallaDBEntities2 : DbContext
     {
-        public MallaDBEntities()
-            : base("name=MallaDBEntities")
+        public MallaDBEntities2()
+            : base("name=MallaDBEntities2")
         {
         }
     
@@ -28,5 +28,6 @@ namespace MallaCurricular.Models
         public virtual DbSet<Curso> Cursos { get; set; }
         public virtual DbSet<MallaCurso> MallaCursos { get; set; }
         public virtual DbSet<Malla> Mallas { get; set; }
+        public virtual DbSet<Usuario> Usuarios { get; set; }
     }
 }

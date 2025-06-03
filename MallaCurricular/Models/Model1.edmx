@@ -34,6 +34,16 @@
           <Property Name="UpdatedAt" Type="datetime" />
           <Property Name="Nombre" Type="nvarchar" MaxLength="100" />
         </EntityType>
+        <EntityType Name="Usuarios">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Correo" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Clave" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="Rol" Type="nvarchar" MaxLength="50" />
+        </EntityType>
         <!--Errors Found During Generation:
 warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
         <Association Name="FK__Cursos__Prerequi__38996AB5" />-->
@@ -69,6 +79,7 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
           <EntitySet Name="Cursos" EntityType="Self.Cursos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MallaCursos" EntityType="Self.MallaCursos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Mallas" EntityType="Self.Mallas" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Usuarios" EntityType="Self.Usuarios" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__MallaCurs__Curso__412EB0B6" Association="Self.FK__MallaCurs__Curso__412EB0B6">
             <End Role="Cursos" EntitySet="Cursos" />
             <End Role="MallaCursos" EntitySet="MallaCursos" />
@@ -116,6 +127,16 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
           <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="MallaCursos" Relationship="Self.FK__MallaCurs__Malla__403A8C7D" FromRole="Mallas" ToRole="MallaCursos" />
         </EntityType>
+        <EntityType Name="Usuario">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Correo" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Clave" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Rol" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
         <Association Name="FK__MallaCurs__Curso__412EB0B6">
           <End Role="Cursos" Type="Self.Curso" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -144,10 +165,11 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="MallaDBEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="MallaDBEntities2" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Cursos" EntityType="Self.Curso" />
           <EntitySet Name="MallaCursos" EntityType="Self.MallaCurso" />
           <EntitySet Name="Mallas" EntityType="Self.Malla" />
+          <EntitySet Name="Usuarios" EntityType="Self.Usuario" />
           <AssociationSet Name="FK__MallaCurs__Curso__412EB0B6" Association="Self.FK__MallaCurs__Curso__412EB0B6">
             <End Role="Cursos" EntitySet="Cursos" />
             <End Role="MallaCursos" EntitySet="MallaCursos" />
@@ -162,7 +184,7 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="MallaDBModelStoreContainer" CdmEntityContainer="MallaDBEntities">
+        <EntityContainerMapping StorageEntityContainer="MallaDBModelStoreContainer" CdmEntityContainer="MallaDBEntities2">
           <EntitySetMapping Name="Cursos">
             <EntityTypeMapping TypeName="MallaDBModel.Curso">
               <MappingFragment StoreEntitySet="Cursos">
@@ -191,6 +213,17 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
                 <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
                 <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Usuarios">
+            <EntityTypeMapping TypeName="MallaDBModel.Usuario">
+              <MappingFragment StoreEntitySet="Usuarios">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Correo" ColumnName="Correo" />
+                <ScalarProperty Name="Clave" ColumnName="Clave" />
+                <ScalarProperty Name="Rol" ColumnName="Rol" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

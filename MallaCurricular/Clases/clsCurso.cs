@@ -7,7 +7,7 @@ namespace MallaCurricular.Services
 {
     public class clsCurso
     {
-        public MallaDBEntities db = new MallaDBEntities();
+        public MallaDBEntities2 db = new MallaDBEntities2();
         public Curso curso = new Curso();
 
         private readonly ICursoRepositorio _cursoRepositorio;

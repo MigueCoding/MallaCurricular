@@ -1,0 +1,30 @@
+﻿@model MallaCurricular.Models.LoginViewModel
+
+@{
+    ViewBag.Title = "Iniciar Sesión";
+}
+
+<h2>Iniciar Sesión</h2>
+
+@using (Html.BeginForm("Login", "Auth", FormMethod.Post))
+{
+    <div>
+        @Html.LabelFor(m => m.Email)
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Email)
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Contrasena)
+        @Html.PasswordFor(m => m.Contrasena, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Contrasena)
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+
+    if (ViewBag.Error != null)
+    {
+        <div style="color:red">@ViewBag.Error</div>
+    }
+}

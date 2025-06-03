@@ -36,7 +36,7 @@ namespace MallaCurricular.Services
         public IEnumerable<object> ObtenerCursosPorMalla(int mallaId)
         {
             var mallaCursos = _mallaCursoRepositorio.GetByMallaId(mallaId);
-            var cursos = new MallaDBEntities().Cursos.ToList(); // Acceso directo para mapear
+            var cursos = new MallaDBEntities2().Cursos.ToList(); // Acceso directo para mapear
 
             return mallaCursos
                 .Join(cursos,
@@ -57,7 +57,7 @@ namespace MallaCurricular.Services
         public string CrearMalla(Malla malla, List<MallaCurso> mallaCursos)
         {
             // Validar que los cursos existan y los semestres sean válidos
-            var db = new MallaDBEntities();
+            var db = new MallaDBEntities2();
             foreach (var mc in mallaCursos)
             {
                 if (db.Cursos.FirstOrDefault(c => c.Codigo == mc.CursoCodigo) == null)

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web.Http;
-using System.Web.Http.Cors;
+﻿using System.Web.Http;
+using System.Web.Http.Cors; // Añade esto para CORS
 
 namespace MallaCurricular
 {
@@ -11,13 +8,14 @@ namespace MallaCurricular
         public static void Register(HttpConfiguration config)
         {
             // Habilitar CORS
-            var cors = new EnableCorsAttribute("*", "*", "*"); // Permitir todos los orígenes (ajusta en producción)
+            var cors = new EnableCorsAttribute("*", "*", "*"); // Permitir todos los orígenes, encabezados y métodos
             config.EnableCors(cors);
 
-            // Habilitar rutas basadas en atributos
+            // Configuración y servicios de Web API
+
+            // Rutas de Web API
             config.MapHttpAttributeRoutes();
 
-            // Ruta predeterminada
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",

@@ -4,10 +4,11 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="a0b1d38e1e794bc790835b1708c5563c" Name="Diagram1">
+      <Diagram DiagramId="c70d4d631dd846ffa52b3f6faa950654" Name="Diagram1">
         <EntityTypeShape EntityType="MallaDBModel.Curso" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
         <EntityTypeShape EntityType="MallaDBModel.MallaCurso" Width="1.5" PointX="3" PointY="1.125" IsExpanded="true" />
         <EntityTypeShape EntityType="MallaDBModel.Malla" Width="1.5" PointX="0.75" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="MallaDBModel.Usuario" Width="1.5" PointX="6.875" PointY="3.5" IsExpanded="true" />
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Curso__412EB0B6" ManuallyRouted="false" />
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Malla__403A8C7D" ManuallyRouted="false" />
       </Diagram>

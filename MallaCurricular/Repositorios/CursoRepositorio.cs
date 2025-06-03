@@ -6,11 +6,11 @@ namespace MallaCurricular.Repositories
 {
     public class CursoRepositorio : ICursoRepositorio
     {
-        private readonly MallaDBEntities _db;
+        private readonly MallaDBEntities2 _db;
 
         public CursoRepositorio()
         {
-            _db = new MallaDBEntities();
+            _db = new MallaDBEntities2();
         }
 
         public IEnumerable<Curso> GetAll()
