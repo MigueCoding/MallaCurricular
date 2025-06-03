@@ -71,9 +71,10 @@ namespace MallaCurricular.Controllers
 
 
         // POST: api/cursos
+        // POST: api/cursos/crear
         [HttpPost]
-        [Route("")]
-        public IHttpActionResult Post([FromBody] Curso curso)
+        [Route("crear")]
+        public IHttpActionResult CrearCurso([FromBody] Curso curso)
         {
             try
             {
@@ -91,6 +92,7 @@ namespace MallaCurricular.Controllers
                 }
 
                 var error = _cursoService.CrearCurso(curso);
+
                 if (!string.IsNullOrEmpty(error))
                     return BadRequest(error);
 
@@ -101,5 +103,6 @@ namespace MallaCurricular.Controllers
                 return InternalServerError(new Exception("Error al crear el curso: " + ex.Message));
             }
         }
+
     }
 }

@@ -53,7 +53,8 @@ namespace MallaCurricular.Services
             c.Asignatura,
             c.Prerequisito,
             c.Color,
-            c.Semestre
+            c.Semestre,
+            c.Creditos
         };
     }
 }

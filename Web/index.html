@@ -537,7 +537,8 @@
                         name: course.Asignatura,
                         prerequisite: course.Prerequisito || '',
                         color: course.Color,
-                        semester: course.Semestre
+                        semester: course.Semestre,
+                        credits: course.Creditos
                     };
                 });
                 renderSemesters();
@@ -550,44 +551,60 @@
         }
 
         function renderSemesters() {
-            const grid = document.getElementById('semester-grid');
-            grid.innerHTML = '';
-            for (let i = 1; i <= 10; i++) {
-                const semester = document.createElement('div');
-                semester.className = 'semester';
-                semester.setAttribute('data-semester', i);
-                semester.innerHTML = `
-                    <h3>Semestre ${i}</h3>
-                    <select class="course-select" onchange="addCourse(this, ${i})">
-                        <option value="">Seleccione un curso...</option>
-                        ${Object.values(courses)
-                            .filter(c => c.semester === i && !addedCourses.has(c.code))
-                            .map(c => `<option value="${c.code}">${c.name}</option>`)
-                            .join('')}
-                    </select>
-                    <div id="courses-semester-${i}"></div>
-                `;
-                grid.appendChild(semester);
-            }
-            addedCourses.forEach((semester, courseCode) => {
-                const course = courses[courseCode];
-                if (course) {
-                    const courseList = document.getElementById(`courses-semester-${semester}`);
-                    const courseDiv = document.createElement('div');
-                    courseDiv.className = `course ${course.color}`;
-                    courseDiv.setAttribute('data-code', courseCode);
-                    courseDiv.setAttribute('data-semester', semester);
-                    courseDiv.innerHTML = `
+    const grid = document.getElementById('semester-grid');
+    grid.innerHTML = '';
+    
+    for (let i = 1; i <= 10; i++) {
+        const semester = document.createElement('div');
+        semester.className = 'semester';
+        semester.setAttribute('data-semester', i);
+        semester.innerHTML = `
+            <h3>Semestre ${i}</h3>
+            <select class="course-select" onchange="addCourse(this, ${i})">
+                <option value="">Seleccione un curso...</option>
+                ${Object.values(courses)
+                    .filter(c => c.semester === i && !addedCourses.has(c.code))
+                    .map(c => `<option value="${c.code}">${c.name}</option>`)
+                    .join('')}
+            </select>
+            <div id="courses-semester-${i}"></div>
+        `;
+        grid.appendChild(semester);
+    }
+
+    addedCourses.forEach((semester, courseCode) => {
+        const course = courses[courseCode];
+        if (course) {
+            const courseList = document.getElementById(`courses-semester-${semester}`);
+            const courseDiv = document.createElement('div');
+            courseDiv.className = `course ${course.color}`;
+            courseDiv.setAttribute('data-code', courseCode);
+            courseDiv.setAttribute('data-semester', semester);
+
+            const creditText = (typeof course.credits === 'number' && !isNaN(course.credits))
+                ? `${course.credits} crédito${course.credits === 1 ? '' : 's'}`
+                : 'Sin créditos';
+
+            courseDiv.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
                         <div class="course-title">${course.name}</div>
                         <div class="course-code">${course.code}</div>
                         <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
-                        <button class="remove-btn" onclick="removeCourse(this, '${courseCode}')">Remover</button>
-                    `;
-                    courseList.appendChild(courseDiv);
-                }
-            });
-            applyFilters();
+                    </div>
+                    <div class="text-sm text-indigo-700 font-semibold bg-indigo-100 px-2 py-1 rounded ml-2 whitespace-nowrap">
+                        ${creditText}
+                    </div>
+                </div>
+                <button class="remove-btn mt-1" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+            `;
+            courseList.appendChild(courseDiv);
         }
+    });
+
+    applyFilters();
+}
+
 
         function addCourse(select, semester) {
             const courseCode = select.value;
@@ -610,59 +627,75 @@
         }
 
         async function createCourse() {
-            const errorMessage = document.getElementById('error-message');
-            const successMessage = document.getElementById('success-message'); // Obtener el elemento de éxito
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none'; // Ocultar mensaje de éxito al iniciar
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message'); // Obtener el elemento de éxito
+    errorMessage.style.display = 'none';
+    successMessage.style.display = 'none'; // Ocultar mensaje de éxito al iniciar
 
-            const code = document.getElementById('new-code').value.trim();
-            const name = document.getElementById('new-name').value.trim();
-            const prerequisite = document.getElementById('new-prerequisite').value.trim();
-            const color = document.getElementById('new-color').value;
-            const semester = parseInt(document.getElementById('new-semester').value);
+    // Obtener valores del formulario
+    const code = document.getElementById('new-code').value.trim();
+    const name = document.getElementById('new-name').value.trim();
+    const prerequisite = document.getElementById('new-prerequisite').value.trim();
+    const color = document.getElementById('new-color').value;
+    const semester = parseInt(document.getElementById('new-semester').value);
 
-            if (!code || !name || !color || isNaN(semester)) {
-                errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
-                errorMessage.style.display = 'block';
-                return;
-            }
+    // Validación básica
+    if (!code || !name || !color || isNaN(semester)) {
+        errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
+        errorMessage.style.display = 'block';
+        return;
+    }
 
-            const newCourse = {
-                Codigo: code,
-                Asignatura: name,
-                Prerequisito: prerequisite || null,
-                Color: color,
-                Semestre: semester
-            };
+    // Construcción del objeto de curso
+    const newCourse = {
+        Codigo: code,
+        Asignatura: name,
+        Prerequisito: prerequisite || null,
+        Color: color,
+        Semestre: semester
+    };
 
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/cursos/crear`, { // Endpoint corregido
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(newCourse)
+        });
+
+        if (!response.ok) {
+            let errorText = `Error HTTP: ${response.status} ${response.statusText}`;
             try {
-                const response = await fetch(`${API_BASE_URL}/api/cursos/todos`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(newCourse)
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `Error HTTP: ${response.status} ${response.statusText}`);
+                const errorData = await response.json();
+                if (errorData?.message) {
+                    errorText = errorData.message;
                 }
-                document.getElementById('new-code').value = '';
-                document.getElementById('new-name').value = '';
-                document.getElementById('new-prerequisite').value = '';
-                document.getElementById('new-color').value = 'course-green';
-                document.getElementById('new-semester').value = '1';
-                successMessage.textContent = 'Asignatura creada exitosamente.'; // Mostrar mensaje de éxito
-                successMessage.style.display = 'block';
-                setTimeout(() => successMessage.style.display = 'none', 3000); // Ocultar después de 3 segundos
-                await fetchCourses();
-            } catch (error) {
-                console.error('Error al crear el curso:', error);
-                errorMessage.textContent = `Error al crear el curso: ${error.message}.`;
-                errorMessage.style.display = 'block';
-            }
+            } catch {}
+            throw new Error(errorText);
         }
+
+        // Limpiar formulario
+        document.getElementById('new-code').value = '';
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-prerequisite').value = '';
+        document.getElementById('new-color').value = 'course-green';
+        document.getElementById('new-semester').value = '1';
+
+        // Mostrar mensaje de éxito
+        successMessage.textContent = 'Asignatura creada exitosamente.';
+        successMessage.style.display = 'block';
+        setTimeout(() => successMessage.style.display = 'none', 3000);
+
+        // Recargar cursos para reflejar el nuevo
+        await fetchCourses();
+    } catch (error) {
+        console.error('Error al crear el curso:', error);
+        errorMessage.textContent = `Error al crear el curso: ${error.message}`;
+        errorMessage.style.display = 'block';
+    }
+}
 
         function applyFilters() {
             const semesterFilter = document.getElementById('semester-filter').value;
