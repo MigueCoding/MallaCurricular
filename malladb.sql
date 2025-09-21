@@ -1,5 +1,3 @@
-CREATE DATABASE MallaDB;
-GO
 
 USE MallaDB;
 GO
@@ -109,3 +107,6 @@ SELECT Semestre, Codigo, Asignatura, Prerequisito, Color, Creditos
 FROM Cursos
 ORDER BY Semestre ASC;
 GO
+
+INSERT INTO [dbo].[Usuarios] (Nombre, Correo, Clave, Rol)
+VALUES ('Miguel Casseres', 'miguel@example.com', '123456', 'Admin');

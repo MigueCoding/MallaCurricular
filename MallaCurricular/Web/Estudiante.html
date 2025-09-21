@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Malla Curricular - ITM (Estudiante)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+        }
+
+        .filters {
+            width: 25%;
+            padding: 2rem;
+            background: #f9fafb;
+            border-right: 1px solid #d1d5db;
+        }
+
+        .courses {
+            width: 75%;
+            padding: 2rem;
+        }
+
+        .header {
+            background: #1e40af;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .semester-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .semester {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .filters img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .semester h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .course {
+            position: relative; /* Necesario para la línea diagonal */
+            background: white;
+            border-left: 4px solid transparent;
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .course-green {
+            border-left-color: #10b981;
+        }
+
+        .course-blue {
+            border-left-color: #3b82f6;
+        }
+
+        .course-purple {
+            border-left-color: #8b5cf6;
+        }
+
+        .course-red {
+            border-left-color: #ef4444;
+        }
+
+        .course-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .course-code {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .course-prerequisite {
+            font-size: 0.7rem;
+            color: #dc2626;
+            display: none;
+        }
+
+        /* ✅ Completada: línea diagonal roja con animación */
+        .course.completed {
+            opacity: 0.9;
+        }
+
+            .course.completed::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 10%;
+                width: 80%; /* Más corta */
+                height: 3px;
+                background: red;
+                transform: rotate(-20deg) scaleX(0);
+                transform-origin: center;
+                animation: drawLine 0.4s ease-out forwards;
+                pointer-events: none;
+            }
+
+        @keyframes drawLine {
+            from {
+                transform: rotate(-20deg) scaleX(0);
+            }
+
+            to {
+                transform: rotate(-20deg) scaleX(1);
+            }
+        }
+
+        /* 🔒 Bloqueada hasta que se cumpla el prerrequisito */
+        .course.disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* ✨ Disponible: animación verde cuando se habilita */
+        .course.available {
+            animation: highlightAvailable 1s ease-out;
+        }
+
+        @keyframes highlightAvailable {
+            0% {
+                background-color: #bbf7d0;
+            }
+
+            50% {
+                background-color: #86efac;
+            }
+
+            100% {
+                background-color: white;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .filters, .courses {
+                width: 100%;
+            }
+
+            .semester-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="filters">
+            <img src="https://www.redttu.edu.co/es/wp-content/uploads/2015/12/13.-ITM.png" alt="ITM Logo" />
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
+            <div class="error-message" id="error-message"></div>
+
+            <!-- Selector de Malla -->
+            <div class="filter-group">
+                <label class="filter-label">Malla Curricular</label>
+                <select class="filter-select" id="malla-select" onchange="fetchCoursesByMalla()">
+                    <option value="">Seleccione una malla</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="courses">
+            <div class="header">
+                <h1>Malla Curricular - ITM</h1>
+            </div>
+            <div class="semester-grid" id="semester-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        let courses = {};
+        const addedCourses = new Map();
+
+        async function fetchMallas() {
+            const mallaSelect = document.getElementById('malla-select');
+            try {
+                const res = await fetch('http://localhost:49513/api/mallas');
+                if (!res.ok) throw new Error('No se pudieron cargar las mallas.');
+                const mallas = await res.json();
+                mallas.forEach(malla => {
+                    const option = document.createElement('option');
+                    option.value = malla.Id;
+                    option.textContent = malla.Nombre || `Malla ${malla.Id}`;
+                    mallaSelect.appendChild(option);
+                });
+            } catch (err) {
+                document.getElementById('error-message').textContent = err.message;
+                document.getElementById('error-message').style.display = 'block';
+                console.error(err);
+            }
+        }
+
+        async function fetchCoursesByMalla() {
+            const mallaId = document.getElementById('malla-select').value;
+            const grid = document.getElementById("semester-grid");
+            grid.innerHTML = '<p class="text-center">Cargando cursos...</p>';
+            document.getElementById('error-message').style.display = 'none';
+
+            if (!mallaId) {
+                grid.innerHTML = '<p class="text-center text-red-500">Seleccione una malla.</p>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`http://localhost:49513/api/cursos?mallaId=${mallaId}`);
+                if (!res.ok) throw new Error('No se pudieron cargar los cursos.');
+                const data = await res.json();
+
+                courses = {};
+                addedCourses.clear();
+                data.forEach(course => {
+                    courses[course.Codigo] = {
+                        code: course.Codigo,
+                        name: course.Asignatura,
+                        prerequisite: course.Prerequisito || '',
+                        color: course.Color,
+                        semester: course.Semestre
+                    };
+                    addedCourses.set(course.Codigo, course.Semestre);
+                });
+
+                renderSemesters();
+            } catch (err) {
+                grid.innerHTML = `<p class="text-center text-red-600">${err.message}</p>`;
+                console.error(err);
+            }
+        }
+
+        function renderSemesters() {
+            const grid = document.getElementById('semester-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const semester = document.createElement('div');
+                semester.className = 'semester';
+                semester.setAttribute('data-semester', i);
+                semester.innerHTML = `<h3>Semestre ${i}</h3><div id="courses-semester-${i}"></div>`;
+                grid.appendChild(semester);
+            }
+
+            addedCourses.forEach((semester, code) => {
+                const course = courses[code];
+                if (course) {
+                    const container = document.getElementById(`courses-semester-${semester}`);
+                    const courseDiv = document.createElement('div');
+                    courseDiv.className = `course ${course.color}`;
+                    courseDiv.setAttribute("data-code", course.code);
+
+                    // Estado guardado
+                    if (localStorage.getItem(`course-${course.code}`) === "true") {
+                        courseDiv.classList.add("completed");
+                    }
+
+                    // Bloquear si tiene prerequisito no cumplido
+                    if (course.prerequisite && !isCompletedByName(course.prerequisite)) {
+                        courseDiv.classList.add("disabled");
+                    }
+
+                    courseDiv.innerHTML = `
+                        <div class="course-title">${course.name}</div>
+                        <div class="course-code">${course.code}</div>
+                        <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
+                    `;
+
+                    // Evento click → completar
+                    courseDiv.addEventListener("click", () => {
+                        courseDiv.classList.toggle("completed");
+                        localStorage.setItem(`course-${course.code}`, courseDiv.classList.contains("completed"));
+                        updateDependencies(course.code);
+                    });
+
+                    container.appendChild(courseDiv);
+                }
+            });
+
+            // Revisar dependencias iniciales
+            Object.values(courses).forEach(c => updateDependencies(c.code));
+        }
+
+        function isCompletedByName(courseName) {
+            const course = Object.values(courses).find(c => c.name === courseName);
+            if (!course) return false;
+            const div = document.querySelector(`[data-code="${course.code}"]`);
+            return div && div.classList.contains("completed");
+        }
+
+        function updateDependencies(code) {
+            const completed = localStorage.getItem(`course-${code}`) === "true";
+            Object.values(courses).forEach(course => {
+                if (course.prerequisite === courses[code]?.name) {
+                    const div = document.querySelector(`[data-code="${course.code}"]`);
+                    if (!div) return;
+                    if (completed) {
+                        if (div.classList.contains("disabled")) {
+                            div.classList.remove("disabled");
+                            div.classList.add("available"); // ✨ animación
+                            setTimeout(() => div.classList.remove("available"), 1000);
+                        }
+                    } else {
+                        div.classList.add("disabled");
+                        div.classList.remove("completed");
+                        localStorage.setItem(`course-${course.code}`, false);
+                    }
+                    updateDependencies(course.code);
+                }
+            });
+        }
+
+        window.onload = fetchMallas;
+    </script>
+</body>
+</html>

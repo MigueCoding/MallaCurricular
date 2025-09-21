@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="MallaDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="MallaDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Cursos">
           <Key>
             <PropertyRef Name="Codigo" />
@@ -44,9 +44,6 @@
           <Property Name="Clave" Type="nvarchar" MaxLength="200" Nullable="false" />
           <Property Name="Rol" Type="nvarchar" MaxLength="50" />
         </EntityType>
-        <!--Errors Found During Generation:
-warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
-        <Association Name="FK__Cursos__Prerequi__38996AB5" />-->
         <Association Name="FK__MallaCurs__Curso__412EB0B6">
           <End Role="Cursos" Type="Self.Cursos" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -89,8 +86,7 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
             <End Role="MallaCursos" EntitySet="MallaCursos" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="MallaDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -127,16 +123,6 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
           <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="MallaCursos" Relationship="Self.FK__MallaCurs__Malla__403A8C7D" FromRole="Mallas" ToRole="MallaCursos" />
         </EntityType>
-        <EntityType Name="Usuario">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Correo" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Clave" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Rol" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-        </EntityType>
         <Association Name="FK__MallaCurs__Curso__412EB0B6">
           <End Role="Cursos" Type="Self.Curso" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -169,7 +155,6 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
           <EntitySet Name="Cursos" EntityType="Self.Curso" />
           <EntitySet Name="MallaCursos" EntityType="Self.MallaCurso" />
           <EntitySet Name="Mallas" EntityType="Self.Malla" />
-          <EntitySet Name="Usuarios" EntityType="Self.Usuario" />
           <AssociationSet Name="FK__MallaCurs__Curso__412EB0B6" Association="Self.FK__MallaCurs__Curso__412EB0B6">
             <End Role="Cursos" EntitySet="Cursos" />
             <End Role="MallaCursos" EntitySet="MallaCursos" />
@@ -178,7 +163,18 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
             <End Role="Mallas" EntitySet="Mallas" />
             <End Role="MallaCursos" EntitySet="MallaCursos" />
           </AssociationSet>
+          <EntitySet Name="Usuarios" EntityType="MallaDBModel.Usuario" />
         </EntityContainer>
+        <EntityType Name="Usuario">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Correo" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Clave" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Rol" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -219,11 +215,11 @@ warning 6035: The relationship 'FK__Cursos__Prerequi__38996AB5' has columns that
           <EntitySetMapping Name="Usuarios">
             <EntityTypeMapping TypeName="MallaDBModel.Usuario">
               <MappingFragment StoreEntitySet="Usuarios">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
-                <ScalarProperty Name="Correo" ColumnName="Correo" />
-                <ScalarProperty Name="Clave" ColumnName="Clave" />
                 <ScalarProperty Name="Rol" ColumnName="Rol" />
+                <ScalarProperty Name="Clave" ColumnName="Clave" />
+                <ScalarProperty Name="Correo" ColumnName="Correo" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
