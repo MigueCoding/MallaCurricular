@@ -72,7 +72,7 @@
         }
 
         .course {
-            position: relative; /* Necesario para la línea diagonal */
+            position: relative;
             background: white;
             border-left: 4px solid transparent;
             border-radius: 6px;
@@ -109,13 +109,6 @@
             color: #6b7280;
         }
 
-        .course-prerequisite {
-            font-size: 0.7rem;
-            color: #dc2626;
-            display: none;
-        }
-
-        /* ✅ Completada: línea diagonal roja con animación */
         .course.completed {
             opacity: 0.9;
         }
@@ -125,7 +118,7 @@
                 position: absolute;
                 top: 50%;
                 left: 10%;
-                width: 80%; /* Más corta */
+                width: 80%;
                 height: 3px;
                 background: red;
                 transform: rotate(-20deg) scaleX(0);
@@ -144,7 +137,6 @@
             }
         }
 
-        /* 🔒 Bloqueada hasta que se cumpla el prerrequisito */
         .course.disabled {
             background: #e5e7eb;
             color: #9ca3af;
@@ -152,7 +144,6 @@
             opacity: 0.6;
         }
 
-        /* ✨ Disponible: animación verde cuando se habilita */
         .course.available {
             animation: highlightAvailable 1s ease-out;
         }
@@ -185,7 +176,6 @@
             }
         }
     </style>
-
 </head>
 <body>
     <div class="container">
@@ -194,7 +184,6 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
             <div class="error-message" id="error-message"></div>
 
-            <!-- Selector de Malla -->
             <div class="filter-group">
                 <label class="filter-label">Malla Curricular</label>
                 <select class="filter-select" id="malla-select" onchange="fetchCoursesByMalla()">
@@ -252,13 +241,15 @@
 
                 courses = {};
                 addedCourses.clear();
+
                 data.forEach(course => {
                     courses[course.Codigo] = {
                         code: course.Codigo,
                         name: course.Asignatura,
                         prerequisite: course.Prerequisito || '',
                         color: course.Color,
-                        semester: course.Semestre
+                        semester: course.Semestre,
+                        creditos: course.Creditos
                     };
                     addedCourses.set(course.Codigo, course.Semestre);
                 });
@@ -289,23 +280,63 @@
                     courseDiv.className = `course ${course.color}`;
                     courseDiv.setAttribute("data-code", course.code);
 
-                    // Estado guardado
                     if (localStorage.getItem(`course-${course.code}`) === "true") {
                         courseDiv.classList.add("completed");
                     }
 
-                    // Bloquear si tiene prerequisito no cumplido
                     if (course.prerequisite && !isCompletedByName(course.prerequisite)) {
                         courseDiv.classList.add("disabled");
                     }
 
-                    courseDiv.innerHTML = `
-                        <div class="course-title">${course.name}</div>
-                        <div class="course-code">${course.code}</div>
-                        <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
-                    `;
+                    const creditos = course.creditos || 0;
+                    let supIzq = 0, infIzq = 0, supDer = 0, infDer = 0;
 
-                    // Evento click → completar
+                    switch (creditos) {
+                        case 2:
+                            supIzq = 2; infIzq = supIzq * 16;
+                            supDer = 4; infDer = supDer * 16;
+                            break;
+                        case 3:
+                            supIzq = 4; infIzq = supIzq * 16;
+                            supDer = 2; infDer = supDer * 16;
+                            break;
+                        case 5:
+                            supIzq = 6; infIzq = supIzq * 16;
+                            supDer = 9; infDer = supDer * 16;
+                            break;
+                        case 8:
+                            supIzq = 2; infIzq = supIzq * 16;
+                            supDer = 22; infDer = supDer * 16;
+                            break;
+                        default:
+                            supIzq = "-"; infIzq = "-";
+                            supDer = "-"; infDer = "-";
+                    }
+
+                    // 🔲 Cuadrícula corregida
+                    courseDiv.innerHTML = `
+                            <div class="course-title">${course.name}</div>
+                            <div class="course-code">${course.code}</div>
+                            <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
+                                <div class="grid grid-cols-3 text-sm text-center h-20">
+                                    <!-- Columna izquierda -->
+                                    <div class="border-r flex flex-col justify-between">
+                                        <div class="p-1 border-b">${supIzq}</div>
+                                        <div class="p-1">${infIzq}</div>
+                                    </div>
+
+                                    <!-- Columna central -->
+                                    <div class="border-r flex flex-col justify-between">
+                                        <div class="p-1 border-b">${supDer}</div>
+                                        <div class="p-1">${infDer}</div>
+                                    </div>
+
+                                    <!-- Columna derecha (creditos centrado verticalmente) -->
+                                    <div class="flex items-center justify-center text-lg font-semibold">${creditos}</div>
+                                </div>
+                            </div>
+                        `;
+
                     courseDiv.addEventListener("click", () => {
                         courseDiv.classList.toggle("completed");
                         localStorage.setItem(`course-${course.code}`, courseDiv.classList.contains("completed"));
@@ -316,7 +347,6 @@
                 }
             });
 
-            // Revisar dependencias iniciales
             Object.values(courses).forEach(c => updateDependencies(c.code));
         }
 
@@ -336,7 +366,7 @@
                     if (completed) {
                         if (div.classList.contains("disabled")) {
                             div.classList.remove("disabled");
-                            div.classList.add("available"); // ✨ animación
+                            div.classList.add("available");
                             setTimeout(() => div.classList.remove("available"), 1000);
                         }
                     } else {
