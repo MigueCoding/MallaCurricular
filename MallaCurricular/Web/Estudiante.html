@@ -314,28 +314,25 @@
                     }
 
                     // 🔲 Cuadrícula corregida
-                    courseDiv.innerHTML = `
+                    courseDiv.innerHTML = 
                             <div class="course-title">${course.name}</div>
                             <div class="course-code">${course.code}</div>
                             <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
                                 <div class="grid grid-cols-3 text-sm text-center h-20">
-                                    <!-- Columna izquierda -->
                                     <div class="border-r flex flex-col justify-between">
                                         <div class="p-1 border-b">${supIzq}</div>
                                         <div class="p-1">${infIzq}</div>
                                     </div>
 
-                                    <!-- Columna central -->
                                     <div class="border-r flex flex-col justify-between">
                                         <div class="p-1 border-b">${supDer}</div>
                                         <div class="p-1">${infDer}</div>
                                     </div>
 
-                                    <!-- Columna derecha (creditos centrado verticalmente) -->
                                     <div class="flex items-center justify-center text-lg font-semibold">${creditos}</div>
                                 </div>
                             </div>
-                        `;
+                        ;
 
                     courseDiv.addEventListener("click", () => {
                         courseDiv.classList.toggle("completed");
