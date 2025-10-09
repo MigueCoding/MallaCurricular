@@ -44,7 +44,7 @@
           <Property Name="Clave" Type="nvarchar" MaxLength="200" Nullable="false" />
           <Property Name="Rol" Type="nvarchar" MaxLength="50" />
         </EntityType>
-        <Association Name="FK_MallaCursCurso_412EB0B6">
+        <Association Name="FK__MallaCurs__Curso__412EB0B6">
           <End Role="Cursos" Type="Self.Cursos" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -58,7 +58,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_MallaCursMalla_403A8C7D">
+        <Association Name="FK__MallaCurs__Malla__403A8C7D">
           <End Role="Mallas" Type="Self.Mallas" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -77,11 +77,11 @@
           <EntitySet Name="MallaCursos" EntityType="Self.MallaCursos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Mallas" EntityType="Self.Mallas" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Usuarios" EntityType="Self.Usuarios" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK_MallaCursCurso_412EB0B6" Association="Self.FK_MallaCursCurso_412EB0B6">
+          <AssociationSet Name="FK__MallaCurs__Curso__412EB0B6" Association="Self.FK__MallaCurs__Curso__412EB0B6">
             <End Role="Cursos" EntitySet="Cursos" />
             <End Role="MallaCursos" EntitySet="MallaCursos" />
           </AssociationSet>
-          <AssociationSet Name="FK_MallaCursMalla_403A8C7D" Association="Self.FK_MallaCursMalla_403A8C7D">
+          <AssociationSet Name="FK__MallaCurs__Malla__403A8C7D" Association="Self.FK__MallaCurs__Malla__403A8C7D">
             <End Role="Mallas" EntitySet="Mallas" />
             <End Role="MallaCursos" EntitySet="MallaCursos" />
           </AssociationSet>

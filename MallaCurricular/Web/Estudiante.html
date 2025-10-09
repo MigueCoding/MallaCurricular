@@ -162,23 +162,6 @@
             }
         }
 
-        .summary-box {
-            margin-top: 1rem;
-            background-color: #e2e8f0;
-            border: 2px solid black;
-            border-radius: 4px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            text-align: center;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .summary-cell {
-            border: 1px solid black;
-            padding: 0.5rem;
-        }
-
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -281,7 +264,6 @@
         function renderSemesters() {
             const grid = document.getElementById('semester-grid');
             grid.innerHTML = '';
-
             for (let i = 1; i <= 10; i++) {
                 const semester = document.createElement('div');
                 semester.className = 'semester';
@@ -331,19 +313,25 @@
                             supDer = "-"; infDer = "-";
                     }
 
+                    // 🔲 Cuadrícula corregida
                     courseDiv.innerHTML = `
                             <div class="course-title">${course.name}</div>
                             <div class="course-code">${course.code}</div>
                             <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
                                 <div class="grid grid-cols-3 text-sm text-center h-20">
+                                    <!-- Columna izquierda -->
                                     <div class="border-r flex flex-col justify-between">
                                         <div class="p-1 border-b">${supIzq}</div>
                                         <div class="p-1">${infIzq}</div>
                                     </div>
+
+                                    <!-- Columna central -->
                                     <div class="border-r flex flex-col justify-between">
                                         <div class="p-1 border-b">${supDer}</div>
                                         <div class="p-1">${infDer}</div>
                                     </div>
+
+                                    <!-- Columna derecha (creditos centrado verticalmente) -->
                                     <div class="flex items-center justify-center text-lg font-semibold">${creditos}</div>
                                 </div>
                             </div>
@@ -358,31 +346,6 @@
                     container.appendChild(courseDiv);
                 }
             });
-
-            // 🔹 Agregar el recuadro resumen de cada semestre
-            for (let i = 1; i <= 10; i++) {
-                const container = document.getElementById(`courses-semester-${i}`);
-                const courseDivs = container.querySelectorAll(".course");
-                if (courseDivs.length > 0) {
-                    let totalCreditos = 0;
-                    courseDivs.forEach(div => {
-                        const code = div.getAttribute("data-code");
-                        totalCreditos += courses[code]?.creditos || 0;
-                    });
-
-                    const resumen = document.createElement("div");
-                    resumen.className = "summary-box mt-2";
-                    resumen.innerHTML = `
-                            <div class="summary-cell">18</div>
-                            <div class="summary-cell">21</div>
-                            <div class="summary-cell">${totalCreditos}</div>
-                            <div class="summary-cell">288</div>
-                            <div class="summary-cell">336</div>
-                            <div class="summary-cell"></div>
-                        `;
-                    container.appendChild(resumen);
-                }
-            }
 
             Object.values(courses).forEach(c => updateDependencies(c.code));
         }
