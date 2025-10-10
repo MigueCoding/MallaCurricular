@@ -113,6 +113,7 @@
             opacity: 0.9;
         }
 
+            /* ✅ Solo el chulito cambia de color, no el texto */
             .course.completed::after {
                 content: "✔";
                 position: absolute;
@@ -120,10 +121,10 @@
                 left: 50%;
                 transform: translate(-50%, -50%) scale(0);
                 font-size: 2rem;
-                color: #10b981;
                 font-weight: bold;
                 animation: showCheck 0.3s ease-out forwards;
                 pointer-events: none;
+                color: var(--check-color, #000);
             }
 
         @keyframes showCheck {
@@ -151,11 +152,11 @@
 
         @keyframes highlightAvailable {
             0% {
-                background-color: #bbf7d0;
+                background-color: var(--highlight-color, #bbf7d0);
             }
 
             50% {
-                background-color: #86efac;
+                background-color: var(--highlight-color, #86efac);
             }
 
             100% {
@@ -180,7 +181,6 @@
             padding: 0.5rem;
         }
 
-        /* 🔹 Descripción debajo de la tabla */
         .legend {
             margin-top: 0.75rem;
             font-size: 0.85rem;
@@ -192,7 +192,6 @@
                 margin: 0.2rem 0;
             }
 
-        /* 🔹 Centrar línea horizontal en las cuadrículas de créditos */
         .credit-grid .grid > div {
             display: flex;
             flex-direction: column;
@@ -210,7 +209,7 @@
                 .credit-grid .grid > div > div:last-child {
                     border-bottom: none;
                 }
-        /* 🔹 Mantener el mismo color de líneas en todas las cuadrículas */
+
         .course.disabled .credit-grid .grid > div {
             border-right: 1px solid #d1d5db;
         }
@@ -223,9 +222,6 @@
                 border-bottom: 1px solid #d1d5db;
             }
 
-        /* -------------------------
-   Leyenda fija y coherente con el color de las tarjetas|
-------------------------- */
         .color-legend {
             background: white;
             border: 1px solid #d1d5db;
@@ -237,7 +233,19 @@
             top: 1rem;
         }
 
-
+        .enabler-tag {
+            position: absolute;
+            top: 0;
+            right: 8px;
+            background: linear-gradient(#b6ffff,transparent);
+            color: #191717;
+            font-size: 0.5rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 2;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
 
         @media (max-width: 768px) {
             .container {
@@ -268,14 +276,9 @@
                 </select>
             </div>
 
-            <!-- 🔹 Aquí se insertará dinámicamente el cuadro resumen -->
             <div id="summary-container"></div>
-           
-
         </div>
 
-        <!-- 🔹 Leyenda fija -->
-        
         <div class="courses">
             <div class="header">
                 <h1>Malla Curricular - ITM</h1>
@@ -312,7 +315,6 @@
             const grid = document.getElementById("semester-grid");
             grid.innerHTML = '<p class="text-center">Cargando cursos...</p>';
             document.getElementById('error-message').style.display = 'none';
-
             const summaryContainer = document.getElementById("summary-container");
             summaryContainer.innerHTML = "";
 
@@ -341,44 +343,38 @@
                     addedCourses.set(course.Codigo, course.Semestre);
                 });
 
-                // 🔹 Cuadro resumen principal
                 const summaryBox = document.createElement("div");
                 summaryBox.className = "summary-box mt-4";
                 summaryBox.innerHTML = `
-                            <div class="summary-cell">TPS</div>
-                            <div class="summary-cell">TIS</div>
-                            <div class="summary-cell">Creditos</div>
-                            <div class="summary-cell">TPT</div>
-                            <div class="summary-cell">TIT</div>
-                            <div class="summary-cell">#</div>
-                        `;
+                                        <div class="summary-cell">TPS</div>
+                                        <div class="summary-cell">TIS</div>
+                                        <div class="summary-cell">Creditos</div>
+                                        <div class="summary-cell">TPT</div>
+                                        <div class="summary-cell">TIT</div>
+                                        <div class="summary-cell">#</div>`;
                 summaryContainer.appendChild(summaryBox);
 
-                // 🔸 Descripción debajo de la tabla
                 const legend = document.createElement("div");
                 legend.className = "legend";
                 legend.innerHTML = `
-                            <p><strong>TPS:</strong> Trabajo Presencial Semanal</p>
-                            <p><strong>TIS:</strong> Trabajo Independiente Semanal</p>
-                            <p><strong>TPT:</strong> Trabajo Presencial Total</p>
-                            <p><strong>TIT:</strong> Trabajo Independiente Total</p>
-                            <p><strong>#:</strong> Número total de créditos</p>
-                        `;
+                                        <p><strong>TPS:</strong> Trabajo Presencial Semanal</p>
+                                        <p><strong>TIS:</strong> Trabajo Independiente Semanal</p>
+                                        <p><strong>TPT:</strong> Trabajo Presencial Total</p>
+                                        <p><strong>TIT:</strong> Trabajo Independiente Total</p>
+                                        <p><strong>#:</strong> Número total de créditos</p>`;
                 summaryContainer.appendChild(legend);
 
-                // 🔹 Leyenda de colores debajo de la descripción
                 const colorLegend = document.createElement("div");
                 colorLegend.className = "color-legend mt-6 text-sm text-gray-700";
                 colorLegend.innerHTML = `
-                          <h3 class="font-semibold text-gray-800 mb-2">Leyenda de Colores</h3>
-                          <div><span class="inline-block w-4 h-4 bg-[#10b981] rounded-sm mr-2"></span> Ciencias Básicas</div>
-                          <div><span class="inline-block w-4 h-4 bg-[#3b82f6] rounded-sm mr-2"></span> Ciencias Básicas Tecnología - Ingeniería</div>
-                          <div><span class="inline-block w-4 h-4 bg-[#8b5cf6] rounded-sm mr-2"></span> Formación Profesional</div>
-                          <div><span class="inline-block w-4 h-4 bg-[#ef4444] rounded-sm mr-2"></span> Formación Complementaria</div>
-                        `;
-                summaryContainer.appendChild(colorLegend);
+                                        <h3 class="font-semibold text-gray-800 mb-2">Leyenda de Colores</h3>
+                                        <div><span class="inline-block w-4 h-4 bg-[#10b981] rounded-sm mr-2"></span> Ciencias Básicas</div>
+                                        <div><span class="inline-block w-4 h-4 bg-[#3b82f6] rounded-sm mr-2"></span> Ciencias Básicas Tecnología - Ingeniería</div>
+                                        <div><span class="inline-block w-4 h-4 bg-[#8b5cf6] rounded-sm mr-2"></span> Formación Profesional</div>
+                                        <div><span class="inline-block w-4 h-4 bg-[#ef4444] rounded-sm mr-2"></span> Formación Complementaria</div>
+                                        <div><span class="inline-block w-4 h-4 bg-[#b6ffff] rounded-sm mr-2"></span> Asignatura que la habilitó</div>`;
 
-      
+                summaryContainer.appendChild(colorLegend);
 
                 renderSemesters();
             } catch (err) {
@@ -401,114 +397,122 @@
 
             addedCourses.forEach((semester, code) => {
                 const course = courses[code];
-                if (course) {
-                    const container = document.getElementById(`courses-semester-${semester}`);
-                    const courseDiv = document.createElement('div');
-                    courseDiv.className = `course ${course.color}`;
-                    courseDiv.setAttribute("data-code", course.code);
+                if (!course) return;
+                const container = document.getElementById(`courses-semester-${semester}`);
+                const courseDiv = document.createElement('div');
+                courseDiv.className = `course ${course.color}`;
+                courseDiv.setAttribute("data-code", course.code);
 
-                    // Mantener estado completado según localStorage
-                    if (localStorage.getItem(`course-${course.code}`) === "true") {
-                        courseDiv.classList.add("completed");
+                // Guardamos si estaba completado en storage para usarlo después (sin calcular estilo aún)
+                const wasCompletedInStorage = localStorage.getItem(`course-${course.code}`) === "true";
+                if (wasCompletedInStorage) {
+                    // Añadimos la clase 'completed' ahora (esto mantiene la lógica original)
+                    courseDiv.classList.add("completed");
+                }
+
+                if (course.prerequisite && !isCompletedByName(course.prerequisite)) {
+                    courseDiv.classList.add("disabled");
+                }
+
+                const creditos = course.creditos || 0;
+                let supIzq = 0, infIzq = 0, supDer = 0, infDer = 0;
+
+                switch (creditos) {
+                    case 2: supIzq = 2; infIzq = 32; supDer = 4; infDer = 64; break;
+                    case 3: supIzq = 4; infIzq = 64; supDer = 2; infDer = 32; break;
+                    case 5: supIzq = 6; infIzq = 96; supDer = 9; infDer = 144; break;
+                    case 8: supIzq = 2; infIzq = 32; supDer = 22; infDer = 352; break;
+                }
+
+                courseDiv.innerHTML = `
+                                        <div class="course-title">${course.name}</div>
+                                        <div class="course-code">${course.code}</div>
+                                        <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
+                                            <div class="grid grid-cols-3 text-sm text-center h-20">
+                                                <div class="border-r flex flex-col justify-between">
+                                                    <div class="p-1 border-b supIzq">${supIzq}</div>
+                                                    <div class="p-1 infIzq">${infIzq}</div>
+                                                </div>
+                                                <div class="border-r flex flex-col justify-between">
+                                                    <div class="p-1 border-b supDer">${supDer}</div>
+                                                    <div class="p-1 infDer">${infDer}</div>
+                                                </div>
+                                                <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
+                                            </div>
+                                        </div>`;
+
+                courseDiv.addEventListener("click", () => {
+                    if (courseDiv.classList.contains("disabled")) return;
+                    const isNowCompleted = courseDiv.classList.toggle("completed");
+
+                    // ✅ solo actualiza color del chulito, no del texto
+                    const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
+                    if (isNowCompleted) {
+                        courseDiv.style.setProperty("--check-color", borderColor);
+                    } else {
+                        courseDiv.style.removeProperty("--check-color");
                     }
 
-                    // Si tiene prerequisito y no está completado, deshabilitar (igual que antes)
-                    if (course.prerequisite && !isCompletedByName(course.prerequisite)) {
-                        courseDiv.classList.add("disabled");
-                    }
+                    localStorage.setItem(`course-${course.code}`, isNowCompleted ? "true" : "false");
+                    updateDependencies(course.code);
+                    computeSemesterSums();
+                });
 
-                    const creditos = course.creditos || 0;
-                    let supIzq = 0, infIzq = 0, supDer = 0, infDer = 0;
+                container.appendChild(courseDiv);
 
-                    switch (creditos) {
-                        case 2: supIzq = 2; infIzq = 32; supDer = 4; infDer = 64; break;
-                        case 3: supIzq = 4; infIzq = 64; supDer = 2; infDer = 32; break;
-                        case 5: supIzq = 6; infIzq = 96; supDer = 9; infDer = 144; break;
-                        case 8: supIzq = 2; infIzq = 32; supDer = 22; infDer = 352; break;
-                        default: supIzq = 0; infIzq = 0; supDer = 0; infDer = 0;
-                    }
-
-                    courseDiv.innerHTML = `
-                                <div class="course-title">${course.name}</div>
-                                <div class="course-code">${course.code}</div>
-                                <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
-                                    <div class="grid grid-cols-3 text-sm text-center h-20">
-                                        <div class="border-r flex flex-col justify-between">
-                                            <div class="p-1 border-b supIzq">${supIzq}</div>
-                                            <div class="p-1 infIzq">${infIzq}</div>
-                                        </div>
-                                        <div class="border-r flex flex-col justify-between">
-                                            <div class="p-1 border-b supDer">${supDer}</div>
-                                            <div class="p-1 infDer">${infDer}</div>
-                                        </div>
-                                        <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
-                                    </div>
-                                </div>
-                            `;
-
-                    // CLICK: marcar/desmarcar completado, guardar en localStorage, y actualizar dependencias
-                    courseDiv.addEventListener("click", () => {
-                        // si está disabled no se puede marcar (como antes)
-                        if (courseDiv.classList.contains("disabled")) return;
-
-                        const isNowCompleted = courseDiv.classList.toggle("completed");
-                        localStorage.setItem(`course-${course.code}`, isNowCompleted ? "true" : "false");
-
-                        // Después de marcar/desmarcar, actualizar dependencias y recalcular sumatorias
-                        updateDependencies(course.code);
-                        computeSemesterSums(); // mantener resumen correcto si hay cambios
-                    });
-
-                    container.appendChild(courseDiv);
+                // Ahora que el elemento está en el DOM, sí podemos calcular el color real del borde
+                if (wasCompletedInStorage) {
+                    const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
+                    courseDiv.style.setProperty("--check-color", borderColor);
                 }
             });
 
-            // Al final del render, actualizar dependencias iniciales
             Object.values(courses).forEach(c => updateDependencies(c.code));
-
-            // Calcular sumas iniciales
             computeSemesterSums();
         }
 
-        function isCompletedByName(courseName) {
-            // Buscar el curso por nombre en el objeto courses
-            const course = Object.values(courses).find(c => c.name === courseName);
-            if (!course) return false;
-
-            // Preferir verificar localStorage (estado persistente)
-            const ls = localStorage.getItem(`course-${course.code}`);
-            if (ls === "true") return true;
-            if (ls === "false") return false;
-
-            // Si no hay registro en localStorage, comprobar el DOM
-            const div = document.querySelector(`[data-code="${course.code}"]`);
-            return div && div.classList.contains("completed");
+        function isCompletedByName(name) {
+            const c = Object.values(courses).find(x => x.name === name);
+            if (!c) return false;
+            return localStorage.getItem(`course-${c.code}`) === "true";
         }
 
         function updateDependencies(code) {
             const completed = localStorage.getItem(`course-${code}`) === "true";
+            const enablerDiv = document.querySelector(`[data-code="${code}"]`);
+            const enablerColor = enablerDiv ? window.getComputedStyle(enablerDiv).borderLeftColor : "#86efac";
+
             Object.values(courses).forEach(course => {
                 if (course.prerequisite === courses[code]?.name) {
                     const div = document.querySelector(`[data-code="${course.code}"]`);
                     if (!div) return;
+
+                    const existingTag = div.querySelector(".enabler-tag");
+
                     if (completed) {
                         if (div.classList.contains("disabled")) {
                             div.classList.remove("disabled");
                             div.classList.add("available");
+                            div.style.setProperty("--highlight-color", enablerColor);
                             setTimeout(() => div.classList.remove("available"), 1000);
                         }
+
+                        if (!existingTag) {
+                            const tag = document.createElement("div");
+                            tag.className = "enabler-tag";
+                            tag.textContent = code;
+                            div.appendChild(tag);
+                        }
                     } else {
-                        // si se desmarca el prerequisito, se deshabilita el dependiente y se quita completado
                         div.classList.add("disabled");
                         if (div.classList.contains("completed")) div.classList.remove("completed");
                         localStorage.setItem(`course-${course.code}`, "false");
+                        if (existingTag) existingTag.remove();
                     }
-                    // Llamada recursiva para propagar la habilitación/deshabilitación a niveles siguientes
+
                     updateDependencies(course.code);
                 }
             });
-
-            // Al final, recalcular sumas por si hubo cambios visibles
             computeSemesterSums();
         }
 
@@ -516,46 +520,37 @@
             for (let i = 1; i <= 10; i++) {
                 const cont = document.getElementById(`courses-semester-${i}`);
                 if (!cont) continue;
+
                 const cursos = cont.querySelectorAll(".course");
+                const prev = cont.querySelector(".summary-box");
+                if (prev) prev.remove();
 
-                // eliminar resumen anterior (si existe) para no duplicar
-                const previousResumen = cont.querySelector(".summary-box");
-                if (previousResumen) previousResumen.remove();
-
-                if (cursos.length > 0) {
-                    let sumSupIzq = 0, sumSupDer = 0, sumInfIzq = 0, sumInfDer = 0, sumCred = 0;
-
+                if (cursos.length) {
+                    let s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0;
                     cursos.forEach(c => {
-                        const sIzq = parseFloat(c.querySelector(".supIzq")?.textContent) || 0;
-                        const sDer = parseFloat(c.querySelector(".supDer")?.textContent) || 0;
-                        const iIzq = parseFloat(c.querySelector(".infIzq")?.textContent) || 0;
-                        const iDer = parseFloat(c.querySelector(".infDer")?.textContent) || 0;
-                        const cred = parseFloat(c.querySelector(".creditos")?.textContent) || 0;
-
-                        sumSupIzq += sIzq;
-                        sumSupDer += sDer;
-                        sumInfIzq += iIzq;
-                        sumInfDer += iDer;
-                        sumCred += cred;
+                        if (c.classList.contains("disabled")) return;
+                        s1 += parseInt(c.querySelector(".supIzq").textContent) || 0;
+                        s2 += parseInt(c.querySelector(".infIzq").textContent) || 0;
+                        s3 += parseInt(c.querySelector(".supDer").textContent) || 0;
+                        s4 += parseInt(c.querySelector(".infDer").textContent) || 0;
+                        s5 += parseInt(c.querySelector(".creditos").textContent) || 0;
                     });
 
-                    const resumen = document.createElement("div");
-                    resumen.className = "summary-box mt-2";
-                    resumen.innerHTML = `
-                            <div class="summary-cell">${sumSupIzq}</div>
-                            <div class="summary-cell">${sumSupDer}</div>
-                            <div class="summary-cell">Total.C</div>
-                            <div class="summary-cell">${sumInfIzq}</div>
-                            <div class="summary-cell">${sumInfDer}</div>
-                            <div class="summary-cell">${sumCred}</div>
-                        `;
-                    cont.appendChild(resumen);
+                    const box = document.createElement("div");
+                    box.className = "summary-box mt-4";
+                    box.innerHTML = `
+                                            <div class="summary-cell">${s1}</div>
+                                            <div class="summary-cell">${s2}</div>
+                                            <div class="summary-cell">${s5}</div>
+                                            <div class="summary-cell">${s3}</div>
+                                            <div class="summary-cell">${s4}</div>
+                                            <div class="summary-cell">${s5}</div>`;
+                    cont.appendChild(box);
                 }
             }
         }
 
         window.onload = fetchMallas;
     </script>
-
 </body>
 </html>
