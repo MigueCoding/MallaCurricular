@@ -192,6 +192,53 @@
                 margin: 0.2rem 0;
             }
 
+        /* 🔹 Centrar línea horizontal en las cuadrículas de créditos */
+        .credit-grid .grid > div {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .credit-grid .grid > div > div {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 50%;
+                border-bottom: 1px solid #d1d5db;
+            }
+
+                .credit-grid .grid > div > div:last-child {
+                    border-bottom: none;
+                }
+        /* 🔹 Mantener el mismo color de líneas en todas las cuadrículas */
+        .course.disabled .credit-grid .grid > div {
+            border-right: 1px solid #d1d5db;
+        }
+
+        .course.disabled .credit-grid .grid {
+            border-color: #d1d5db;
+        }
+
+            .course.disabled .credit-grid .grid > div > div {
+                border-bottom: 1px solid #d1d5db;
+            }
+
+        /* -------------------------
+   Leyenda fija y coherente con el color de las tarjetas|
+------------------------- */
+        .color-legend {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 1rem;
+        }
+
+
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -223,8 +270,12 @@
 
             <!-- 🔹 Aquí se insertará dinámicamente el cuadro resumen -->
             <div id="summary-container"></div>
+           
+
         </div>
 
+        <!-- 🔹 Leyenda fija -->
+        
         <div class="courses">
             <div class="header">
                 <h1>Malla Curricular - ITM</h1>
@@ -314,6 +365,20 @@
                             <p><strong>#:</strong> Número total de créditos</p>
                         `;
                 summaryContainer.appendChild(legend);
+
+                // 🔹 Leyenda de colores debajo de la descripción
+                const colorLegend = document.createElement("div");
+                colorLegend.className = "color-legend mt-6 text-sm text-gray-700";
+                colorLegend.innerHTML = `
+                          <h3 class="font-semibold text-gray-800 mb-2">Leyenda de Colores</h3>
+                          <div><span class="inline-block w-4 h-4 bg-[#10b981] rounded-sm mr-2"></span> Ciencias Básicas</div>
+                          <div><span class="inline-block w-4 h-4 bg-[#3b82f6] rounded-sm mr-2"></span> Ciencias Básicas Tecnología - Ingeniería</div>
+                          <div><span class="inline-block w-4 h-4 bg-[#8b5cf6] rounded-sm mr-2"></span> Formación Profesional</div>
+                          <div><span class="inline-block w-4 h-4 bg-[#ef4444] rounded-sm mr-2"></span> Formación Complementaria</div>
+                        `;
+                summaryContainer.appendChild(colorLegend);
+
+      
 
                 renderSemesters();
             } catch (err) {
@@ -491,5 +556,6 @@
 
         window.onload = fetchMallas;
     </script>
+
 </body>
 </html>
