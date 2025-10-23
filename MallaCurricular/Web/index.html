@@ -48,11 +48,11 @@
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0;
-        }
+            .header h1 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin: 0;
+            }
 
         .error-message {
             color: #dc2626;
@@ -81,9 +81,9 @@
             margin: 0 auto 1rem;
         }
 
-        .retry-btn:hover, .export-btn:hover, .save-btn:hover {
-            background: #2563eb;
-        }
+            .retry-btn:hover, .export-btn:hover, .save-btn:hover {
+                background: #2563eb;
+            }
 
         .filter-group, .form-group {
             margin-bottom: 1.5rem;
@@ -103,10 +103,10 @@
             border-radius: 6px;
         }
 
-        .filter-select:focus, .course-select:focus, .form-input:focus, .form-select:focus {
-            border-color: #3b82f6;
-            outline: none;
-        }
+            .filter-select:focus, .course-select:focus, .form-input:focus, .form-select:focus {
+                border-color: #3b82f6;
+                outline: none;
+            }
 
         .apply-btn, .submit-btn, .login-btn, .logout-btn { /* Agregados login-btn y logout-btn */
             width: 100%;
@@ -119,18 +119,18 @@
             margin-top: 1rem; /* Añadido margen superior */
         }
 
-        .apply-btn:hover, .submit-btn:hover, .login-btn:hover, .logout-btn:hover {
-            background: #2563eb;
-        }
+            .apply-btn:hover, .submit-btn:hover, .login-btn:hover, .logout-btn:hover {
+                background: #2563eb;
+            }
 
         .logout-btn { /* Estilo específico para el botón de logout */
             background: #ef4444; /* Rojo para logout */
             margin-top: 2rem; /* Más margen para separarlo */
         }
 
-        .logout-btn:hover {
-            background: #dc2626;
-        }
+            .logout-btn:hover {
+                background: #dc2626;
+            }
 
         .semester-grid {
             display: grid;
@@ -146,11 +146,11 @@
             text-align: center;
         }
 
-        .semester h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+            .semester h3 {
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
 
         .course {
             background: white;
@@ -161,10 +161,21 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .course-green { border-left-color: #10b981; }
-        .course-blue { border-left-color: #3b82f6; }
-        .course-purple { border-left-color: #8b5cf6; }
-        .course-red { border-left-color: #ef4444; }
+        .course-green {
+            border-left-color: #10b981;
+        }
+
+        .course-blue {
+            border-left-color: #3b82f6;
+        }
+
+        .course-purple {
+            border-left-color: #8b5cf6;
+        }
+
+        .course-red {
+            border-left-color: #ef4444;
+        }
 
         .course-title {
             font-size: 0.9rem;
@@ -181,6 +192,22 @@
             color: #dc2626;
             display: none;
         }
+        .summary-box {
+            margin-top: 1rem;
+            background-color: #e2e8f0;
+            border: 2px solid black;
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .summary-cell {
+            border: 1px solid black;
+            padding: 0.5rem;
+        }
 
         .remove-btn {
             background: #ef4444;
@@ -193,9 +220,9 @@
             margin-top: 0.25rem;
         }
 
-        .remove-btn:hover {
-            background: #dc2626;
-        }
+            .remove-btn:hover {
+                background: #dc2626;
+            }
 
         .color-palette {
             position: absolute;
@@ -208,11 +235,11 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .color-palette h4 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+            .color-palette h4 {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
 
         .color-item {
             display: flex;
@@ -231,7 +258,7 @@
             max-width: 100%;
             height: auto;
             margin-bottom: 1.5rem;
-            }
+        }
 
         /* Estilos para el formulario de login */
         .login-container {
@@ -244,12 +271,12 @@
             text-align: center;
         }
 
-        .login-container h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: #1e40af;
-        }
+            .login-container h2 {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 2rem;
+                color: #1e40af;
+            }
 
         .login-form .form-group {
             margin-bottom: 1.5rem;
@@ -276,17 +303,21 @@
             .container {
                 flex-direction: column;
             }
+
             .filters, .courses {
                 width: 100%;
             }
+
             .semester-grid {
                 grid-template-columns: 1fr;
             }
+
             .color-palette {
                 position: static;
                 margin-top: 1rem;
                 width: 100%;
             }
+
             .top-left-image {
                 width: 60px;
                 top: 0.25rem;
@@ -297,7 +328,7 @@
 </head>
 <body>
     <div id="login-section" class="login-container">
-        <img src="images.png" alt="ITM Logo" class="mx-auto mb-6 w-32"/>
+        <img src="images.png" alt="ITM Logo" class="mx-auto mb-6 w-32" />
         <h2>Iniciar Sesión</h2>
         <div class="error-message" id="login-error-message"></div>
         <form id="login-form" class="login-form">
@@ -430,7 +461,7 @@
 
         async function handleLogin(event) {
             event.preventDefault(); // Evita que el formulario se envíe de forma tradicional
-            
+
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const loginErrorMessage = document.getElementById('login-error-message');
@@ -458,7 +489,7 @@
                         localStorage.setItem('isAuthenticated', 'true');
                         localStorage.setItem('userId', data.userId);
                         localStorage.setItem('userName', data.userName); // Opcional: almacenar el nombre de usuario
-                        
+
                         showMallaSection(); // Mostrar la interfaz de la malla
                         fetchCourses(); // Cargar los cursos
                     } else {
@@ -568,59 +599,60 @@
 
 
         function renderSemesters() {
-    const grid = document.getElementById('semester-grid');
-    grid.innerHTML = '';
-    
-    for (let i = 1; i <= 10; i++) {
-        const semester = document.createElement('div');
-        semester.className = 'semester';
-        semester.setAttribute('data-semester', i);
-        semester.innerHTML = `
-            <h3>Semestre ${i}</h3>
-            <select class="course-select" onchange="addCourse(this, ${i})">
-                <option value="">Seleccione un curso...</option>
-                ${Object.values(courses)
-                    .filter(c => c.semester === i && !addedCourses.has(c.code))
-                    .map(c => `<option value="${c.code}">${c.name}</option>`)
-                    .join('')}
-            </select>
-            <div id="courses-semester-${i}"></div>
-        `;
-        grid.appendChild(semester);
-    }
+            const grid = document.getElementById('semester-grid');
+            grid.innerHTML = '';
 
-    addedCourses.forEach((semester, courseCode) => {
-        const course = courses[courseCode];
-        if (course) {
-            const courseList = document.getElementById(`courses-semester-${semester}`);
-            const courseDiv = document.createElement('div');
-            courseDiv.className = `course ${course.color}`;
-            courseDiv.setAttribute('data-code', courseCode);
-            courseDiv.setAttribute('data-semester', semester);
-
-            const creditText = (typeof course.credits === 'number' && !isNaN(course.credits))
-                ? `${course.credits} crédito${course.credits === 1 ? '' : 's'}`
-                : 'Sin créditos';
-
-            courseDiv.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <div class="course-title">${course.name}</div>
-                        <div class="course-code">${course.code}</div>
-                        <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
-                    </div>
-                    <div class="text-sm text-indigo-700 font-semibold bg-indigo-100 px-2 py-1 rounded ml-2 whitespace-nowrap">
-                        ${creditText}
-                    </div>
-                </div>
-                <button class="remove-btn mt-1" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+            for (let i = 1; i <= 10; i++) {
+                const semester = document.createElement('div');
+                semester.className = 'semester';
+                semester.setAttribute('data-semester', i);
+                semester.innerHTML = `
+                <h3>Semestre ${i}</h3>
+                <select class="course-select" onchange="addCourse(this, ${i})">
+                    <option value="">Seleccione un curso...</option>
+                    ${Object.values(courses)
+                        .filter(c => c.semester === i && !addedCourses.has(c.code))
+                        .map(c => `<option value="${c.code}">${c.name}</option>`)
+                        .join('')}
+                </select>
+                <div id="courses-semester-${i}"></div>
             `;
-            courseList.appendChild(courseDiv);
-        }
-    });
+                grid.appendChild(semester);
+            }
 
-    applyFilters();
-}
+            addedCourses.forEach((semester, courseCode) => {
+                const course = courses[courseCode];
+                if (course) {
+                    const courseList = document.getElementById(`courses-semester-${semester}`);
+                    const courseDiv = document.createElement('div');
+                    courseDiv.className = `course ${course.color}`;
+                    courseDiv.setAttribute('data-code', courseCode);
+                    courseDiv.setAttribute('data-semester', semester);
+
+                    const creditText = (typeof course.credits === 'number' && !isNaN(course.credits))
+                        ? `${course.credits} crédito${course.credits === 1 ? '' : 's'}`
+                        : 'Sin créditos';
+
+                    courseDiv.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="course-title">${course.name}</div>
+                            <div class="course-code">${course.code}</div>
+                            <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
+                        </div>
+                        <div class="text-sm text-indigo-700 font-semibold bg-indigo-100 px-2 py-1 rounded ml-2 whitespace-nowrap">
+                            ${creditText}
+                        </div>
+                    </div>
+                    <button class="remove-btn mt-1" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+                `;
+                    courseList.appendChild(courseDiv);
+                }
+            });
+
+            applyFilters();
+            computeSemesterSums();
+        }
 
 
         function addCourse(select, semester) {
@@ -732,34 +764,43 @@
         async function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
-                orientation: 'portrait',
+                orientation: 'portrait', // Cambia a 'landscape' si prefieres horizontal
                 unit: 'mm',
                 format: 'a4'
             });
+
+            // 🔹 Elementos principales
             const coursesSection = document.querySelector('.courses');
             const filtersSection = document.querySelector('.filters');
             const retryBtn = document.querySelector('.retry-btn');
             const exportBtn = document.querySelector('.export-btn');
             const saveBtn = document.querySelector('.save-btn');
             const colorPalette = document.querySelector('.color-palette');
-            const logoutBtn = document.querySelector('.logout-btn'); // Ocultar también el botón de logout
+            const logoutBtn = document.querySelector('.logout-btn');
 
-            filtersSection.style.display = 'none';
-            retryBtn.style.display = 'none';
-            exportBtn.style.display = 'none';
-            saveBtn.style.display = 'none';
-            colorPalette.style.display = 'none';
-            logoutBtn.style.display = 'none';
+            // 🔹 Todos los selects y botones "Remover" de todos los semestres
+            const courseSelects = document.querySelectorAll('.course-select');
+            const removeButtons = document.querySelectorAll('.remove-btn');
+
+            // 🔹 Ocultar elementos no deseados
+            [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn].forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+            courseSelects.forEach(sel => sel.style.display = 'none');
+            removeButtons.forEach(btn => btn.style.display = 'none');
 
             try {
+                // Captura directamente lo visible
                 const canvas = await html2canvas(coursesSection, {
-                    scale: 1,
+                    scale: 2, // mejor calidad visual
                     useCORS: true,
                     backgroundColor: '#ffffff',
-                    windowWidth: coursesSection.scrollWidth,
-                    windowHeight: coursesSection.scrollHeight
+                    scrollX: 0,
+                    scrollY: 0
                 });
-                const imgData = canvas.toDataURL('image/jpeg', 0.7);
+
+                // Convertir a imagen y agregar al PDF
+                const imgData = canvas.toDataURL('image/jpeg', 0.9);
                 const imgWidth = 190;
                 const pageHeight = 297;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -772,6 +813,7 @@
                 doc.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
                 heightLeft -= (pageHeight - position - 10);
 
+                // Añadir más páginas si el contenido no cabe
                 while (heightLeft > 0) {
                     doc.addPage();
                     position = 10;
@@ -779,20 +821,26 @@
                     heightLeft -= (pageHeight - 10);
                 }
 
+                // Guardar el archivo
                 doc.save('malla_curricular.pdf');
             } catch (error) {
                 console.error('Error al generar el PDF:', error);
-                document.getElementById('error-message').textContent = 'Error al generar el PDF. Revisa la consola.';
-                document.getElementById('error-message').style.display = 'block';
+                const errorMsg = document.getElementById('error-message');
+                if (errorMsg) {
+                    errorMsg.textContent = 'Error al generar el PDF. Revisa la consola.';
+                    errorMsg.style.display = 'block';
+                }
             } finally {
-                filtersSection.style.display = 'block';
-                retryBtn.style.display = 'block';
-                exportBtn.style.display = 'block';
-                saveBtn.style.display = 'block';
-                colorPalette.style.display = 'block';
-                logoutBtn.style.display = 'block';
+                // 🔹 Restaurar todo a su estado normal
+                [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn].forEach(el => {
+                    if (el) el.style.display = 'block';
+                });
+                courseSelects.forEach(sel => sel.style.display = 'block');
+                removeButtons.forEach(btn => btn.style.display = 'block');
             }
         }
+
+
 
         async function saveMalla() {
             const errorMessage = document.getElementById('error-message');
@@ -839,6 +887,41 @@
                 errorMessage.style.display = 'block';
             }
         }
+        function computeSemesterSums() {
+            for (let i = 1; i <= 10; i++) {
+                const cont = document.getElementById(`courses-semester-${i}`);
+                if (!cont) continue;
+
+                const cursos = cont.querySelectorAll(".course");
+                const prev = cont.querySelector(".summary-box");
+                if (prev) prev.remove();
+
+                if (cursos.length) {
+                    let s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0;
+
+                    cursos.forEach(c => {
+                        if (c.classList.contains("disabled")) return;
+                        s1 += parseInt(c.querySelector(".supIzq")?.textContent || 0);
+                        s2 += parseInt(c.querySelector(".infIzq")?.textContent || 0);
+                        s3 += parseInt(c.querySelector(".supDer")?.textContent || 0);
+                        s4 += parseInt(c.querySelector(".infDer")?.textContent || 0);
+                        s5 += parseInt(c.querySelector(".creditos")?.textContent || 0);
+                    });
+
+                    const box = document.createElement("div");
+                    box.className = "summary-box mt-4";
+                    box.innerHTML = `
+                <div class="summary-cell">${s1}</div>
+                <div class="summary-cell">${s2}</div>
+                <div class="summary-cell">${s5}</div>
+                <div class="summary-cell">${s3}</div>
+                <div class="summary-cell">${s4}</div>
+                <div class="summary-cell">${s5}</div>`;
+                    cont.appendChild(box);
+                }
+            }
+        }
+
 
 
         // --- Inicialización ---
