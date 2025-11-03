@@ -26,6 +26,9 @@ namespace MallaCurricular.Models
         public string Color { get; set; }
         public Nullable<int> Semestre { get; set; }
         public Nullable<int> Creditos { get; set; }
+        public string Tipo { get; set; }
+        public Nullable<int> TPS { get; set; }
+        public Nullable<int> TIS { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MallaCurso> MallaCursos { get; set; }

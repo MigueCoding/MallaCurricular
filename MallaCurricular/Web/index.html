@@ -573,7 +573,9 @@
                         prerequisite: course.Prerequisito || '',
                         color: course.Color,
                         semester: course.Semestre,
-                        credits: course.Creditos
+                        credits: course.Creditos,
+                        tps: course.TPS,
+                        tis: course.TIS
                     };
                 });
 
@@ -607,16 +609,16 @@
                 semester.className = 'semester';
                 semester.setAttribute('data-semester', i);
                 semester.innerHTML = `
-                <h3>Semestre ${i}</h3>
-                <select class="course-select" onchange="addCourse(this, ${i})">
-                    <option value="">Seleccione un curso...</option>
-                    ${Object.values(courses)
+            <h3>Semestre ${i}</h3>
+            <select class="course-select" onchange="addCourse(this, ${i})">
+                <option value="">Seleccione un curso...</option>
+                ${Object.values(courses)
                         .filter(c => c.semester === i && !addedCourses.has(c.code))
                         .map(c => `<option value="${c.code}">${c.name}</option>`)
                         .join('')}
-                </select>
-                <div id="courses-semester-${i}"></div>
-            `;
+            </select>
+            <div id="courses-semester-${i}"></div>
+        `;
                 grid.appendChild(semester);
             }
 
@@ -633,19 +635,22 @@
                         ? `${course.credits} crédito${course.credits === 1 ? '' : 's'}`
                         : 'Sin créditos';
 
+                    // 👇 Agregamos los valores de TIS, TPS y créditos visibles y con clases
                     courseDiv.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="course-title">${course.name}</div>
-                            <div class="course-code">${course.code}</div>
-                            <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
-                        </div>
-                        <div class="text-sm text-indigo-700 font-semibold bg-indigo-100 px-2 py-1 rounded ml-2 whitespace-nowrap">
-                            ${creditText}
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="course-title">${course.name}</div>
+                        <div class="course-code">${course.code}</div>
+                        <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
+                        <div class="text-xs mt-1 text-gray-600">
+                            <span class="tps">TPS: ${course.tps || 0}</span> |
+                            <span class="tis">TIS: ${course.tis || 0}</span> |
+                            <span class="creditos">Créditos: ${course.credits || 0}</span>
                         </div>
                     </div>
-                    <button class="remove-btn mt-1" onclick="removeCourse(this, '${courseCode}')">Remover</button>
-                `;
+                </div>
+                <button class="remove-btn mt-1" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+            `;
                     courseList.appendChild(courseDiv);
                 }
             });
@@ -653,6 +658,7 @@
             applyFilters();
             computeSemesterSums();
         }
+
 
 
         function addCourse(select, semester) {
@@ -897,30 +903,54 @@
                 if (prev) prev.remove();
 
                 if (cursos.length) {
+                    // s1: TIS total
+                    // s2: TPS total
+                    // s3, s4: (opcional, si los quieres usar para otros valores)
+                    // s5: Créditos totales
                     let s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0;
 
                     cursos.forEach(c => {
                         if (c.classList.contains("disabled")) return;
-                        s1 += parseInt(c.querySelector(".supIzq")?.textContent || 0);
-                        s2 += parseInt(c.querySelector(".infIzq")?.textContent || 0);
-                        s3 += parseInt(c.querySelector(".supDer")?.textContent || 0);
-                        s4 += parseInt(c.querySelector(".infDer")?.textContent || 0);
-                        s5 += parseInt(c.querySelector(".creditos")?.textContent || 0);
+
+                        // Busca los valores dentro del curso
+                        const tisText = c.querySelector(".tis")?.textContent || "";
+                        const tpsText = c.querySelector(".tps")?.textContent || "";
+                        const creditText = c.querySelector(".creditos")?.textContent || "";
+
+                        // Extrae números de los textos
+                        const tis = parseInt(tisText.replace(/[^\d]/g, "")) || 0;
+                        const tps = parseInt(tpsText.replace(/[^\d]/g, "")) || 0;
+                        const creditos = parseInt(creditText.replace(/[^\d]/g, "")) || 0;
+
+                        // Suma a los acumuladores
+                        s1 += tis;   // TIS
+                        s2 += tps;   // TPS
+                        s5 += creditos; // Créditos
+                        s3 = s1 * 16;
+                        s4 = s2 * 16;
                     });
 
+                    // Crear caja de resumen con misma estructura visual
                     const box = document.createElement("div");
-                    box.className = "summary-box mt-4";
+                    box.className = "summary-box grid grid-cols-3 border border-black text-center";
                     box.innerHTML = `
-                <div class="summary-cell">${s1}</div>
-                <div class="summary-cell">${s2}</div>
-                <div class="summary-cell">${s5}</div>
-                <div class="summary-cell">${s3}</div>
-                <div class="summary-cell">${s4}</div>
-                <div class="summary-cell">${s5}</div>`;
+                <div class="col-span-2 grid grid-cols-2 border-r border-black">
+                    <div class="border-b border-black">${s1}</div>
+                    <div class="border-b border-l border-black">${s2}</div>
+                    <div class="border-black">${s3}</div>
+                    <div class="border-l border-black">${s4}</div>
+                </div>
+                <div class="flex items-center justify-center text-lg font-bold border-l border-black">${s5}</div>
+            `;
                     cont.appendChild(box);
                 }
             }
         }
+
+
+
+
+
 
 
 

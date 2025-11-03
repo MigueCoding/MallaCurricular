@@ -54,7 +54,9 @@ namespace MallaCurricular.Services
             c.Prerequisito,
             c.Color,
             c.Semestre,
-            c.Creditos
+            c.Creditos,
+            c.TIS,
+            c.TPS
         };
     }
 }

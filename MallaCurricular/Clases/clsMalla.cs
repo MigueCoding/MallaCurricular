@@ -49,7 +49,10 @@ namespace MallaCurricular.Services
                         c.Prerequisito,
                         c.Color,
                         Semestre = mc.Semestre, // Usar el semestre de la malla
-                        c.Creditos
+                        c.Creditos,
+                        c.TPS,
+                        c.TIS
+
                     })
                 .ToList();
         }

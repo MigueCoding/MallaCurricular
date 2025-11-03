@@ -15,6 +15,9 @@
           <Property Name="Color" Type="varchar" MaxLength="50" />
           <Property Name="Semestre" Type="int" />
           <Property Name="Creditos" Type="int" />
+          <Property Name="Tipo" Type="varchar" MaxLength="50" />
+          <Property Name="TPS" Type="int" />
+          <Property Name="TIS" Type="int" />
         </EntityType>
         <EntityType Name="MallaCursos">
           <Key>
@@ -101,6 +104,9 @@
           <Property Name="Semestre" Type="Int32" />
           <Property Name="Creditos" Type="Int32" />
           <NavigationProperty Name="MallaCursos" Relationship="Self.FK__MallaCurs__Curso__412EB0B6" FromRole="Cursos" ToRole="MallaCursos" />
+          <Property Name="Tipo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TPS" Type="Int32" />
+          <Property Name="TIS" Type="Int32" />
         </EntityType>
         <EntityType Name="MallaCurso">
           <Key>
@@ -179,53 +185,55 @@
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
-      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="MallaDBModelStoreContainer" CdmEntityContainer="MallaDBEntities2">
-          <EntitySetMapping Name="Cursos">
-            <EntityTypeMapping TypeName="MallaDBModel.Curso">
-              <MappingFragment StoreEntitySet="Cursos">
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="MallaDBModelStoreContainer" CdmEntityContainer="MallaDBEntities2">
+    <EntitySetMapping Name="Cursos">
+      <EntityTypeMapping TypeName="IsTypeOf(MallaDBModel.Curso)">
+        <MappingFragment StoreEntitySet="Cursos">
+          <ScalarProperty Name="TIS" ColumnName="TIS" />
+                <ScalarProperty Name="TPS" ColumnName="TPS" />
+                <ScalarProperty Name="Tipo" ColumnName="Tipo" />
                 <ScalarProperty Name="Codigo" ColumnName="Codigo" />
-                <ScalarProperty Name="Asignatura" ColumnName="Asignatura" />
-                <ScalarProperty Name="Prerequisito" ColumnName="Prerequisito" />
-                <ScalarProperty Name="Color" ColumnName="Color" />
-                <ScalarProperty Name="Semestre" ColumnName="Semestre" />
-                <ScalarProperty Name="Creditos" ColumnName="Creditos" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="MallaCursos">
-            <EntityTypeMapping TypeName="MallaDBModel.MallaCurso">
-              <MappingFragment StoreEntitySet="MallaCursos">
-                <ScalarProperty Name="MallaId" ColumnName="MallaId" />
-                <ScalarProperty Name="CursoCodigo" ColumnName="CursoCodigo" />
-                <ScalarProperty Name="Semestre" ColumnName="Semestre" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Mallas">
-            <EntityTypeMapping TypeName="MallaDBModel.Malla">
-              <MappingFragment StoreEntitySet="Mallas">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
-                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
-                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Usuarios">
-            <EntityTypeMapping TypeName="MallaDBModel.Usuario">
-              <MappingFragment StoreEntitySet="Usuarios">
-                <ScalarProperty Name="Rol" ColumnName="Rol" />
-                <ScalarProperty Name="Clave" ColumnName="Clave" />
-                <ScalarProperty Name="Correo" ColumnName="Correo" />
-                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-        </EntityContainerMapping>
-      </Mapping>
-    </edmx:Mappings>
+          <ScalarProperty Name="Asignatura" ColumnName="Asignatura" />
+          <ScalarProperty Name="Prerequisito" ColumnName="Prerequisito" />
+          <ScalarProperty Name="Color" ColumnName="Color" />
+          <ScalarProperty Name="Semestre" ColumnName="Semestre" />
+          <ScalarProperty Name="Creditos" ColumnName="Creditos" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="MallaCursos">
+      <EntityTypeMapping TypeName="IsTypeOf(MallaDBModel.MallaCurso)">
+        <MappingFragment StoreEntitySet="MallaCursos">
+          <ScalarProperty Name="MallaId" ColumnName="MallaId" />
+          <ScalarProperty Name="CursoCodigo" ColumnName="CursoCodigo" />
+          <ScalarProperty Name="Semestre" ColumnName="Semestre" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Mallas">
+      <EntityTypeMapping TypeName="IsTypeOf(MallaDBModel.Malla)">
+        <MappingFragment StoreEntitySet="Mallas">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+          <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+          <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Usuarios">
+      <EntityTypeMapping TypeName="IsTypeOf(MallaDBModel.Usuario)">
+        <MappingFragment StoreEntitySet="Usuarios">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+          <ScalarProperty Name="Correo" ColumnName="Correo" />
+          <ScalarProperty Name="Clave" ColumnName="Clave" />
+          <ScalarProperty Name="Rol" ColumnName="Rol" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
   </edmx:Runtime>
   <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
   <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
@@ -239,7 +247,7 @@
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
         <DesignerProperty Name="EnablePluralization" Value="true" />
         <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
-        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="UseLegacyProvider" Value="False" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
       </DesignerInfoPropertySet>
     </Options>
