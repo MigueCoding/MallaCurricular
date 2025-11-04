@@ -262,7 +262,21 @@
             padding: 1rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        #courses-semester-P {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: nowrap; /* ❗ No permite que bajen de línea */
+            overflow-x: auto; /* Permite desplazamiento si son muchas */
+            gap: 1rem;
+            padding: 1rem 0;
+        }
 
+            #courses-semester-P .course {
+                min-width: 200px; /* Cada tarjeta de curso */
+                flex: 0 0 auto; /* No se expanden ni encogen */
+            }
             .color-palette h4 {
                 font-size: 0.9rem;
                 font-weight: 600;
@@ -488,6 +502,12 @@
             <button class="export-btn" onclick="exportToPDF()">Exportar Malla a PDF</button>
             <button class="save-btn" onclick="saveMalla()">Guardar Malla</button>
             <div class="semester-grid" id="semester-grid"></div>
+           
+            
+
+            <div id="courses-semester-P" class="flex flex-wrap justify-center gap-4 mt-4"></div>
+            </div>
+
         </div>
         
     </div>
@@ -637,12 +657,11 @@
             }
         }
 
-
-
         function renderSemesters() {
             const grid = document.getElementById('semester-grid');
             grid.innerHTML = '';
 
+            // 🔹 Generar los 10 semestres normales
             for (let i = 1; i <= 10; i++) {
                 const semester = document.createElement('div');
                 semester.className = 'semester';
@@ -661,12 +680,35 @@
                 grid.appendChild(semester);
             }
 
+            // 🔹 Agregar bloque de Materias Propedéuticas (en horizontal)
+            const propedeutic = document.createElement('div');
+            propedeutic.className = 'semester mt-10';
+            propedeutic.setAttribute('data-semester', 'P');
+            propedeutic.style.gridColumn = "1 / -1";
+            propedeutic.innerHTML = `
+        <h3 class="text-center mb-4 text-lg font-semibold">Materias Propedéuticas</h3>
+        <select class="course-select mb-4 w-full md:w-1/3 block mx-auto" onchange="addCourse(this, 'P')">
+            <option value="">Seleccione una materia...</option>
+            ${Object.values(courses)
+                    .filter(c => !addedCourses.has(c.code))
+                    .map(c => `<option value="${c.code}">${c.name}</option>`)
+                    .join('')}
+        </select>
+        <div id="courses-semester-P" 
+             class="flex flex-wrap justify-center gap-4 mt-4">
+        </div>
+    `;
+            grid.appendChild(propedeutic);
+
+            // 🔹 Renderizar cursos ya agregados (incluye los de propedéuticas)
             addedCourses.forEach((semester, courseCode) => {
                 const course = courses[courseCode];
                 if (course) {
                     const courseList = document.getElementById(`courses-semester-${semester}`);
+                    if (!courseList) return;
+
                     const courseDiv = document.createElement('div');
-                    courseDiv.className = `course ${course.color}`;
+                    courseDiv.className = `course ${course.color} p-3 rounded-lg shadow text-center`;
                     courseDiv.setAttribute('data-code', courseCode);
                     courseDiv.setAttribute('data-semester', semester);
 
@@ -674,22 +716,19 @@
                         ? `${course.credits} crédito${course.credits === 1 ? '' : 's'}`
                         : 'Sin créditos';
 
-                    // 👇 Agregamos los valores de TIS, TPS y créditos visibles y con clases
                     courseDiv.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <div class="course-title">${course.name}</div>
-                        <div class="course-code">${course.code}</div>
-                        <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
-                        <div class="text-xs mt-1 text-gray-600">
-                            <span class="tps">TPS: ${course.tps || 0}</span> |
-                            <span class="tis">TIS: ${course.tis || 0}</span> |
-                            <span class="creditos">Créditos: ${course.credits || 0}</span>
-                        </div>
+                <div>
+                    <div class="course-title font-semibold">${course.name}</div>
+                    <div class="course-code text-sm text-gray-600">${course.code}</div>
+                    <div class="text-xs mt-1 text-gray-600">
+                        <span class="tps">TPS: ${course.tps || 0}</span> |
+                        <span class="tis">TIS: ${course.tis || 0}</span> |
+                        <span class="creditos">Créditos: ${course.credits || 0}</span>
                     </div>
                 </div>
-                <button class="remove-btn mt-1" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+                <button class="remove-btn mt-2 bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded" onclick="removeCourse(this, '${courseCode}')">Remover</button>
             `;
+
                     courseList.appendChild(courseDiv);
                 }
             });
@@ -697,7 +736,6 @@
             applyFilters();
             computeSemesterSums();
         }
-
 
 
         function addCourse(select, semester) {
