@@ -10,7 +10,7 @@
         <EntityTypeShape EntityType="MallaDBModel.Malla" Width="1.5" PointX="0.75" PointY="5.125" IsExpanded="true" />
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Curso__412EB0B6" ManuallyRouted="false" />
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Malla__403A8C7D" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="MallaDBModel.Usuario" Width="1.5" PointX="6.75" PointY="4.25" />
+        <EntityTypeShape EntityType="MallaDBModel.Usuario" Width="1.5" PointX="6.75" PointY="4.25" IsExpanded="true" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

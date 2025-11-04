@@ -434,20 +434,28 @@
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Semestre</label>
-                <select id="new-semester" class="form-select" required>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
+                <label class="form-label">Trabajo Presencial Semanal (TPS)</label>
+                <input type="number" id="new-tps" class="form-input" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Trabajo Independiente Semanal (TIS)</label>
+                <input type="number" id="new-tis" class="form-input" min="0" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipo</label>
+                <select id="new-type" class="form-select" required>
+                    <option value="Teorica">Teórica</option>
+                    <option value="Teorico-Practica">Teórico-Práctica</option>
+                    <option value="Practica">Práctica</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label class="form-label">Créditos</label>
+                <input type="number" id="new-credits" class="form-input" min="1" required>
+            </div>
+
+
             <button class="submit-btn" onclick="createCourse()">Crear Asignatura</button>
             <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
 
@@ -604,7 +612,6 @@
                         name: course.Asignatura,
                         prerequisite: course.Prerequisito || '',
                         color: course.Color,
-                        semester: course.Semestre,
                         credits: course.Creditos,
                         tps: course.TPS,
                         tis: course.TIS
@@ -645,7 +652,7 @@
             <select class="course-select" onchange="addCourse(this, ${i})">
                 <option value="">Seleccione un curso...</option>
                 ${Object.values(courses)
-                        .filter(c => c.semester === i && !addedCourses.has(c.code))
+                        .filter(c => !addedCourses.has(c.code))
                         .map(c => `<option value="${c.code}">${c.name}</option>`)
                         .join('')}
             </select>
@@ -703,10 +710,35 @@
                 return;
             }
 
+            // 🔍 Verificar si tiene uno o varios prerrequisitos
+            if (course.prerequisite && course.prerequisite.trim() !== "") {
+                // Dividir por comas y limpiar espacios
+                const prereqNames = course.prerequisite.split(",").map(p => p.trim()).filter(p => p.length > 0);
+
+                // Buscar los códigos correspondientes
+                const missingPrereqs = prereqNames.filter(prName => {
+                    const prereqCode = Object.keys(courses).find(c =>
+                        courses[c].name.toLowerCase() === prName.toLowerCase() ||
+                        courses[c].code.toLowerCase() === prName.toLowerCase()
+                    );
+                    // Si no se encuentra o no está agregado aún → falta
+                    return !prereqCode || !addedCourses.has(prereqCode);
+                });
+
+                if (missingPrereqs.length > 0) {
+                    alert(`No puedes agregar "${course.name}" porque debes agregar primero:\n• ${missingPrereqs.join("\n• ")}`);
+                    select.value = ''; // Reiniciar el select
+                    return;
+                }
+            }
+
+            // ✅ Si pasa la validación, agregar el curso
             addedCourses.set(courseCode, semester);
             renderSemesters();
             select.value = '';
         }
+
+
 
         function removeCourse(button, courseCode) {
             addedCourses.delete(courseCode);
@@ -721,11 +753,15 @@
 
             const code = document.getElementById('new-code').value.trim();
             const name = document.getElementById('new-name').value.trim();
-            const prerequisite = document.getElementById('new-prerequisite').value; // ahora es el código seleccionado
+            const prerequisite = document.getElementById('new-prerequisite').value; // ahora guarda el nombre
             const color = document.getElementById('new-color').value;
-            const semester = parseInt(document.getElementById('new-semester').value);
+            const tps = parseInt(document.getElementById('new-tps').value);
+            const tis = parseInt(document.getElementById('new-tis').value);
+            const tipo = document.getElementById('new-type').value;
+            const creditos = parseInt(document.getElementById('new-credits').value);
 
-            if (!code || !name || !color || isNaN(semester)) {
+            // Validar campos obligatorios
+            if (!code || !name || !color || !tipo || isNaN(tps) || isNaN(tis) || isNaN(creditos)) {
                 errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
                 errorMessage.style.display = 'block';
                 return;
@@ -734,9 +770,12 @@
             const newCourse = {
                 Codigo: code,
                 Asignatura: name,
-                Prerequisito: prerequisite || null, // guardar código del curso como requisito
+                Prerequisito: prerequisite || null, // se guarda el nombre del curso prerequisito
                 Color: color,
-                Semestre: semester
+                TPS: tps,
+                TIS: tis,
+                Tipo: tipo,
+                Creditos: creditos
             };
 
             try {
@@ -758,17 +797,22 @@
                     throw new Error(errorText);
                 }
 
+                // Limpiar formulario
                 document.getElementById('new-code').value = '';
                 document.getElementById('new-name').value = '';
                 document.getElementById('new-prerequisite').value = '';
                 document.getElementById('new-color').value = 'course-green';
-                document.getElementById('new-semester').value = '1';
+                document.getElementById('new-tps').value = '';
+                document.getElementById('new-tis').value = '';
+                document.getElementById('new-type').value = 'Teorica';
+                document.getElementById('new-credits').value = '';
 
+                // Mostrar mensaje y recargar cursos
                 successMessage.textContent = 'Asignatura creada exitosamente.';
                 successMessage.style.display = 'block';
                 setTimeout(() => successMessage.style.display = 'none', 3000);
 
-                await fetchCourses(); // recargar cursos
+                await fetchCourses();
             } catch (error) {
                 console.error('Error al crear el curso:', error);
                 errorMessage.textContent = `Error al crear el curso: ${error.message}`;
@@ -989,8 +1033,6 @@
                 }
             }
         }
-
-
 
 
 

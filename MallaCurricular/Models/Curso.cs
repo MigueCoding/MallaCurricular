@@ -24,7 +24,6 @@ namespace MallaCurricular.Models
         public string Asignatura { get; set; }
         public string Prerequisito { get; set; }
         public string Color { get; set; }
-        public Nullable<int> Semestre { get; set; }
         public Nullable<int> Creditos { get; set; }
         public string Tipo { get; set; }
         public Nullable<int> TPS { get; set; }
