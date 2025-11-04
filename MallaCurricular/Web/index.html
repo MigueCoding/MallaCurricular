@@ -253,6 +253,35 @@
             margin-right: 0.5rem;
             border-radius: 2px;
         }
+        .color-palette {
+            position: static; /* ❗ Elimina cualquier posicionamiento absoluto */
+            margin-top: 1.5rem;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+            .color-palette h4 {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                text-align: center;
+            }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .color-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
 
         .filters img {
             max-width: 100%;
@@ -421,6 +450,27 @@
             </div>
             <button class="submit-btn" onclick="createCourse()">Crear Asignatura</button>
             <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+
+            <div class="color-palette">
+                <h4>Leyenda de Colores</h4>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #10b981;"></div>
+                    <span>Ciencias Básicas</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #3b82f6;"></div>
+                    <span>Ciencias Básicas Tecnología - Ingeniería</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #8b5cf6;"></div>
+                    <span>Formación Profesional</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #ef4444;"></div>
+                    <span>Formación Complementaria</span>
+                </div>
+            </div>
+
         </div>
         <div class="courses">
             <div class="header">
@@ -431,25 +481,7 @@
             <button class="save-btn" onclick="saveMalla()">Guardar Malla</button>
             <div class="semester-grid" id="semester-grid"></div>
         </div>
-        <div class="color-palette">
-            <h4>Leyenda de Colores</h4>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #10b981;"></div>
-                <span>Ciencias Básicas</span>
-            </div>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #3b82f6;"></div>
-                <span>Ciencias Básicas Tecnología - Ingeniería</span>
-            </div>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #8b5cf6;"></div>
-                <span>Formación Profesional</span>
-            </div>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #ef4444;"></div>
-                <span>Formación Complementaria</span>
-            </div>
-        </div>
+        
     </div>
 
     <script>
@@ -860,12 +892,23 @@
                 alert("Debe ingresar un nombre para la malla.");
                 return;
             }
+            const Version = prompt("Ingrese version de la malla:");
+            if (!nombreMalla || nombreMalla.trim() === "") {
+                alert("Debe ingresar una version para la malla.");
+                return;
+            }
+            const fechaCreacion = new Date().toISOString();
+            
+            
 
             const malla = {
                 nombre: nombreMalla.trim(),
+                Version: Version.trim(),
+                fechaCreacion: fechaCreacion,
                 courses: Array.from(addedCourses).map(([code, semester]) => ({
                     Codigo: code,
-                    Semestre: semester
+                    Semestre: semester,
+                    
                 }))
             };
 
@@ -923,8 +966,8 @@
                         const creditos = parseInt(creditText.replace(/[^\d]/g, "")) || 0;
 
                         // Suma a los acumuladores
-                        s1 += tis;   // TIS
-                        s2 += tps;   // TPS
+                        s1 += tps;   // TIS
+                        s2 += tis;   // TPS
                         s5 += creditos; // Créditos
                         s3 = s1 * 16;
                         s4 = s2 * 16;
