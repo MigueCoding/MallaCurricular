@@ -101,7 +101,6 @@
           <Property Name="Asignatura" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="Prerequisito" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="Color" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Semestre" Type="Int32" />
           <Property Name="Creditos" Type="Int32" />
           <NavigationProperty Name="MallaCursos" Relationship="Self.FK__MallaCurs__Curso__412EB0B6" FromRole="Cursos" ToRole="MallaCursos" />
           <Property Name="Tipo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
@@ -197,7 +196,6 @@
           <ScalarProperty Name="Asignatura" ColumnName="Asignatura" />
           <ScalarProperty Name="Prerequisito" ColumnName="Prerequisito" />
           <ScalarProperty Name="Color" ColumnName="Color" />
-          <ScalarProperty Name="Semestre" ColumnName="Semestre" />
           <ScalarProperty Name="Creditos" ColumnName="Creditos" />
         </MappingFragment>
       </EntityTypeMapping>

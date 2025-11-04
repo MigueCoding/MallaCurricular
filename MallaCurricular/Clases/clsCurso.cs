@@ -37,9 +37,7 @@ namespace MallaCurricular.Services
             if (_cursoRepositorio.GetById(curso.Codigo) != null)
                 return "El código de la asignatura ya existe.";
 
-            if (curso.Semestre < 1 || curso.Semestre > 10)
-                return "El semestre debe estar entre 1 y 10.";
-
+           
             if (!coloresValidos.Contains(curso.Color))
                 return "Color inválido. Use: course-green, course-blue, course-purple, course-red";
 
@@ -53,7 +51,6 @@ namespace MallaCurricular.Services
             c.Asignatura,
             c.Prerequisito,
             c.Color,
-            c.Semestre,
             c.Creditos,
             c.TIS,
             c.TPS
