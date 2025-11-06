@@ -390,6 +390,8 @@
         function renderSemesters() {
             const grid = document.getElementById('semester-grid');
             grid.innerHTML = '';
+
+            // 1. Crear los 10 semestres normales (1 a 10)
             for (let i = 1; i <= 10; i++) {
                 const semester = document.createElement('div');
                 semester.className = 'semester';
@@ -397,78 +399,151 @@
                 semester.innerHTML = `<h3>Semestre ${i}</h3><div id="courses-semester-${i}"></div>`;
                 grid.appendChild(semester);
             }
+
+            // 2. Crear el bloque de Asignaturas Propedéuticas (Semestre 11 o P)
+            // Usaremos el valor '11' para hacer referencia al Semestre Propedéutico
+            const propedeutic = document.createElement('div');
+            propedeutic.className = 'semester mt-10';
+            propedeutic.setAttribute('data-semester', 11);
+            propedeutic.style.gridColumn = "1 / -1"; // Ocupar todo el ancho
+            propedeutic.innerHTML = `<h3 class="text-center mb-4 text-lg font-semibold">Asignaturas Propedéuticas</h3>
+        <div id="courses-semester-11" class="flex flex-wrap justify-center gap-4 mt-4"></div>`;
+            grid.appendChild(propedeutic);
+
+
+            // 3. Renderizar todos los cursos (Semestres 1-10 y 11)
             addedCourses.forEach((semester, code) => {
                 const course = courses[code];
                 if (!course) return;
-                const container = document.getElementById(`courses-semester-${semester}`);
+
+                // ❗ La corrección clave: Asegurarse de buscar el ID de contenedor correcto.
+                const containerId = `courses-semester-${semester}`;
+                const container = document.getElementById(containerId);
+
+                // Si el contenedor no existe (por ejemplo, si el semestre viene como 'P' en lugar de '11')
+                if (!container) {
+                    console.error(`Contenedor no encontrado para el semestre: ${semester}. Verifique que el backend devuelva 11 para Propedéuticas.`);
+                    return; // Detiene el procesamiento de este curso
+                }
+
                 const courseDiv = document.createElement('div');
                 courseDiv.className = `course ${course.color}`;
                 courseDiv.setAttribute("data-code", course.code);
+
                 const wasCompletedInStorage = localStorage.getItem(`course-${course.code}`) === "true";
-                if (wasCompletedInStorage) { courseDiv.classList.add("completed"); }
+                if (wasCompletedInStorage) {
+                    courseDiv.classList.add("completed");
+                }
+
+                // Ahora el requisito de semestre 11 debe funcionar
                 if (course.prerequisite && !isCompletedByName(course.prerequisite)) {
                     courseDiv.classList.add("disabled");
                 }
+
                 const TPS = course.TPS || 0;
                 const TIS = course.TIS || 0;
                 const creditos = course.creditos || 0;
                 const TPT = TPS * 16;
                 const TIT = TIS * 16;
-                courseDiv.innerHTML = `
-                                <div class="course-title">${course.name}</div>
-                                <div class="course-code">${course.code}</div>
-                                <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
-                                    <div class="grid grid-cols-3 text-sm text-center h-20">
-                                        <div class="border-r flex flex-col justify-between">
-                                            <div class="p-1 border-b supIzq">${TPS}</div>
-                                            <div class="p-1 infIzq">${TPT}</div>
-                                        </div>
-                                        <div class="border-r flex flex-col justify-between">
-                                            <div class="p-1 border-b supDer">${TIS}</div>
-                                            <div class="p-1 infDer">${TIT}</div>
-                                        </div>
-                                        <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
-                                    </div>
-                                </div>`;
+
+                courseDiv.innerHTML = `<div class="course-title">${course.name}</div>
+            <div class="course-code">${course.code}</div>
+            <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
+                <div class="grid grid-cols-3 text-sm text-center h-20">
+                    <div class="border-r flex flex-col justify-between">
+                        <div class="p-1 border-b supIzq">${TPS}</div>
+                        <div class="p-1 infIzq">${TPT}</div>
+                    </div>
+                    <div class="border-r flex flex-col justify-between">
+                        <div class="p-1 border-b supDer">${TIS}</div>
+                        <div class="p-1 infDer">${TIT}</div>
+                    </div>
+                    <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
+                </div>
+            </div>`;
+
                 courseDiv.addEventListener("click", () => {
                     if (courseDiv.classList.contains("disabled")) return;
+
                     const isNowCompleted = courseDiv.classList.toggle("completed");
                     const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
+
                     if (isNowCompleted) {
                         courseDiv.style.setProperty("--check-color", borderColor);
                     } else {
                         courseDiv.style.removeProperty("--check-color");
                     }
+
                     localStorage.setItem(`course-${course.code}`, isNowCompleted ? "true" : "false");
                     updateDependencies(course.code);
                     computeSemesterSums();
                 });
+
+                // ❗ Aquí se produce el append, ahora el 'container' ya existe para el semestre 11.
                 container.appendChild(courseDiv);
+
                 if (wasCompletedInStorage) {
                     const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
                     courseDiv.style.setProperty("--check-color", borderColor);
                 }
             });
+
             Object.values(courses).forEach(c => updateDependencies(c.code));
             computeSemesterSums();
         }
 
-        function isCompletedByName(name) {
-            const c = Object.values(courses).find(x => x.name === name);
-            if (!c) return false;
-            return localStorage.getItem(`course-${c.code}`) === "true";
+        function isCompletedByName(prereqString) {
+            if (!prereqString || prereqString.trim() === "") return true;
+
+            // Dividir la cadena de prerrequisitos por coma (,) y limpiar espacios
+            const requiredPrereqs = prereqString.split(',').map(p => p.trim()).filter(p => p.length > 0);
+
+            // Iterar sobre cada prerrequisito requerido
+            const allCompleted = requiredPrereqs.every(reqName => {
+                // Buscar el curso correspondiente por nombre o código
+                const c = Object.values(courses).find(x =>
+                    x.name.toLowerCase() === reqName.toLowerCase() ||
+                    x.code.toLowerCase() === reqName.toLowerCase()
+                );
+
+                // Si el curso no existe en la lista (error de tipeo), lo consideramos "no completado" por seguridad
+                if (!c) {
+                    console.warn(`Prerrequisito no encontrado en la lista maestra: ${reqName}`);
+                    return false;
+                }
+
+                // Verificar el estado de completado en localStorage
+                return localStorage.getItem(`course-${c.code}`) === "true";
+            });
+
+            return allCompleted;
         }
 
         function updateDependencies(code) {
             const completed = localStorage.getItem(`course-${code}`) === "true";
             const enablerDiv = document.querySelector(`[data-code="${code}"]`);
             const enablerColor = enablerDiv ? window.getComputedStyle(enablerDiv).borderLeftColor : "#86efac";
+
+            // Obtener el nombre o código del curso que acaba de cambiar de estado
+            const currentCourseName = courses[code]?.name || code;
+
             Object.values(courses).forEach(course => {
-                if (course.prerequisite === courses[code]?.name) {
+
+                // ❗ NUEVA LÓGICA: Verificar si el curso actual (code) es uno de los prerrequisitos
+                const prereqList = (course.prerequisite || '').split(',').map(p => p.trim().toLowerCase());
+                const dependsOnCurrent = prereqList.includes(currentCourseName.toLowerCase()) || prereqList.includes(code.toLowerCase());
+
+                // Si el curso actual (code) es un prerrequisito del curso que estamos evaluando
+                if (dependsOnCurrent) {
                     const div = document.querySelector(`[data-code="${course.code}"]`);
                     if (!div) return;
+
+                    // ❗ Reevaluar el estado de habilitación usando la NUEVA función de validación
+                    const allPrereqsMet = isCompletedByName(course.prerequisite);
                     const existingTag = div.querySelector(".enabler-tag");
-                    if (completed) {
+
+                    if (allPrereqsMet) {
+                        // Habilitar
                         if (div.classList.contains("disabled")) {
                             div.classList.remove("disabled");
                             div.classList.add("available");
@@ -476,20 +551,25 @@
                             setTimeout(() => div.classList.remove("available"), 1000);
                         }
                         if (!existingTag) {
+                            // Solo añadir el tag si es necesario (ejemplo visual)
                             const tag = document.createElement("div");
                             tag.className = "enabler-tag";
                             tag.textContent = code;
                             div.appendChild(tag);
                         }
                     } else {
+                        // Deshabilitar (si le falta algún prerrequisito)
                         div.classList.add("disabled");
                         if (div.classList.contains("completed")) div.classList.remove("completed");
                         localStorage.setItem(`course-${course.code}`, "false");
                         if (existingTag) existingTag.remove();
                     }
+
+                    // Continuar la recursividad para las dependencias de este curso
                     updateDependencies(course.code);
                 }
             });
+
             computeSemesterSums();
         }
 

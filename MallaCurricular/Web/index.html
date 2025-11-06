@@ -208,6 +208,12 @@
             border: 1px solid black;
             padding: 0.5rem;
         }
+        .legend { /* Para la lista de definiciones */
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #374151;
+            line-height: 1.4;
+        }
 
         .remove-btn {
             background: #ef4444;
@@ -416,14 +422,27 @@
                         <input type="checkbox" id="show-prerequisites" class="mr-2 rounded text-blue-600">
                         Mostrar Prerrequisitos
                     </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="hide-completed" class="mr-2 rounded text-blue-600">
-                        Ocultar Completados
-                    </label>
                 </div>
             </div>
 
             <button class="apply-btn" onclick="applyFilters()">Aplicar Filtros</button>
+            <div class="legend-box mt-6">
+                <div class="summary-box grid grid-cols-3 border border-black text-center">
+                    <div class="summary-cell font-bold">TPS</div>
+                    <div class="summary-cell font-bold">TIS</div>
+                    <div class="summary-cell font-bold">Créditos</div>
+                    <div class="summary-cell font-bold">TPT</div>
+                    <div class="summary-cell font-bold">TIT</div>
+                    <div class="summary-cell font-bold">#</div>
+                </div>
+                <div class="legend mt-2 text-sm text-gray-700">
+                    <p><strong>TPS:</strong> Trabajo Presencial Semanal</p>
+                    <p><strong>TIS:</strong> Trabajo Independiente Semanal</p>
+                    <p><strong>TPT:</strong> Trabajo Presencial Total</p>
+                    <p><strong>TIT:</strong> Trabajo Independiente Total</p>
+                    <p><strong>#:</strong> Número total de créditos</p>
+                </div>
+            </div>
             <h2 class="text-xl font-bold text-gray-800 mt-6 mb-4">Crear Asignatura</h2>
             <div class="form-group">
                 <label class="form-label">Código</label>
@@ -866,7 +885,6 @@
         function applyFilters() {
             const semesterFilter = document.getElementById('semester-filter').value;
             const showPrerequisites = document.getElementById('show-prerequisites').checked;
-            const hideCompleted = document.getElementById('hide-completed').checked;
 
             document.querySelectorAll('.semester').forEach(semester => {
                 const semesterNum = semester.getAttribute('data-semester');
