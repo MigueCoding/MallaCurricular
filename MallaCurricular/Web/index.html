@@ -371,7 +371,7 @@
 </head>
 <body>
     <div id="login-section" class="login-container">
-        <img src="images.png" alt="ITM Logo" class="mx-auto mb-6 w-32" />
+        <img src="logo2020.png" alt="ITM Logo" class="mx-auto mb-6 w-32" />
         <h2>Iniciar Sesión</h2>
         <div class="error-message" id="login-error-message"></div>
         <form id="login-form" class="login-form">
@@ -389,7 +389,7 @@
 
     <div id="malla-section" class="container hidden">
         <div class="filters">
-            <img src="images.png" alt="ITM Logo" />
+            <img src="logo2020.png" alt="ITM Logo" />
             <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
             <div class="error-message" id="error-message"></div>
             <div class="success-message" id="success-message"></div> <div class="filter-group">
@@ -408,6 +408,7 @@
                     <option value="10">Semestre 10</option>
                 </select>
             </div>
+
             <div class="filter-group">
                 <label class="filter-label">Opciones</label>
                 <div class="space-y-2">
@@ -421,6 +422,7 @@
                     </label>
                 </div>
             </div>
+
             <button class="apply-btn" onclick="applyFilters()">Aplicar Filtros</button>
             <h2 class="text-xl font-bold text-gray-800 mt-6 mb-4">Crear Asignatura</h2>
             <div class="form-group">
@@ -510,7 +512,6 @@
 
         </div>
         
-    </div>
 
     <script>
         let courses = {};
@@ -609,6 +610,7 @@
             document.getElementById('malla-section').classList.remove('hidden');
         }
 
+
         // --- Funciones existentes de la Malla Curricular ---
 
         async function fetchCourses() {
@@ -637,6 +639,8 @@
                         tis: course.TIS
                     };
                 });
+
+
 
                 // 🔹 Llenar lista de prerrequisitos dinámicamente
                 const prereqSelect = document.getElementById('new-prerequisite');
@@ -989,9 +993,9 @@
                 fechaCreacion: fechaCreacion,
                 courses: Array.from(addedCourses).map(([code, semester]) => ({
                     Codigo: code,
-                    Semestre: semester,
-                    
+                    Semestre: semester === 'P' ? 11 : semester,
                 }))
+
             };
 
             try {

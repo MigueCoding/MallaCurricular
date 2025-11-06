@@ -65,8 +65,9 @@ namespace MallaCurricular.Services
             {
                 if (db.Cursos.FirstOrDefault(c => c.Codigo == mc.CursoCodigo) == null)
                     return $"El curso con código {mc.CursoCodigo} no existe.";
-                if (mc.Semestre < 1 || mc.Semestre > 10)
-                    return $"El semestre {mc.Semestre} debe estar entre 1 y 10.";
+                if (mc.Semestre < 1 || mc.Semestre > 11)
+                    return $"El semestre {mc.Semestre} debe estar entre 1 y 11.";
+
             }
 
             // Guardar la malla
