@@ -523,15 +523,13 @@
             <button class="export-btn" onclick="exportToPDF()">Exportar Malla a PDF</button>
             <button class="save-btn" onclick="saveMalla()">Guardar Malla</button>
             <div class="semester-grid" id="semester-grid"></div>
-           
-            
+
+
 
             <div id="courses-semester-P" class="flex flex-wrap justify-center gap-4 mt-4"></div>
-            </div>
-
         </div>
-        
 
+    </div>
     <script>
         let courses = {};
         const addedCourses = new Map();
@@ -618,7 +616,111 @@
 
 
         // ----------------------------------------------------------------------
-        // --- Funciones de la Malla Curricular (CORREGIDAS) ---
+        // --- Funciones del Buscador en Tiempo Real (Modificada la Generación HTML) ---
+
+        /**
+         * Genera el HTML para el custom select con buscador.
+         * @param {number|string} semester - El número de semestre o 'P'.
+         */
+        function createCustomSelect(semester) {
+            let availableCourses = Object.values(courses).filter(c => !addedCourses.has(c.code));
+
+            // Ordenar alfabéticamente por nombre
+            availableCourses.sort((a, b) => {
+                const nameA = a.name.toUpperCase();
+                const nameB = b.name.toUpperCase();
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+                return 0;
+            });
+
+            const optionsHtml = availableCourses
+                .map(c => `<div class="custom-option p-2 hover:bg-blue-100 cursor-pointer whitespace-nowrap" data-value="${c.code}" onclick="selectCustomOption(this, '${semester}', '${c.code}')">${c.name} (${c.code})</div>`)
+                .join('');
+
+            // ✅ MODIFICACIÓN CLAVE: Se cambió el ancho a un valor fijo de 400px.
+            return `
+                <div class="custom-select-container relative mb-4">
+                    <button type="button" class="custom-select-button course-select p-2 border border-gray-300 rounded-md w-full text-left bg-white text-gray-500 hover:text-gray-700" onclick="toggleCustomDropdown(this)">
+                        Seleccione un curso...
+                    </button>
+                    <div class="custom-dropdown absolute z-10 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto hidden"
+                         style="width: 400px;"
+                         >
+                        <input type="text" class="custom-search-input p-2 border-b border-gray-300 w-full sticky top-0" placeholder="Buscar curso..." onkeyup="filterCustomOptions(this)">
+                        <div class="custom-options-list">
+                            ${optionsHtml || '<div class="p-2 text-gray-500">No hay cursos disponibles.</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleCustomDropdown(button) {
+            // Cierra todos los otros dropdowns abiertos
+            document.querySelectorAll('.custom-dropdown').forEach(d => {
+                if (d !== button.nextElementSibling) {
+                    d.classList.add('hidden');
+                }
+            });
+
+            const dropdown = button.nextElementSibling;
+            dropdown.classList.toggle('hidden');
+
+            if (!dropdown.classList.contains('hidden')) {
+                const searchInput = dropdown.querySelector('.custom-search-input');
+                searchInput.value = '';
+                searchInput.focus();
+                dropdown.querySelectorAll('.custom-option').forEach(option => option.style.display = 'block');
+            }
+        }
+
+        function filterCustomOptions(input) {
+            const filter = input.value.toUpperCase();
+            const optionsList = input.nextElementSibling;
+            const options = optionsList.querySelectorAll('.custom-option');
+
+            options.forEach(option => {
+                const text = option.textContent || option.innerText;
+                option.style.display = text.toUpperCase().includes(filter) ? 'block' : 'none';
+            });
+        }
+
+        function selectCustomOption(optionDiv, semester, courseCode) {
+            const button = optionDiv.closest('.custom-select-container').querySelector('.custom-select-button');
+            const dropdown = optionDiv.closest('.custom-dropdown');
+
+            addCourseLogic(courseCode, semester);
+
+            dropdown.classList.add('hidden');
+            button.textContent = 'Seleccione un curso...';
+        }
+
+        function addCourseLogic(courseCode, semester) {
+            if (!courseCode || addedCourses.has(courseCode)) return;
+
+            const course = courses[courseCode];
+            if (!course) {
+                console.error(`Curso no encontrado: ${courseCode}`);
+                return;
+            }
+
+            const prereqCodes = course.prerequisiteCodes || [];
+            const missingPrereqs = prereqCodes.filter(prCode => !addedCourses.has(prCode));
+
+            if (missingPrereqs.length > 0) {
+                const missingPrereqNames = missingPrereqs.map(code => courses[code] ? courses[code].name : code);
+                alert(`No puedes agregar "${course.name}" porque debes agregar primero:\n• ${missingPrereqNames.join("\n• ")}`);
+                return;
+            }
+
+            addedCourses.set(courseCode, semester);
+            renderSemesters();
+        }
+
+
+        // ----------------------------------------------------------------------
+        // --- Funciones de la Malla Curricular (Sin Cambios) ---
 
         async function fetchCourses() {
             const errorMessage = document.getElementById('error-message');
@@ -636,7 +738,6 @@
                 const data = await response.json();
                 courses = {};
                 data.forEach(course => {
-                    // ✅ CORRECCIÓN 1: Mapear Prerequisitos (que ahora es una lista de objetos)
                     const prerequisiteCodes = Array.isArray(course.Prerequisitos)
                         ? course.Prerequisitos.map(p => p.Codigo)
                         : [];
@@ -644,7 +745,6 @@
                     courses[course.Codigo] = {
                         code: course.Codigo,
                         name: course.Asignatura,
-                        // Se usa la nueva propiedad que contiene una lista de códigos
                         prerequisiteCodes: prerequisiteCodes,
                         color: course.Color,
                         credits: course.Creditos,
@@ -654,7 +754,6 @@
                 });
 
 
-                // 🔹 Llenar lista de prerequisitos dinámicamente (solo el Select para NUEVOS cursos)
                 const prereqSelect = document.getElementById('new-prerequisite');
                 prereqSelect.innerHTML = `<option value="">Ninguno</option>`;
                 Object.values(courses).forEach(c => {
@@ -673,50 +772,46 @@
             }
         }
 
+        function addCourse(select, semester) {
+            const courseCode = select.value;
+            if (!courseCode) return;
+
+            addCourseLogic(courseCode, semester);
+        }
+
+
         function renderSemesters() {
             const grid = document.getElementById('semester-grid');
             grid.innerHTML = '';
 
-            // 🔹 Generar los 10 semestres normales
+            // Generar los 10 semestres normales
             for (let i = 1; i <= 10; i++) {
                 const semester = document.createElement('div');
                 semester.className = 'semester';
                 semester.setAttribute('data-semester', i);
                 semester.innerHTML = `
-                <h3>Semestre ${i}</h3>
-                <select class="course-select" onchange="addCourse(this, ${i})">
-                    <option value="">Seleccione un curso...</option>
-                    ${Object.values(courses)
-                        .filter(c => !addedCourses.has(c.code))
-                        .map(c => `<option value="${c.code}">${c.name}</option>`)
-                        .join('')}
-                </select>
+                <h3>Semestre ${i}</h3> ${createCustomSelect(i)} 
                 <div id="courses-semester-${i}"></div>
             `;
                 grid.appendChild(semester);
             }
 
-            // 🔹 Agregar bloque de Materias Propedéuticas (en horizontal)
+            // Agregar bloque de Materias Propedéuticas (en horizontal)
             const propedeutic = document.createElement('div');
             propedeutic.className = 'semester mt-10';
             propedeutic.setAttribute('data-semester', 'P');
             propedeutic.style.gridColumn = "1 / -1";
             propedeutic.innerHTML = `
             <h3 class="text-center mb-4 text-lg font-semibold">Materias Propedéuticas</h3>
-            <select class="course-select mb-4 w-full md:w-1/3 block mx-auto" onchange="addCourse(this, 'P')">
-                <option value="">Seleccione una materia...</option>
-                ${Object.values(courses)
-                    .filter(c => !addedCourses.has(c.code))
-                    .map(c => `<option value="${c.code}">${c.name}</option>`)
-                    .join('')}
-            </select>
+            <div class="mx-auto" style="max-width: 600px;"> 
+                ${createCustomSelect('P')} 
+            </div>
             <div id="courses-semester-P"
-                 class="flex flex-wrap justify-center gap-4 mt-4">
+                class="flex flex-wrap justify-center gap-4 mt-4">
             </div>
         `;
             grid.appendChild(propedeutic);
 
-            // 🔹 Renderizar cursos ya agregados (incluye los de propedéuticas)
             addedCourses.forEach((semester, courseCode) => {
                 const course = courses[courseCode];
                 if (course) {
@@ -728,73 +823,33 @@
                     courseDiv.setAttribute('data-code', courseCode);
                     courseDiv.setAttribute('data-semester', semester);
 
-                    const creditText = (typeof course.credits === 'number' && !isNaN(course.credits))
-                        ? `${course.credits} crédito${course.credits === 1 ? '' : 's'}`
-                        : 'Sin créditos';
-
-                    // Mostrar los códigos de prerrequisitos si existen
                     const prereqsHtml = course.prerequisiteCodes && course.prerequisiteCodes.length > 0
                         ? `<div class="text-xs mt-1 text-gray-500">Req: ${course.prerequisiteCodes.join(', ')}</div>`
                         : '';
 
-
                     courseDiv.innerHTML = `
-                    <div>
-                        <div class="course-title font-semibold">${course.name}</div>
-                        <div class="course-code text-sm text-gray-600">${course.code}</div>
-                        ${prereqsHtml}
-                        <div class="text-xs mt-1 text-gray-600">
-                            <span class="tps">TPS: ${course.tps || 0}</span> |
-                            <span class="tis">TIS: ${course.tis || 0}</span> |
-                            <span class="creditos">Créditos: ${course.credits || 0}</span>
+                        <div>
+                            <div class="course-title font-semibold">${course.name}</div>
+                            <div class="course-code text-sm text-gray-600">${course.code}</div>
+                            ${prereqsHtml}
+                            <div class="text-xs mt-1 text-gray-600">
+                                <span class="tps">TPS: ${course.tps || 0}</span> |
+                                <span class="tis">TIS: ${course.tis || 0}</span> |
+                                <span class="creditos">Créditos: ${course.credits || 0}</span>
+                            </div>
                         </div>
-                    </div>
-                    <button class="remove-btn mt-2 bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded" onclick="removeCourse(this, '${courseCode}')">Remover</button>
-                `;
+                        <button class="remove-btn mt-2 bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+                    `;
 
                     courseList.appendChild(courseDiv);
                 }
             });
 
-            // 🚀 Ejecutar la lógica de filtros y sumas DESPUÉS de que todos los cursos están en el DOM
             if (typeof applyFilters === 'function') {
-                applyFilters(); // Asumiendo que esta función existe en tu HTML principal
+                applyFilters();
             }
             computeSemesterSums();
         }
-
-
-        function addCourse(select, semester) {
-            const courseCode = select.value;
-            if (!courseCode || addedCourses.has(courseCode)) return;
-
-            const course = courses[courseCode];
-            if (!course) {
-                console.error(`Curso no encontrado: ${courseCode}`);
-                return;
-            }
-
-            // ✅ CORRECCIÓN 2: Validar MÚLTIPLES prerrequisitos desde la colección
-            const prereqCodes = course.prerequisiteCodes || [];
-
-            // Buscar si los prerrequisitos están agregados
-            const missingPrereqs = prereqCodes.filter(prCode => !addedCourses.has(prCode));
-
-            if (missingPrereqs.length > 0) {
-                // Obtener los NOMBRES de los prerrequisitos faltantes para el mensaje
-                const missingPrereqNames = missingPrereqs.map(code => courses[code] ? courses[code].name : code);
-
-                alert(`No puedes agregar "${course.name}" porque debes agregar primero:\n• ${missingPrereqNames.join("\n• ")}`);
-                select.value = ''; // Reiniciar el select
-                return;
-            }
-
-            // ✅ Si pasa la validación, agregar el curso
-            addedCourses.set(courseCode, semester);
-            renderSemesters();
-            select.value = '';
-        }
-
 
 
         function removeCourse(button, courseCode) {
@@ -810,7 +865,6 @@
 
             const code = document.getElementById('new-code').value.trim();
             const name = document.getElementById('new-name').value.trim();
-            // Obtiene el código del único prerequisito seleccionado (o vacío)
             const prerequisiteCode = document.getElementById('new-prerequisite').value;
             const color = document.getElementById('new-color').value;
             const tps = parseInt(document.getElementById('new-tps').value);
@@ -818,16 +872,12 @@
             const tipo = document.getElementById('new-type').value;
             const creditos = parseInt(document.getElementById('new-credits').value);
 
-            // Validar campos obligatorios
             if (!code || !name || !color || !tipo || isNaN(tps) || isNaN(tis) || isNaN(creditos)) {
                 errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
                 errorMessage.style.display = 'block';
                 return;
             }
 
-            // ✅ CORRECCIÓN 3: Payload corregido.
-            // 1. Uso de 'prerequisiteCode' (variable definida) en lugar de 'prerequisitoCode' (ReferenceError).
-            // 2. Envío de la estructura plana compatible con el Controlador (JObject o DTO plano).
             const payload = {
                 Codigo: code,
                 Asignatura: name,
@@ -847,7 +897,6 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    // Usamos el payload que incluye la lista de códigos
                     body: JSON.stringify(payload)
                 });
 
@@ -855,13 +904,11 @@
                     let errorText = `Error HTTP: ${response.status} ${response.statusText}`;
                     try {
                         const errorData = await response.json();
-                        // El controlador devuelve 'message' si hay un error de negocio o validación
                         if (errorData?.message) errorText = errorData.message;
                     } catch { }
                     throw new Error(errorText);
                 }
 
-                // Limpiar formulario
                 document.getElementById('new-code').value = '';
                 document.getElementById('new-name').value = '';
                 document.getElementById('new-prerequisite').value = '';
@@ -871,7 +918,6 @@
                 document.getElementById('new-type').value = 'Teorica';
                 document.getElementById('new-credits').value = '';
 
-                // Mostrar mensaje y recargar cursos
                 successMessage.textContent = 'Asignatura creada exitosamente.';
                 successMessage.style.display = 'block';
                 setTimeout(() => successMessage.style.display = 'none', 3000);
@@ -899,8 +945,6 @@
             document.querySelectorAll('.course-prerequisite').forEach(prereq => {
                 prereq.style.display = showPrerequisites ? 'block' : 'none';
             });
-
-            // ... (resto del código de applyFilters)
         }
 
         async function exportToPDF() {
@@ -919,17 +963,15 @@
             const colorPalette = document.querySelector('.color-palette');
             const logoutBtn = document.querySelector('.logout-btn');
 
-            const courseSelects = document.querySelectorAll('.course-select');
+            const courseSelects = document.querySelectorAll('.custom-select-container');
             const removeButtons = document.querySelectorAll('.remove-btn');
+            const summaryBoxes = document.querySelectorAll('.semester-summary');
 
             [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn].forEach(el => {
                 if (el) el.style.display = 'none';
             });
             courseSelects.forEach(sel => sel.style.display = 'none');
             removeButtons.forEach(btn => btn.style.display = 'none');
-
-            // Ocultar las cajas de resumen temporalmente para el PDF, si no son deseadas
-            const summaryBoxes = document.querySelectorAll('.semester-summary'); // Cambiado a 'semester-summary'
             summaryBoxes.forEach(box => box.style.display = 'none');
 
 
@@ -976,10 +1018,9 @@
                 });
                 courseSelects.forEach(sel => sel.style.display = 'block');
                 removeButtons.forEach(btn => btn.style.display = 'block');
-                summaryBoxes.forEach(box => box.style.display = 'block'); // Restaurar las cajas de resumen
+                summaryBoxes.forEach(box => box.style.display = 'block');
             }
         }
-
 
 
         async function saveMalla() {
@@ -1037,49 +1078,46 @@
             }
         }
 
-        /**
-         * Calcula y muestra la suma de TPS, TIS y Créditos para cada semestre,
-         * utilizando la estructura compacta 2x2 + Celda Grande Lateral con bordes visibles.
-         */
         function computeSemesterSums() {
             for (let i = 1; i <= 10; i++) {
-                const cont = document.getElementById(`courses-semester-${i}`);
-                if (!cont) continue;
+                computeForSemester(i);
+            }
+            computeForSemester('P');
+        }
 
-                const cursos = cont.querySelectorAll(".course");
-                // 1. Eliminar la caja previa si existe. Usamos '.semester-summary' para la estética.
-                const prev = cont.querySelector(".semester-summary");
-                if (prev) prev.remove();
+        function computeForSemester(semesterKey) {
+            const cont = document.getElementById(`courses-semester-${semesterKey}`);
+            if (!cont) return;
 
-                if (cursos.length) {
-                    let tps_total = 0, tis_total = 0, creditos_total = 0;
+            const cursos = cont.querySelectorAll(".course");
 
-                    cursos.forEach(c => {
-                        if (c.classList.contains("disabled")) return;
+            const prev = cont.querySelector(".semester-summary");
+            if (prev) prev.remove();
 
-                        // Extracción de valores de los atributos data-
-                        const courseCode = c.getAttribute('data-code');
-                        const courseData = courses[courseCode]; // Asumo que 'courses' es tu objeto global
+            if (cursos.length) {
+                let tps_total = 0, tis_total = 0, creditos_total = 0;
 
-                        if (courseData) {
-                            tps_total += courseData.tps || 0;
-                            tis_total += courseData.tis || 0;
-                            creditos_total += courseData.credits || 0;
-                        }
-                    });
+                cursos.forEach(c => {
+                    if (c.classList.contains("disabled")) return;
 
-                    // Cálculo de horas (TPS * 16 y TIS * 16)
-                    const tps_hours = tps_total * 16;
-                    const tis_hours = tis_total * 16;
-                    const total_credits = creditos_total;
+                    const courseCode = c.getAttribute('data-code');
+                    const courseData = courses[courseCode];
 
-                    // 2. Crear caja de resumen con la estética exacta de las imágenes.
-                    const box = document.createElement("div");
-                    // Usamos una nueva clase para evitar conflictos con el 'summary-box' de la leyenda
-                    box.className = "semester-summary mt-2 text-center text-xs";
+                    if (courseData) {
+                        tps_total += courseData.tps || 0;
+                        tis_total += courseData.tis || 0;
+                        creditos_total += courseData.credits || 0;
+                    }
+                });
 
-                    // Estructura: grid-cols-3 principal
-                    box.innerHTML = `
+                const tps_hours = tps_total * 16;
+                const tis_hours = tis_total * 16;
+                const total_credits = creditos_total;
+
+                const box = document.createElement("div");
+                box.className = "semester-summary mt-2 text-center text-xs";
+
+                box.innerHTML = `
                     <div class="grid grid-cols-3 border border-black" style="font-size: 1.25rem;">
 
                         <div class="col-span-2 grid grid-cols-2 border-r border-black bg-gray-100">
@@ -1096,9 +1134,7 @@
                         </div>
                     </div>
                 `;
-                    // 3. Añadir la caja al contenedor
-                    cont.appendChild(box);
-                }
+                cont.appendChild(box);
             }
         }
 
@@ -1108,6 +1144,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             checkAuthAndRender();
+
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.custom-select-container')) {
+                    document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.add('hidden'));
+                }
+            });
         });
     </script>
 </body>
