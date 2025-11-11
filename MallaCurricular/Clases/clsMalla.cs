@@ -11,12 +11,24 @@ namespace MallaCurricular.Services
     {
         private readonly IMallaRepositorio _mallaRepositorio;
         private readonly IMallaCursoRepositorio _mallaCursoRepositorio;
+        private readonly IElectivaRepositorio _electivaRepositorio; // NUEVO
+        private readonly IOptativaRepositorio _optativaRepositorio; // NUEVO
 
-        public clsMalla(IMallaRepositorio mallaRepositorio, IMallaCursoRepositorio mallaCursoRepositorio)
+        // Constructor actualizado para inyectar los nuevos repositorios
+        public clsMalla(IMallaRepositorio mallaRepositorio,
+                        IMallaCursoRepositorio mallaCursoRepositorio,
+                        IElectivaRepositorio electivaRepositorio,
+                        IOptativaRepositorio optativaRepositorio)
         {
             _mallaRepositorio = mallaRepositorio;
             _mallaCursoRepositorio = mallaCursoRepositorio;
+            _electivaRepositorio = electivaRepositorio;
+            _optativaRepositorio = optativaRepositorio;
         }
+
+        // --------------------------------------------------
+        // MÉTODOS EXISTENTES
+        // --------------------------------------------------
 
         public IEnumerable<object> ObtenerTodos()
         {
@@ -37,7 +49,7 @@ namespace MallaCurricular.Services
         {
             var mallaCursos = _mallaCursoRepositorio.GetByMallaId(mallaId);
 
-            // --- CAMBIO CLAVE: Cargar Cursos CON la colección de Prerequisitos ---
+            // Se usa el contexto directamente (asumiendo que MallaDBEntities4 existe y es accesible)
             using (var db = new MallaDBEntities4())
             {
                 var cursosConPrerequisitos = db.Cursos
@@ -53,12 +65,8 @@ namespace MallaCurricular.Services
                         {
                             c.Codigo,
                             c.Asignatura,
-
-                            // *** LÍNEA 49 CORREGIDA (AHORA ES UNA CADENA DE CÓDIGOS) ***
                             // Concatena todos los Códigos de los prerrequisitos separados por coma.
                             Prerequisito = string.Join(",", c.PrerequisitosQueTengo.Select(p => p.Codigo)),
-                            // **********************************************************
-
                             c.Color,
                             Semestre = mc.Semestre,
                             c.Creditos,
@@ -68,6 +76,7 @@ namespace MallaCurricular.Services
                     .ToList();
             } // Fin del using
         }
+
         public string CrearMalla(Malla malla, List<MallaCurso> mallaCursos)
         {
             // Validar que los cursos existan y los semestres sean válidos
@@ -78,7 +87,6 @@ namespace MallaCurricular.Services
                     return $"El curso con código {mc.CursoCodigo} no existe.";
                 if (mc.Semestre < 1 || mc.Semestre > 11)
                     return $"El semestre {mc.Semestre} debe estar entre 1 y 11.";
-
             }
 
             // Guardar la malla
@@ -95,6 +103,46 @@ namespace MallaCurricular.Services
 
             return null;
         }
+
+        // --------------------------------------------------
+        // NUEVOS MÉTODOS PARA CATÁLOGOS (ELECTIVAS Y OPTATIVAS)
+        // --------------------------------------------------
+
+        /// <summary>
+        /// Obtiene la lista completa de Electivas disponibles.
+        /// </summary>
+        public IEnumerable<object> ObtenerCatalogoElectivas()
+        {
+            // Mapeo simple de las propiedades necesarias para el catálogo de la vista.
+            return _electivaRepositorio.GetAll().Select(e => new
+            {
+                e.Codigo,
+                e.Asignatura,
+                e.Color,
+                e.Creditos,
+                e.Tipo
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Obtiene la lista completa de Optativas disponibles.
+        /// </summary>
+        public IEnumerable<object> ObtenerCatalogoOptativas()
+        {
+            // Mapeo simple de las propiedades necesarias para el catálogo de la vista.
+            return _optativaRepositorio.GetAll().Select(o => new
+            {
+                o.Codigo,
+                o.Asignatura,
+                o.Color,
+                o.Creditos,
+                o.Tipo
+            }).ToList();
+        }
+
+        // --------------------------------------------------
+        // MÉTODO DE MAPEO
+        // --------------------------------------------------
 
         private object MapearMalla(Malla m) => new
         {

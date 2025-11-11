@@ -9,7 +9,7 @@ namespace MallaCurricular.Repositories
     {
         private readonly MallaDBEntities4 _db;
 
-        public CursoRepositorio()
+        public CursoRepositorio(MallaDBEntities4 dbContext)
         {
             _db = new MallaDBEntities4();
         }

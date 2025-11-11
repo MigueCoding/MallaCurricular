@@ -12,6 +12,8 @@
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Curso__412EB0B6" ManuallyRouted="false" />
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Malla__403A8C7D" ManuallyRouted="false" />
         <AssociationConnector Association="MallaDBModel.Prerequisitos" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="MallaDBModel.Electiva" Width="1.5" PointX="5.375" PointY="0.75" />
+        <EntityTypeShape EntityType="MallaDBModel.Optativa" Width="1.5" PointX="5.375" PointY="4.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

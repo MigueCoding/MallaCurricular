@@ -4,8 +4,20 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="MallaDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="MallaDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Cursos">
+          <Key>
+            <PropertyRef Name="Codigo" />
+          </Key>
+          <Property Name="Codigo" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Asignatura" Type="nvarchar" MaxLength="100" />
+          <Property Name="Color" Type="varchar" MaxLength="50" />
+          <Property Name="Creditos" Type="int" />
+          <Property Name="Tipo" Type="varchar" MaxLength="50" />
+          <Property Name="TPS" Type="int" />
+          <Property Name="TIS" Type="int" />
+        </EntityType>
+        <EntityType Name="Electivas">
           <Key>
             <PropertyRef Name="Codigo" />
           </Key>
@@ -34,6 +46,18 @@
           <Property Name="CreatedAt" Type="datetime" />
           <Property Name="UpdatedAt" Type="datetime" />
           <Property Name="Nombre" Type="nvarchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="Optativas">
+          <Key>
+            <PropertyRef Name="Codigo" />
+          </Key>
+          <Property Name="Codigo" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Asignatura" Type="nvarchar" MaxLength="100" />
+          <Property Name="Color" Type="varchar" MaxLength="50" />
+          <Property Name="Creditos" Type="int" />
+          <Property Name="Tipo" Type="varchar" MaxLength="50" />
+          <Property Name="TPS" Type="int" />
+          <Property Name="TIS" Type="int" />
         </EntityType>
         <EntityType Name="Prerequisitos">
           <Key>
@@ -109,8 +133,10 @@
         </Association>
         <EntityContainer Name="MallaDBModelStoreContainer">
           <EntitySet Name="Cursos" EntityType="Self.Cursos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Electivas" EntityType="Self.Electivas" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MallaCursos" EntityType="Self.MallaCursos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Mallas" EntityType="Self.Mallas" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Optativas" EntityType="Self.Optativas" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Prerequisitos" EntityType="Self.Prerequisitos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Usuarios" EntityType="Self.Usuarios" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__MallaCurs__Curso__412EB0B6" Association="Self.FK__MallaCurs__Curso__412EB0B6">
@@ -130,8 +156,7 @@
             <End Role="Prerequisitos" EntitySet="Prerequisitos" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="MallaDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -230,7 +255,33 @@
             <End Role="EsPrerequisitoPara" EntitySet="Cursos" />
             <End Role="PrerequisitosQueTengo" EntitySet="Cursos" />
           </AssociationSet>
+          <EntitySet Name="Electivas" EntityType="MallaDBModel.Electiva" />
+          <EntitySet Name="Optativas" EntityType="MallaDBModel.Optativa" />
         </EntityContainer>
+        <EntityType Name="Electiva">
+          <Key>
+            <PropertyRef Name="Codigo" />
+          </Key>
+          <Property Name="Codigo" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Asignatura" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Color" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Creditos" Type="Int32" />
+          <Property Name="Tipo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TPS" Type="Int32" />
+          <Property Name="TIS" Type="Int32" />
+        </EntityType>
+        <EntityType Name="Optativa">
+          <Key>
+            <PropertyRef Name="Codigo" />
+          </Key>
+          <Property Name="Codigo" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Asignatura" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Color" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Creditos" Type="Int32" />
+          <Property Name="Tipo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="TPS" Type="Int32" />
+          <Property Name="TIS" Type="Int32" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -288,6 +339,32 @@
               <ScalarProperty Name="Codigo" ColumnName="Prerequisito" />
             </EndProperty>
           </AssociationSetMapping>
+          <EntitySetMapping Name="Electivas">
+            <EntityTypeMapping TypeName="MallaDBModel.Electiva">
+              <MappingFragment StoreEntitySet="Electivas">
+                <ScalarProperty Name="TIS" ColumnName="TIS" />
+                <ScalarProperty Name="TPS" ColumnName="TPS" />
+                <ScalarProperty Name="Tipo" ColumnName="Tipo" />
+                <ScalarProperty Name="Creditos" ColumnName="Creditos" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="Asignatura" ColumnName="Asignatura" />
+                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Optativas">
+            <EntityTypeMapping TypeName="MallaDBModel.Optativa">
+              <MappingFragment StoreEntitySet="Optativas">
+                <ScalarProperty Name="TIS" ColumnName="TIS" />
+                <ScalarProperty Name="TPS" ColumnName="TPS" />
+                <ScalarProperty Name="Tipo" ColumnName="Tipo" />
+                <ScalarProperty Name="Creditos" ColumnName="Creditos" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="Asignatura" ColumnName="Asignatura" />
+                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

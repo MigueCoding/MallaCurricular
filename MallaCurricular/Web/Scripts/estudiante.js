@@ -35,7 +35,7 @@ async function fetchCoursesByMalla() {
         return;
     }
 
-    // NUEVO BLOQUE: Mostrar nombre y versión de la malla
+    // 🔹 NUEVO BLOQUE: Mostrar nombre y versión de la malla
     try {
         const resMalla = await fetch(`http://localhost:49513/api/mallas/${mallaId}`);
         if (resMalla.ok) {
@@ -110,6 +110,7 @@ async function fetchCoursesByMalla() {
     }
 }
 
+// 🔹 el resto del JS permanece exactamente igual
 function renderSemesters() {
     const grid = document.getElementById('semester-grid');
     grid.innerHTML = '';
@@ -328,3 +329,5 @@ function computeSemesterSums() {
         }
     }
 }
+
+window.onload = fetchMallas;
