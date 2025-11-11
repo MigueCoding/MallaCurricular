@@ -6,7 +6,7 @@ namespace MallaCurricular.Controllers
 {
     public class AuthController : ApiController
     {
-        private MallaDBEntities2 db = new MallaDBEntities2();
+        private MallaDBEntities4 db = new MallaDBEntities4();
 
         [HttpPost]
         [Route("Auth/Login")]

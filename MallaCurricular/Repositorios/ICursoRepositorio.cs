@@ -8,5 +8,7 @@ namespace MallaCurricular.Repositories
         IEnumerable<Curso> GetAll();
         Curso GetById(string id);
         void Add(Curso curso);
+        void Update(Curso curso);
+        void Delete(Curso cursoExistente);
     }
 }

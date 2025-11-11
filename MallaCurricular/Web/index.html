@@ -48,11 +48,11 @@
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0;
-        }
+            .header h1 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin: 0;
+            }
 
         .error-message {
             color: #dc2626;
@@ -81,9 +81,9 @@
             margin: 0 auto 1rem;
         }
 
-        .retry-btn:hover, .export-btn:hover, .save-btn:hover {
-            background: #2563eb;
-        }
+            .retry-btn:hover, .export-btn:hover, .save-btn:hover {
+                background: #2563eb;
+            }
 
         .filter-group, .form-group {
             margin-bottom: 1.5rem;
@@ -103,10 +103,10 @@
             border-radius: 6px;
         }
 
-        .filter-select:focus, .course-select:focus, .form-input:focus, .form-select:focus {
-            border-color: #3b82f6;
-            outline: none;
-        }
+            .filter-select:focus, .course-select:focus, .form-input:focus, .form-select:focus {
+                border-color: #3b82f6;
+                outline: none;
+            }
 
         .apply-btn, .submit-btn, .login-btn, .logout-btn { /* Agregados login-btn y logout-btn */
             width: 100%;
@@ -119,18 +119,18 @@
             margin-top: 1rem; /* Añadido margen superior */
         }
 
-        .apply-btn:hover, .submit-btn:hover, .login-btn:hover, .logout-btn:hover {
-            background: #2563eb;
-        }
+            .apply-btn:hover, .submit-btn:hover, .login-btn:hover, .logout-btn:hover {
+                background: #2563eb;
+            }
 
         .logout-btn { /* Estilo específico para el botón de logout */
             background: #ef4444; /* Rojo para logout */
             margin-top: 2rem; /* Más margen para separarlo */
         }
 
-        .logout-btn:hover {
-            background: #dc2626;
-        }
+            .logout-btn:hover {
+                background: #dc2626;
+            }
 
         .semester-grid {
             display: grid;
@@ -146,11 +146,11 @@
             text-align: center;
         }
 
-        .semester h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+            .semester h3 {
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
 
         .course {
             background: white;
@@ -161,10 +161,21 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .course-green { border-left-color: #10b981; }
-        .course-blue { border-left-color: #3b82f6; }
-        .course-purple { border-left-color: #8b5cf6; }
-        .course-red { border-left-color: #ef4444; }
+        .course-green {
+            border-left-color: #10b981;
+        }
+
+        .course-blue {
+            border-left-color: #3b82f6;
+        }
+
+        .course-purple {
+            border-left-color: #8b5cf6;
+        }
+
+        .course-red {
+            border-left-color: #ef4444;
+        }
 
         .course-title {
             font-size: 0.9rem;
@@ -181,6 +192,28 @@
             color: #dc2626;
             display: none;
         }
+        .summary-box {
+            margin-top: 1rem;
+            background-color: #e2e8f0;
+            border: 2px solid black;
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .summary-cell {
+            border: 1px solid black;
+            padding: 0.5rem;
+        }
+        .legend { /* Para la lista de definiciones */
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #374151;
+            line-height: 1.4;
+        }
 
         .remove-btn {
             background: #ef4444;
@@ -193,9 +226,9 @@
             margin-top: 0.25rem;
         }
 
-        .remove-btn:hover {
-            background: #dc2626;
-        }
+            .remove-btn:hover {
+                background: #dc2626;
+            }
 
         .color-palette {
             position: absolute;
@@ -208,11 +241,11 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .color-palette h4 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+            .color-palette h4 {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
 
         .color-item {
             display: flex;
@@ -226,12 +259,55 @@
             margin-right: 0.5rem;
             border-radius: 2px;
         }
+        .color-palette {
+            position: static; /* ❗ Elimina cualquier posicionamiento absoluto */
+            margin-top: 1.5rem;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #courses-semester-P {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: nowrap; /* ❗ No permite que bajen de línea */
+            overflow-x: auto; /* Permite desplazamiento si son muchas */
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+            #courses-semester-P .course {
+                min-width: 200px; /* Cada tarjeta de curso */
+                flex: 0 0 auto; /* No se expanden ni encogen */
+            }
+            .color-palette h4 {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                text-align: center;
+            }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .color-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
 
         .filters img {
             max-width: 100%;
             height: auto;
             margin-bottom: 1.5rem;
-            }
+        }
 
         /* Estilos para el formulario de login */
         .login-container {
@@ -244,12 +320,12 @@
             text-align: center;
         }
 
-        .login-container h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: #1e40af;
-        }
+            .login-container h2 {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 2rem;
+                color: #1e40af;
+            }
 
         .login-form .form-group {
             margin-bottom: 1.5rem;
@@ -276,17 +352,21 @@
             .container {
                 flex-direction: column;
             }
+
             .filters, .courses {
                 width: 100%;
             }
+
             .semester-grid {
                 grid-template-columns: 1fr;
             }
+
             .color-palette {
                 position: static;
                 margin-top: 1rem;
                 width: 100%;
             }
+
             .top-left-image {
                 width: 60px;
                 top: 0.25rem;
@@ -297,7 +377,7 @@
 </head>
 <body>
     <div id="login-section" class="login-container">
-        <img src="images.png" alt="ITM Logo" class="mx-auto mb-6 w-32"/>
+        <img src="logo2020.png" alt="ITM Logo" class="mx-auto mb-6 w-32" />
         <h2>Iniciar Sesión</h2>
         <div class="error-message" id="login-error-message"></div>
         <form id="login-form" class="login-form">
@@ -315,7 +395,7 @@
 
     <div id="malla-section" class="container hidden">
         <div class="filters">
-            <img src="images.png" alt="ITM Logo" />
+            <img src="logo2020.png" alt="ITM Logo" />
             <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
             <div class="error-message" id="error-message"></div>
             <div class="success-message" id="success-message"></div> <div class="filter-group">
@@ -334,6 +414,7 @@
                     <option value="10">Semestre 10</option>
                 </select>
             </div>
+
             <div class="filter-group">
                 <label class="filter-label">Opciones</label>
                 <div class="space-y-2">
@@ -341,13 +422,27 @@
                         <input type="checkbox" id="show-prerequisites" class="mr-2 rounded text-blue-600">
                         Mostrar Prerrequisitos
                     </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="hide-completed" class="mr-2 rounded text-blue-600">
-                        Ocultar Completados
-                    </label>
                 </div>
             </div>
+
             <button class="apply-btn" onclick="applyFilters()">Aplicar Filtros</button>
+            <div class="legend-box mt-6">
+                <div class="summary-box grid grid-cols-3 border border-black text-center">
+                    <div class="summary-cell font-bold">TPS</div>
+                    <div class="summary-cell font-bold">TIS</div>
+                    <div class="summary-cell font-bold">Créditos</div>
+                    <div class="summary-cell font-bold">TPT</div>
+                    <div class="summary-cell font-bold">TIT</div>
+                    <div class="summary-cell font-bold">#</div>
+                </div>
+                <div class="legend mt-2 text-sm text-gray-700">
+                    <p><strong>TPS:</strong> Trabajo Presencial Semanal</p>
+                    <p><strong>TIS:</strong> Trabajo Independiente Semanal</p>
+                    <p><strong>TPT:</strong> Trabajo Presencial Total</p>
+                    <p><strong>TIT:</strong> Trabajo Independiente Total</p>
+                    <p><strong>#:</strong> Número total de créditos</p>
+                </div>
+            </div>
             <h2 class="text-xl font-bold text-gray-800 mt-6 mb-4">Crear Asignatura</h2>
             <div class="form-group">
                 <label class="form-label">Código</label>
@@ -374,22 +469,51 @@
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Semestre</label>
-                <select id="new-semester" class="form-select" required>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
+                <label class="form-label">Trabajo Presencial Semanal (TPS)</label>
+                <input type="number" id="new-tps" class="form-input" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Trabajo Independiente Semanal (TIS)</label>
+                <input type="number" id="new-tis" class="form-input" min="0" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipo</label>
+                <select id="new-type" class="form-select" required>
+                    <option value="Teorica">Teórica</option>
+                    <option value="Teorico-Practica">Teórico-Práctica</option>
+                    <option value="Practica">Práctica</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label class="form-label">Créditos</label>
+                <input type="number" id="new-credits" class="form-input" min="1" required>
+            </div>
+
+
             <button class="submit-btn" onclick="createCourse()">Crear Asignatura</button>
             <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+
+            <div class="color-palette">
+                <h4>Leyenda de Colores</h4>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #10b981;"></div>
+                    <span>Ciencias Básicas</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #3b82f6;"></div>
+                    <span>Ciencias Básicas Tecnología - Ingeniería</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #8b5cf6;"></div>
+                    <span>Formación Profesional</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background-color: #ef4444;"></div>
+                    <span>Formación Complementaria</span>
+                </div>
+            </div>
+
         </div>
         <div class="courses">
             <div class="header">
@@ -399,44 +523,28 @@
             <button class="export-btn" onclick="exportToPDF()">Exportar Malla a PDF</button>
             <button class="save-btn" onclick="saveMalla()">Guardar Malla</button>
             <div class="semester-grid" id="semester-grid"></div>
-        </div>
-        <div class="color-palette">
-            <h4>Leyenda de Colores</h4>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #10b981;"></div>
-                <span>Ciencias Básicas</span>
-            </div>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #3b82f6;"></div>
-                <span>Ciencias Básicas Tecnología - Ingeniería</span>
-            </div>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #8b5cf6;"></div>
-                <span>Formación Profesional</span>
-            </div>
-            <div class="color-item">
-                <div class="color-swatch" style="background-color: #ef4444;"></div>
-                <span>Formación Complementaria</span>
-            </div>
-        </div>
-    </div>
 
+
+
+            <div id="courses-semester-P" class="flex flex-wrap justify-center gap-4 mt-4"></div>
+        </div>
+
+    </div>
     <script>
         let courses = {};
         const addedCourses = new Map();
         const API_BASE_URL = 'http://localhost:49513'; // Asegúrate de que este puerto sea el correcto
 
-        // --- Funciones de Autenticación ---
+        // --- Funciones de Autenticación (Sin Cambios) ---
 
         async function handleLogin(event) {
-            event.preventDefault(); // Evita que el formulario se envíe de forma tradicional
-            
+            event.preventDefault();
+
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const loginErrorMessage = document.getElementById('login-error-message');
             loginErrorMessage.style.display = 'none';
 
-            // Construye los datos como x-www-form-urlencoded
             const formData = new URLSearchParams();
             formData.append('Email', email);
             formData.append('Contrasena', password);
@@ -445,38 +553,30 @@
                 const response = await fetch(`${API_BASE_URL}/Auth/Login`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded', // Es crucial para el backend de MVC
-                        'Accept': 'application/json' // Decimos que esperamos JSON de vuelta
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
                     },
-                    body: formData.toString() // Convierte URLSearchParams a string
+                    body: formData.toString()
                 });
 
                 if (response.ok) {
-                    const data = await response.json(); // Esperamos un JSON como respuesta exitosa
+                    const data = await response.json();
                     if (data.success) {
-                        // Login exitoso: Almacena info de sesión (ej: ID de usuario)
                         localStorage.setItem('isAuthenticated', 'true');
                         localStorage.setItem('userId', data.userId);
-                        localStorage.setItem('userName', data.userName); // Opcional: almacenar el nombre de usuario
-                        
-                        showMallaSection(); // Mostrar la interfaz de la malla
-                        fetchCourses(); // Cargar los cursos
+                        localStorage.setItem('userName', data.userName);
+
+                        showMallaSection();
+                        fetchCourses();
                     } else {
-                        // El servidor devolvió éxito HTTP (200), pero la lógica de negocio indica fallo
                         loginErrorMessage.textContent = data.message || 'Credenciales incorrectas.';
                         loginErrorMessage.style.display = 'block';
                     }
                 } else {
-                    // Si la respuesta HTTP no es OK (ej. 400 Bad Request por validación)
-                    // El backend MVC para un modelo inválido devuelve la vista HTML con errores.
-                    // Para este frontend, si no es 200, asumimos error.
                     if (response.headers.get('Content-Type')?.includes('text/html')) {
-                        // Si devuelve HTML, probablemente son errores de validación de MVC.
-                        // Podríamos intentar parsear el HTML para mostrar los errores,
-                        // pero por simplicidad, un mensaje genérico.
                         loginErrorMessage.textContent = `Error de validación en el servidor. Verifica tus datos.`;
                     } else {
-                        const errorData = await response.json(); // Intentar leer como JSON
+                        const errorData = await response.json();
                         loginErrorMessage.textContent = errorData.message || `Error en el servidor: ${response.status} ${response.statusText}`;
                     }
                     loginErrorMessage.style.display = 'block';
@@ -493,10 +593,6 @@
             localStorage.removeItem('userId');
             localStorage.removeItem('userName');
             showLoginSection();
-            // Opcional: podrías hacer un fetch al endpoint de Logout del backend
-            // para limpiar la sesión del lado del servidor, aunque si usas JWT
-            // esto no sería tan crítico.
-            // fetch(`${API_BASE_URL}/Auth/Logout`, { method: 'POST' });
         }
 
         function checkAuthAndRender() {
@@ -518,7 +614,113 @@
             document.getElementById('malla-section').classList.remove('hidden');
         }
 
-        // --- Funciones existentes de la Malla Curricular ---
+
+        // ----------------------------------------------------------------------
+        // --- Funciones del Buscador en Tiempo Real (Modificada la Generación HTML) ---
+
+        /**
+         * Genera el HTML para el custom select con buscador.
+         * @param {number|string} semester - El número de semestre o 'P'.
+         */
+        function createCustomSelect(semester) {
+            let availableCourses = Object.values(courses).filter(c => !addedCourses.has(c.code));
+
+            // Ordenar alfabéticamente por nombre
+            availableCourses.sort((a, b) => {
+                const nameA = a.name.toUpperCase();
+                const nameB = b.name.toUpperCase();
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+                return 0;
+            });
+
+            const optionsHtml = availableCourses
+                .map(c => `<div class="custom-option p-2 hover:bg-blue-100 cursor-pointer whitespace-nowrap" data-value="${c.code}" onclick="selectCustomOption(this, '${semester}', '${c.code}')">${c.name} (${c.code})</div>`)
+                .join('');
+
+            // ✅ MODIFICACIÓN CLAVE: Se cambió el ancho a un valor fijo de 400px.
+            return `
+                <div class="custom-select-container relative mb-4">
+                    <button type="button" class="custom-select-button course-select p-2 border border-gray-300 rounded-md w-full text-left bg-white text-gray-500 hover:text-gray-700" onclick="toggleCustomDropdown(this)">
+                        Seleccione un curso...
+                    </button>
+                    <div class="custom-dropdown absolute z-10 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto hidden"
+                         style="width: 400px;"
+                         >
+                        <input type="text" class="custom-search-input p-2 border-b border-gray-300 w-full sticky top-0" placeholder="Buscar curso..." onkeyup="filterCustomOptions(this)">
+                        <div class="custom-options-list">
+                            ${optionsHtml || '<div class="p-2 text-gray-500">No hay cursos disponibles.</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleCustomDropdown(button) {
+            // Cierra todos los otros dropdowns abiertos
+            document.querySelectorAll('.custom-dropdown').forEach(d => {
+                if (d !== button.nextElementSibling) {
+                    d.classList.add('hidden');
+                }
+            });
+
+            const dropdown = button.nextElementSibling;
+            dropdown.classList.toggle('hidden');
+
+            if (!dropdown.classList.contains('hidden')) {
+                const searchInput = dropdown.querySelector('.custom-search-input');
+                searchInput.value = '';
+                searchInput.focus();
+                dropdown.querySelectorAll('.custom-option').forEach(option => option.style.display = 'block');
+            }
+        }
+
+        function filterCustomOptions(input) {
+            const filter = input.value.toUpperCase();
+            const optionsList = input.nextElementSibling;
+            const options = optionsList.querySelectorAll('.custom-option');
+
+            options.forEach(option => {
+                const text = option.textContent || option.innerText;
+                option.style.display = text.toUpperCase().includes(filter) ? 'block' : 'none';
+            });
+        }
+
+        function selectCustomOption(optionDiv, semester, courseCode) {
+            const button = optionDiv.closest('.custom-select-container').querySelector('.custom-select-button');
+            const dropdown = optionDiv.closest('.custom-dropdown');
+
+            addCourseLogic(courseCode, semester);
+
+            dropdown.classList.add('hidden');
+            button.textContent = 'Seleccione un curso...';
+        }
+
+        function addCourseLogic(courseCode, semester) {
+            if (!courseCode || addedCourses.has(courseCode)) return;
+
+            const course = courses[courseCode];
+            if (!course) {
+                console.error(`Curso no encontrado: ${courseCode}`);
+                return;
+            }
+
+            const prereqCodes = course.prerequisiteCodes || [];
+            const missingPrereqs = prereqCodes.filter(prCode => !addedCourses.has(prCode));
+
+            if (missingPrereqs.length > 0) {
+                const missingPrereqNames = missingPrereqs.map(code => courses[code] ? courses[code].name : code);
+                alert(`No puedes agregar "${course.name}" porque debes agregar primero:\n• ${missingPrereqNames.join("\n• ")}`);
+                return;
+            }
+
+            addedCourses.set(courseCode, semester);
+            renderSemesters();
+        }
+
+
+        // ----------------------------------------------------------------------
+        // --- Funciones de la Malla Curricular (Sin Cambios) ---
 
         async function fetchCourses() {
             const errorMessage = document.getElementById('error-message');
@@ -536,23 +738,28 @@
                 const data = await response.json();
                 courses = {};
                 data.forEach(course => {
+                    const prerequisiteCodes = Array.isArray(course.Prerequisitos)
+                        ? course.Prerequisitos.map(p => p.Codigo)
+                        : [];
+
                     courses[course.Codigo] = {
                         code: course.Codigo,
                         name: course.Asignatura,
-                        prerequisite: course.Prerequisito || '',
+                        prerequisiteCodes: prerequisiteCodes,
                         color: course.Color,
-                        semester: course.Semestre,
-                        credits: course.Creditos
+                        credits: course.Creditos,
+                        tps: course.TPS,
+                        tis: course.TIS
                     };
                 });
 
-                // 🔹 Llenar lista de prerrequisitos dinámicamente
+
                 const prereqSelect = document.getElementById('new-prerequisite');
                 prereqSelect.innerHTML = `<option value="">Ninguno</option>`;
                 Object.values(courses).forEach(c => {
                     const opt = document.createElement('option');
-                    opt.value = c.code; // usar el código como valor
-                    opt.textContent = `${c.name} (${c.code})`; // mostrar nombre + código
+                    opt.value = c.code;
+                    opt.textContent = `${c.name} (${c.code})`;
                     prereqSelect.appendChild(opt);
                 });
 
@@ -565,78 +772,85 @@
             }
         }
 
+        function addCourse(select, semester) {
+            const courseCode = select.value;
+            if (!courseCode) return;
+
+            addCourseLogic(courseCode, semester);
+        }
 
 
         function renderSemesters() {
-    const grid = document.getElementById('semester-grid');
-    grid.innerHTML = '';
-    
-    for (let i = 1; i <= 10; i++) {
-        const semester = document.createElement('div');
-        semester.className = 'semester';
-        semester.setAttribute('data-semester', i);
-        semester.innerHTML = `
-            <h3>Semestre ${i}</h3>
-            <select class="course-select" onchange="addCourse(this, ${i})">
-                <option value="">Seleccione un curso...</option>
-                ${Object.values(courses)
-                    .filter(c => c.semester === i && !addedCourses.has(c.code))
-                    .map(c => `<option value="${c.code}">${c.name}</option>`)
-                    .join('')}
-            </select>
-            <div id="courses-semester-${i}"></div>
-        `;
-        grid.appendChild(semester);
-    }
+            const grid = document.getElementById('semester-grid');
+            grid.innerHTML = '';
 
-    addedCourses.forEach((semester, courseCode) => {
-        const course = courses[courseCode];
-        if (course) {
-            const courseList = document.getElementById(`courses-semester-${semester}`);
-            const courseDiv = document.createElement('div');
-            courseDiv.className = `course ${course.color}`;
-            courseDiv.setAttribute('data-code', courseCode);
-            courseDiv.setAttribute('data-semester', semester);
-
-            const creditText = (typeof course.credits === 'number' && !isNaN(course.credits))
-                ? `${course.credits} crédito${course.credits === 1 ? '' : 's'}`
-                : 'Sin créditos';
-
-            courseDiv.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <div class="course-title">${course.name}</div>
-                        <div class="course-code">${course.code}</div>
-                        <div class="course-prerequisite">Prerrequisito: ${course.prerequisite || 'Ninguno'}</div>
-                    </div>
-                    <div class="text-sm text-indigo-700 font-semibold bg-indigo-100 px-2 py-1 rounded ml-2 whitespace-nowrap">
-                        ${creditText}
-                    </div>
-                </div>
-                <button class="remove-btn mt-1" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+            // Generar los 10 semestres normales
+            for (let i = 1; i <= 10; i++) {
+                const semester = document.createElement('div');
+                semester.className = 'semester';
+                semester.setAttribute('data-semester', i);
+                semester.innerHTML = `
+                <h3>Semestre ${i}</h3> ${createCustomSelect(i)} 
+                <div id="courses-semester-${i}"></div>
             `;
-            courseList.appendChild(courseDiv);
-        }
-    });
-
-    applyFilters();
-}
-
-
-        function addCourse(select, semester) {
-            const courseCode = select.value;
-            if (!courseCode || addedCourses.has(courseCode)) return;
-
-            const course = courses[courseCode];
-            if (!course) {
-                console.error(`Curso no encontrado: ${courseCode}`);
-                return;
+                grid.appendChild(semester);
             }
 
-            addedCourses.set(courseCode, semester);
-            renderSemesters();
-            select.value = '';
+            // Agregar bloque de Materias Propedéuticas (en horizontal)
+            const propedeutic = document.createElement('div');
+            propedeutic.className = 'semester mt-10';
+            propedeutic.setAttribute('data-semester', 'P');
+            propedeutic.style.gridColumn = "1 / -1";
+            propedeutic.innerHTML = `
+            <h3 class="text-center mb-4 text-lg font-semibold">Materias Propedéuticas</h3>
+            <div class="mx-auto" style="max-width: 600px;"> 
+                ${createCustomSelect('P')} 
+            </div>
+            <div id="courses-semester-P"
+                class="flex flex-wrap justify-center gap-4 mt-4">
+            </div>
+        `;
+            grid.appendChild(propedeutic);
+
+            addedCourses.forEach((semester, courseCode) => {
+                const course = courses[courseCode];
+                if (course) {
+                    const courseList = document.getElementById(`courses-semester-${semester}`);
+                    if (!courseList) return;
+
+                    const courseDiv = document.createElement('div');
+                    courseDiv.className = `course ${course.color} p-3 rounded-lg shadow text-center`;
+                    courseDiv.setAttribute('data-code', courseCode);
+                    courseDiv.setAttribute('data-semester', semester);
+
+                    const prereqsHtml = course.prerequisiteCodes && course.prerequisiteCodes.length > 0
+                        ? `<div class="text-xs mt-1 text-gray-500">Req: ${course.prerequisiteCodes.join(', ')}</div>`
+                        : '';
+
+                    courseDiv.innerHTML = `
+                        <div>
+                            <div class="course-title font-semibold">${course.name}</div>
+                            <div class="course-code text-sm text-gray-600">${course.code}</div>
+                            ${prereqsHtml}
+                            <div class="text-xs mt-1 text-gray-600">
+                                <span class="tps">TPS: ${course.tps || 0}</span> |
+                                <span class="tis">TIS: ${course.tis || 0}</span> |
+                                <span class="creditos">Créditos: ${course.credits || 0}</span>
+                            </div>
+                        </div>
+                        <button class="remove-btn mt-2 bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded" onclick="removeCourse(this, '${courseCode}')">Remover</button>
+                    `;
+
+                    courseList.appendChild(courseDiv);
+                }
+            });
+
+            if (typeof applyFilters === 'function') {
+                applyFilters();
+            }
+            computeSemesterSums();
         }
+
 
         function removeCourse(button, courseCode) {
             addedCourses.delete(courseCode);
@@ -651,23 +865,30 @@
 
             const code = document.getElementById('new-code').value.trim();
             const name = document.getElementById('new-name').value.trim();
-            const prerequisite = document.getElementById('new-prerequisite').value; // ahora es el código seleccionado
+            const prerequisiteCode = document.getElementById('new-prerequisite').value;
             const color = document.getElementById('new-color').value;
-            const semester = parseInt(document.getElementById('new-semester').value);
+            const tps = parseInt(document.getElementById('new-tps').value);
+            const tis = parseInt(document.getElementById('new-tis').value);
+            const tipo = document.getElementById('new-type').value;
+            const creditos = parseInt(document.getElementById('new-credits').value);
 
-            if (!code || !name || !color || isNaN(semester)) {
+            if (!code || !name || !color || !tipo || isNaN(tps) || isNaN(tis) || isNaN(creditos)) {
                 errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
                 errorMessage.style.display = 'block';
                 return;
             }
 
-            const newCourse = {
+            const payload = {
                 Codigo: code,
                 Asignatura: name,
-                Prerequisito: prerequisite || null, // guardar código del curso como requisito
                 Color: color,
-                Semestre: semester
+                TPS: tps,
+                TIS: tis,
+                Tipo: tipo,
+                Creditos: creditos,
+                PrerequisitoCodigos: prerequisiteCode ? [prerequisiteCode] : []
             };
+
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/cursos/crear`, {
@@ -676,7 +897,7 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(newCourse)
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
@@ -692,13 +913,16 @@
                 document.getElementById('new-name').value = '';
                 document.getElementById('new-prerequisite').value = '';
                 document.getElementById('new-color').value = 'course-green';
-                document.getElementById('new-semester').value = '1';
+                document.getElementById('new-tps').value = '';
+                document.getElementById('new-tis').value = '';
+                document.getElementById('new-type').value = 'Teorica';
+                document.getElementById('new-credits').value = '';
 
                 successMessage.textContent = 'Asignatura creada exitosamente.';
                 successMessage.style.display = 'block';
                 setTimeout(() => successMessage.style.display = 'none', 3000);
 
-                await fetchCourses(); // recargar cursos
+                await fetchCourses();
             } catch (error) {
                 console.error('Error al crear el curso:', error);
                 errorMessage.textContent = `Error al crear el curso: ${error.message}`;
@@ -707,10 +931,11 @@
         }
 
 
+        // --- Funciones sin cambios significativos ---
+
         function applyFilters() {
-            const semesterFilter = document.getElementById('semester-filter').value;
-            const showPrerequisites = document.getElementById('show-prerequisites').checked;
-            const hideCompleted = document.getElementById('hide-completed').checked;
+            const semesterFilter = document.getElementById('semester-filter')?.value;
+            const showPrerequisites = document.getElementById('show-prerequisites')?.checked;
 
             document.querySelectorAll('.semester').forEach(semester => {
                 const semesterNum = semester.getAttribute('data-semester');
@@ -719,13 +944,6 @@
 
             document.querySelectorAll('.course-prerequisite').forEach(prereq => {
                 prereq.style.display = showPrerequisites ? 'block' : 'none';
-            });
-
-            document.querySelectorAll('.course').forEach(course => {
-                // Simplificado: si hideCompleted está activo, siempre oculta, sino siempre muestra.
-                // Si realmente tienes un estado de "completado" para los cursos, necesitarías
-                // una propiedad en el objeto `course` para verificar.
-                course.style.display = hideCompleted ? 'none' : 'block';
             });
         }
 
@@ -736,30 +954,37 @@
                 unit: 'mm',
                 format: 'a4'
             });
+
             const coursesSection = document.querySelector('.courses');
             const filtersSection = document.querySelector('.filters');
             const retryBtn = document.querySelector('.retry-btn');
             const exportBtn = document.querySelector('.export-btn');
             const saveBtn = document.querySelector('.save-btn');
             const colorPalette = document.querySelector('.color-palette');
-            const logoutBtn = document.querySelector('.logout-btn'); // Ocultar también el botón de logout
+            const logoutBtn = document.querySelector('.logout-btn');
 
-            filtersSection.style.display = 'none';
-            retryBtn.style.display = 'none';
-            exportBtn.style.display = 'none';
-            saveBtn.style.display = 'none';
-            colorPalette.style.display = 'none';
-            logoutBtn.style.display = 'none';
+            const courseSelects = document.querySelectorAll('.custom-select-container');
+            const removeButtons = document.querySelectorAll('.remove-btn');
+            const summaryBoxes = document.querySelectorAll('.semester-summary');
+
+            [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn].forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+            courseSelects.forEach(sel => sel.style.display = 'none');
+            removeButtons.forEach(btn => btn.style.display = 'none');
+            summaryBoxes.forEach(box => box.style.display = 'none');
+
 
             try {
                 const canvas = await html2canvas(coursesSection, {
-                    scale: 1,
+                    scale: 2,
                     useCORS: true,
                     backgroundColor: '#ffffff',
-                    windowWidth: coursesSection.scrollWidth,
-                    windowHeight: coursesSection.scrollHeight
+                    scrollX: 0,
+                    scrollY: 0
                 });
-                const imgData = canvas.toDataURL('image/jpeg', 0.7);
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.9);
                 const imgWidth = 190;
                 const pageHeight = 297;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -782,17 +1007,21 @@
                 doc.save('malla_curricular.pdf');
             } catch (error) {
                 console.error('Error al generar el PDF:', error);
-                document.getElementById('error-message').textContent = 'Error al generar el PDF. Revisa la consola.';
-                document.getElementById('error-message').style.display = 'block';
+                const errorMsg = document.getElementById('error-message');
+                if (errorMsg) {
+                    errorMsg.textContent = 'Error al generar el PDF. Revisa la consola.';
+                    errorMsg.style.display = 'block';
+                }
             } finally {
-                filtersSection.style.display = 'block';
-                retryBtn.style.display = 'block';
-                exportBtn.style.display = 'block';
-                saveBtn.style.display = 'block';
-                colorPalette.style.display = 'block';
-                logoutBtn.style.display = 'block';
+                [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn].forEach(el => {
+                    if (el) el.style.display = 'block';
+                });
+                courseSelects.forEach(sel => sel.style.display = 'block');
+                removeButtons.forEach(btn => btn.style.display = 'block');
+                summaryBoxes.forEach(box => box.style.display = 'block');
             }
         }
+
 
         async function saveMalla() {
             const errorMessage = document.getElementById('error-message');
@@ -800,19 +1029,28 @@
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
 
-            // 🔹 Pedir nombre de la malla
             const nombreMalla = prompt("Ingrese un nombre para la malla:");
             if (!nombreMalla || nombreMalla.trim() === "") {
                 alert("Debe ingresar un nombre para la malla.");
                 return;
             }
+            const Version = prompt("Ingrese version de la malla:");
+            if (!Version || Version.trim() === "") {
+                alert("Debe ingresar una version para la malla.");
+                return;
+            }
+            const fechaCreacion = new Date().toISOString();
+
 
             const malla = {
                 nombre: nombreMalla.trim(),
+                Version: Version.trim(),
+                fechaCreacion: fechaCreacion,
                 courses: Array.from(addedCourses).map(([code, semester]) => ({
                     Codigo: code,
-                    Semestre: semester
+                    Semestre: semester === 'P' ? 11 : semester,
                 }))
+
             };
 
             try {
@@ -840,13 +1078,78 @@
             }
         }
 
+        function computeSemesterSums() {
+            for (let i = 1; i <= 10; i++) {
+                computeForSemester(i);
+            }
+            computeForSemester('P');
+        }
+
+        function computeForSemester(semesterKey) {
+            const cont = document.getElementById(`courses-semester-${semesterKey}`);
+            if (!cont) return;
+
+            const cursos = cont.querySelectorAll(".course");
+
+            const prev = cont.querySelector(".semester-summary");
+            if (prev) prev.remove();
+
+            if (cursos.length) {
+                let tps_total = 0, tis_total = 0, creditos_total = 0;
+
+                cursos.forEach(c => {
+                    if (c.classList.contains("disabled")) return;
+
+                    const courseCode = c.getAttribute('data-code');
+                    const courseData = courses[courseCode];
+
+                    if (courseData) {
+                        tps_total += courseData.tps || 0;
+                        tis_total += courseData.tis || 0;
+                        creditos_total += courseData.credits || 0;
+                    }
+                });
+
+                const tps_hours = tps_total * 16;
+                const tis_hours = tis_total * 16;
+                const total_credits = creditos_total;
+
+                const box = document.createElement("div");
+                box.className = "semester-summary mt-2 text-center text-xs";
+
+                box.innerHTML = `
+                    <div class="grid grid-cols-3 border border-black" style="font-size: 1.25rem;">
+
+                        <div class="col-span-2 grid grid-cols-2 border-r border-black bg-gray-100">
+
+                            <div class="border-b border-black font-bold text-lg p-1">${tps_total}</div>
+                            <div class="border-b border-black border-l font-bold text-lg p-1">${tis_total}</div>
+
+                            <div class="font-bold text-lg p-1">${tps_hours}</div>
+                            <div class="font-bold border-l border-black text-lg p-1">${tis_hours}</div>
+                        </div>
+
+                        <div class="flex items-center justify-center text-3xl font-bold text-gray-700 bg-gray-200 border-l border-black">
+                            ${total_credits}
+                        </div>
+                    </div>
+                `;
+                cont.appendChild(box);
+            }
+        }
+
 
         // --- Inicialización ---
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Asigna el evento submit al formulario de login
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             checkAuthAndRender();
+
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.custom-select-container')) {
+                    document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.add('hidden'));
+                }
+            });
         });
     </script>
 </body>
