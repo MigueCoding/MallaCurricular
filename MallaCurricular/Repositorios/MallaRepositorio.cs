@@ -6,7 +6,7 @@ namespace MallaCurricular.Repositories
 {
     public class MallaRepositorio : IMallaRepositorio
     {
-        private readonly MallaDBEntities2 _db = new MallaDBEntities2();
+        private readonly MallaDBEntities4 _db = new MallaDBEntities4();
 
         public IEnumerable<Malla> GetAll()
         {

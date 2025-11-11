@@ -2,8 +2,10 @@
 using MallaCurricular.Repositories;
 using MallaCurricular.Services;
 using System;
+using System.Collections.Generic; // Necesario para List<string>
 using System.Linq;
 using System.Web.Http;
+using Newtonsoft.Json.Linq; // Necesario si estás usando dynamic y ToObject<T>() en ASP.NET Web API
 
 namespace MallaCurricular.Controllers
 {
@@ -30,9 +32,10 @@ namespace MallaCurricular.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error al obtener todos los cursos: " + ex.Message );
+                return BadRequest($"Error al obtener todos los cursos: " + ex.Message);
             }
         }
+
         // GET: api/cursos?mallaId={id}
         [HttpGet]
         [Route("")]
@@ -70,16 +73,30 @@ namespace MallaCurricular.Controllers
         }
 
 
-        // POST: api/cursos
         // POST: api/cursos/crear
         [HttpPost]
         [Route("crear")]
-        public IHttpActionResult CrearCurso([FromBody] Curso curso)
+        public IHttpActionResult CrearCurso([FromBody] JObject data) // Usamos JObject para facilitar la extracción
         {
             try
             {
-                if (curso == null)
+                if (data == null)
                     return BadRequest("Los datos del curso no pueden estar vacíos.");
+
+                // 1. Deserializar la entidad Curso y la lista de códigos de prerequisito.
+                // Asume que las propiedades se llaman 'Curso' y 'PrerequisitoCodigos' en el JSON.
+
+                // Extraer la lista de códigos de prerequisitos (puede ser null)
+                var prerequisitoCodigosToken = data["PrerequisitoCodigos"];
+                List<string> prerequisitoCodigos = prerequisitoCodigosToken?.ToObject<List<string>>()
+                                                    ?? new List<string>();
+
+
+                // Deserializar el resto del objeto JSON a la entidad Curso
+                Curso curso = data.ToObject<Curso>();
+
+                if (curso == null)
+                    return BadRequest("Datos del curso incompletos o mal formados.");
 
                 if (!ModelState.IsValid)
                 {
@@ -91,7 +108,8 @@ namespace MallaCurricular.Controllers
                     return BadRequest("Datos inválidos: " + string.Join(", ", errors));
                 }
 
-                var error = _cursoService.CrearCurso(curso);
+                // 2. Llamar al servicio con los dos argumentos
+                var error = _cursoService.CrearCurso(curso, prerequisitoCodigos); // LÍNEA CORREGIDA
 
                 if (!string.IsNullOrEmpty(error))
                     return BadRequest(error);
@@ -103,6 +121,9 @@ namespace MallaCurricular.Controllers
                 return InternalServerError(new Exception("Error al crear el curso: " + ex.Message));
             }
         }
+
+        // Nota: También debes corregir el método [HttpPut] o [HttpPatch] (ActualizarCurso) 
+        // para que use este mismo patrón de DTO/dynamic y pase la lista de códigos de prerequisito al servicio.
 
     }
 }

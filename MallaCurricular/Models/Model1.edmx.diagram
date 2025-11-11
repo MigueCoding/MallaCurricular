@@ -4,13 +4,14 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="c70d4d631dd846ffa52b3f6faa950654" Name="Diagram1">
+      <Diagram DiagramId="0eea6747c724466eb9a80f3761b38558" Name="Diagram1">
         <EntityTypeShape EntityType="MallaDBModel.Curso" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="MallaDBModel.MallaCurso" Width="1.5" PointX="3" PointY="1.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="MallaDBModel.Malla" Width="1.5" PointX="0.75" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="MallaDBModel.MallaCurso" Width="1.5" PointX="3" PointY="1.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MallaDBModel.Malla" Width="1.5" PointX="0.75" PointY="5.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MallaDBModel.Usuario" Width="1.5" PointX="2.75" PointY="4.75" IsExpanded="true" />
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Curso__412EB0B6" ManuallyRouted="false" />
         <AssociationConnector Association="MallaDBModel.FK__MallaCurs__Malla__403A8C7D" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="MallaDBModel.Usuario" Width="1.5" PointX="6.75" PointY="4.25" IsExpanded="true" />
+        <AssociationConnector Association="MallaDBModel.Prerequisitos" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

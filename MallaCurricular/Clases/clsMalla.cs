@@ -3,6 +3,7 @@ using MallaCurricular.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity; // Necesario para usar .Include()
 
 namespace MallaCurricular.Services
 {
@@ -32,35 +33,45 @@ namespace MallaCurricular.Services
             return _mallaRepositorio.GetById(id);
         }
 
-
         public IEnumerable<object> ObtenerCursosPorMalla(int mallaId)
         {
             var mallaCursos = _mallaCursoRepositorio.GetByMallaId(mallaId);
-            var cursos = new MallaDBEntities2().Cursos.ToList(); // Acceso directo para mapear
 
-            return mallaCursos
-                .Join(cursos,
-                    mc => mc.CursoCodigo,
-                    c => c.Codigo,
-                    (mc, c) => new
-                    {
-                        c.Codigo,
-                        c.Asignatura,
-                        c.Prerequisito,
-                        c.Color,
-                        Semestre = mc.Semestre, // Usar el semestre de la malla
-                        c.Creditos,
-                        c.TPS,
-                        c.TIS
+            // --- CAMBIO CLAVE: Cargar Cursos CON la colección de Prerequisitos ---
+            using (var db = new MallaDBEntities4())
+            {
+                var cursosConPrerequisitos = db.Cursos
+                    .Include(c => c.PrerequisitosQueTengo) // Cargar la colección de navegación M:M
+                    .ToList();
 
-                    })
-                .ToList();
+                // Realizar el JOIN
+                return mallaCursos
+                    .Join(cursosConPrerequisitos,
+                        mc => mc.CursoCodigo,
+                        c => c.Codigo,
+                        (mc, c) => new
+                        {
+                            c.Codigo,
+                            c.Asignatura,
+
+                            // *** LÍNEA 49 CORREGIDA (AHORA ES UNA CADENA DE CÓDIGOS) ***
+                            // Concatena todos los Códigos de los prerrequisitos separados por coma.
+                            Prerequisito = string.Join(",", c.PrerequisitosQueTengo.Select(p => p.Codigo)),
+                            // **********************************************************
+
+                            c.Color,
+                            Semestre = mc.Semestre,
+                            c.Creditos,
+                            c.TPS,
+                            c.TIS
+                        })
+                    .ToList();
+            } // Fin del using
         }
-
         public string CrearMalla(Malla malla, List<MallaCurso> mallaCursos)
         {
             // Validar que los cursos existan y los semestres sean válidos
-            var db = new MallaDBEntities2();
+            var db = new MallaDBEntities4();
             foreach (var mc in mallaCursos)
             {
                 if (db.Cursos.FirstOrDefault(c => c.Codigo == mc.CursoCodigo) == null)

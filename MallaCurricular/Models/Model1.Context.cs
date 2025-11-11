@@ -13,10 +13,10 @@ namespace MallaCurricular.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class MallaDBEntities2 : DbContext
+    public partial class MallaDBEntities4 : DbContext
     {
-        public MallaDBEntities2()
-            : base("name=MallaDBEntities2")
+        public MallaDBEntities4()
+            : base("name=MallaDBEntities4")
         {
         }
     

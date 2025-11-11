@@ -18,11 +18,12 @@ namespace MallaCurricular.Models
         public Curso()
         {
             this.MallaCursos = new HashSet<MallaCurso>();
+            this.PrerequisitosQueTengo = new HashSet<Curso>();
+            this.EsPrerequisitoPara = new HashSet<Curso>();
         }
     
         public string Codigo { get; set; }
         public string Asignatura { get; set; }
-        public string Prerequisito { get; set; }
         public string Color { get; set; }
         public Nullable<int> Creditos { get; set; }
         public string Tipo { get; set; }
@@ -31,5 +32,9 @@ namespace MallaCurricular.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MallaCurso> MallaCursos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Curso> PrerequisitosQueTengo { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Curso> EsPrerequisitoPara { get; set; }
     }
 }
