@@ -120,7 +120,8 @@ namespace MallaCurricular.Services
                 e.Asignatura,
                 e.Color,
                 e.Creditos,
-                e.Tipo
+                e.TIS,
+                e.TPS
             }).ToList();
         }
 
@@ -136,7 +137,8 @@ namespace MallaCurricular.Services
                 o.Asignatura,
                 o.Color,
                 o.Creditos,
-                o.Tipo
+                o.TIS,
+                o.TPS
             }).ToList();
         }
 

@@ -283,7 +283,7 @@
     <Content Include="Web\Content\bootstrap.rtl.css" />
     <Content Include="Web\Content\bootstrap.rtl.min.css" />
     <Content Include="Web\Content\estudiante.css" />
-    <Content Include="Web\Content\logo2020.png" />
+    <Content Include="Web\logo2020.png" />
     <Content Include="Web\Content\Site.css" />
     <Content Include="Web\Content\style.css" />
     <Content Include="Web\Estudiante.html" />

@@ -1,5 +1,21 @@
 ﻿let courses = {};
 const addedCourses = new Map();
+let electivas = [];
+let optativas = [];
+let currentSelector = null; // Para rastrear el selector activo
+let occupiedCourseCodes = new Set(); // ❗ NUEVA LISTA: Códigos de cursos ya en la malla
+
+// Valores por defecto para Electivas/Optativas no especificadas en catálogo
+// NOTA: Estos valores DEBEN SER '0' si la intención es que los valores del endpoint
+// tomen precedencia, incluso cuando sean 0. Ya no deberían usarse si el endpoint
+// siempre los provee, pero los mantendremos en 0 por seguridad.
+const DEFAULT_CREDITOS = 0; // Cambiado de 2 a 0 por seguridad
+const DEFAULT_TPS = 0;      // Cambiado de 2 a 0 por seguridad
+const DEFAULT_TIS = 0;      // Cambiado de 4 a 0 por seguridad
+
+// =========================================================================
+// FUNCIONES DE CARGA Y FETCH
+// =========================================================================
 
 async function fetchMallas() {
     const mallaSelect = document.getElementById('malla-select');
@@ -13,12 +29,37 @@ async function fetchMallas() {
             option.textContent = malla.Nombre || `Malla ${malla.Id}`;
             mallaSelect.appendChild(option);
         });
+
+        await fetchElectivasAndOptativas();
+
     } catch (err) {
         document.getElementById('error-message').textContent = err.message;
         document.getElementById('error-message').style.display = 'block';
         console.error(err);
     }
 }
+
+async function fetchElectivasAndOptativas() {
+    document.getElementById('error-message').style.display = 'none';
+    try {
+        const [resElectivas, resOptativas] = await Promise.all([
+            fetch('http://localhost:49513/api/cursos/catalogo/electivas'),
+            fetch('http://localhost:49513/api/cursos/catalogo/optativas')
+        ]);
+
+        if (!resElectivas.ok) throw new Error('No se pudo cargar el catálogo de Electivas.');
+        electivas = await resElectivas.json();
+
+        if (!resOptativas.ok) throw Error('No se pudo cargar el catálogo de Optativas.');
+        optativas = await resOptativas.json();
+
+    } catch (err) {
+        document.getElementById('error-message').textContent = err.message;
+        document.getElementById('error-message').style.display = 'block';
+        console.error(err);
+    }
+}
+
 
 async function fetchCoursesByMalla() {
     const mallaId = document.getElementById('malla-select').value;
@@ -35,19 +76,6 @@ async function fetchCoursesByMalla() {
         return;
     }
 
-    // 🔹 NUEVO BLOQUE: Mostrar nombre y versión de la malla
-    try {
-        const resMalla = await fetch(`http://localhost:49513/api/mallas/${mallaId}`);
-        if (resMalla.ok) {
-            const mallaData = await resMalla.json();
-            document.getElementById('malla-title').textContent = mallaData.Nombre || "Malla Curricular - ITM";
-            document.getElementById('malla-version').textContent = `Versión: ${mallaData.Version || "No especificada"}`;
-        }
-    } catch (err) {
-        console.warn("No se pudo obtener la versión de la malla.", err);
-        document.getElementById('malla-version').textContent = "";
-    }
-
     try {
         const res = await fetch(`http://localhost:49513/api/cursos?mallaId=${mallaId}`);
         if (!res.ok) throw new Error('No se pudieron cargar los cursos.');
@@ -55,6 +83,7 @@ async function fetchCoursesByMalla() {
 
         courses = {};
         addedCourses.clear();
+        occupiedCourseCodes.clear(); // ❗ Limpiar la lista de ocupados
 
         data.forEach(course => {
             courses[course.Codigo] = {
@@ -64,13 +93,68 @@ async function fetchCoursesByMalla() {
                 color: course.Color,
                 semester: course.Semestre,
                 creditos: course.Creditos,
+                // ✅ CORRECCIÓN 1: Asignación directa, ya que el endpoint lo garantiza.
                 TPS: course.TPS,
                 TIS: course.TIS
             };
             addedCourses.set(course.Codigo, course.Semestre);
+            occupiedCourseCodes.add(course.Codigo); // ❗ Añadir todos los códigos iniciales
         });
 
-        // el resto igual
+        // ADAPTACIÓN PARA MÚLTIPLES SLOTS DE ELECTIVAS/OPTATIVAS
+        Object.values(courses).forEach(course => {
+            const isElectivaSlot = course.name.toLowerCase().includes('electiva');
+            const isOptativaSlot = course.name.toLowerCase().includes('optativa');
+
+            if (isElectivaSlot || isOptativaSlot) {
+                const type = isElectivaSlot ? 'electiva' : 'optativa';
+                const slotCode = course.code; // El código de la tarjeta base es el identificador único.
+                const selectedCode = localStorage.getItem(`selected-${slotCode}-code`);
+
+                // 1. Si hay una selección previa guardada para este slot
+                if (selectedCode) {
+                    const catalogue = type === 'electiva' ? electivas : optativas;
+                    const selectedCourse = catalogue.find(c => c.Codigo === selectedCode);
+
+                    if (selectedCourse) {
+                        // Reemplazar el curso placeholder con el curso seleccionado
+                        delete courses[slotCode];
+                        addedCourses.delete(slotCode);
+                        occupiedCourseCodes.delete(slotCode); // ❗ El placeholder ya no está ocupado
+
+                        const courseData = {
+                            code: selectedCourse.Codigo,
+                            name: selectedCourse.Asignatura,
+                            prerequisite: selectedCourse.Prerequisito || '',
+                            color: course.color,
+                            semester: course.semester,
+                            // ✅ CORRECCIÓN 2: Asignación directa. Usar ?? 0 o solo el valor.
+                            // Aquí usamos la coalescencia nula (??) para manejar si el campo no existe.
+                            // Nota: En este punto, `selectedCourse.Creditos` no debería ser null si el endpoint funciona.
+                            creditos: selectedCourse.Creditos ?? DEFAULT_CREDITOS,
+                            TPS: selectedCourse.TPS ?? DEFAULT_TPS,
+                            TIS: selectedCourse.TIS ?? DEFAULT_TIS
+                        };
+
+                        courses[selectedCourse.Codigo] = courseData;
+                        addedCourses.set(selectedCourse.Codigo, courseData.semester);
+                        occupiedCourseCodes.add(selectedCourse.Codigo); // ❗ Añadir el curso seleccionado como ocupado
+                    }
+                } else {
+                    // 2. Si es un placeholder y NO hay selección
+                    // ✅ CORRECCIÓN 3: Reemplazar || DEFAULT_X por ?? DEFAULT_X para evitar que 0 se interprete como vacío.
+                    course.creditos = course.creditos ?? DEFAULT_CREDITOS;
+                    course.TPS = course.TPS ?? DEFAULT_TPS;
+                    course.TIS = course.TIS ?? DEFAULT_TIS;
+
+                    // ❗ Los placeholders NO cuentan como cursos "ocupados" del catálogo
+                    //    Ya se añadieron, ahora los eliminamos.
+                    occupiedCourseCodes.delete(slotCode);
+                }
+            }
+        });
+
+        // Creación de resumen y leyenda
         const summaryBox = document.createElement("div");
         summaryBox.className = "summary-box mt-4";
         summaryBox.innerHTML = `
@@ -103,6 +187,7 @@ async function fetchCoursesByMalla() {
             <div><span class="inline-block w-4 h-4 bg-[#b6ffff] rounded-sm mr-2"></span> Asignatura que la habilitó</div>`;
         summaryContainer.appendChild(colorLegend);
 
+
         renderSemesters();
     } catch (err) {
         grid.innerHTML = `<p class="text-center text-red-600">${err.message}</p>`;
@@ -110,12 +195,219 @@ async function fetchCoursesByMalla() {
     }
 }
 
-// 🔹 el resto del JS permanece exactamente igual
+// =========================================================================
+// LÓGICA DE SELECCIÓN INTERACTIVA (Manejo por Slot Único)
+// =========================================================================
+
+function handleCourseSelectionInCard(type, slotCode, newCourseCode) {
+    // slotCode es el código original de la tarjeta (e.g., 'ELI101')
+    const previousSelectedCode = localStorage.getItem(`selected-${slotCode}-code`);
+
+    // El código del curso que está actualmente visible en el slot (puede ser el placeholder o un curso seleccionado)
+    const activeCourseCode = previousSelectedCode || slotCode;
+
+    const currentSlotCourse = courses[activeCourseCode];
+
+    if (!currentSlotCourse) {
+        console.error(`No se encontró la información del curso activo para el slot: ${activeCourseCode}`);
+        return;
+    }
+
+    // Lógica de Eliminación centralizada
+    const deleteActiveCourse = () => {
+        if (courses[activeCourseCode]) {
+            // ❗ Eliminar de la lista de ocupados ANTES de eliminar de courses
+            occupiedCourseCodes.delete(activeCourseCode);
+            delete courses[activeCourseCode]; // ✅ CORRECCIÓN APLICADA AQUÍ
+            addedCourses.delete(activeCourseCode);
+            localStorage.removeItem(`course-${activeCourseCode}`);
+        }
+    };
+
+
+    // 1. Lógica de Deselección (Volver al Placeholder)
+    if (!newCourseCode) {
+        // a. Eliminar el curso que está actualmente activo (seleccionado o placeholder)
+        deleteActiveCourse();
+
+        localStorage.removeItem(`selected-${slotCode}-code`); // Limpiar la selección específica del slot
+
+        // b. Restaurar el curso Placeholder con sus datos originales/por defecto
+        const courseData = {
+            code: slotCode, // Volvemos al código original del slot
+            name: currentSlotCourse.name.includes('Electiva') || currentSlotCourse.name.includes('Optativa')
+                ? currentSlotCourse.name
+                : `${type.charAt(0).toUpperCase() + type.slice(1)} I`,
+            prerequisite: currentSlotCourse.prerequisite || '',
+            color: currentSlotCourse.color,
+            semester: currentSlotCourse.semester,
+            creditos: DEFAULT_CREDITOS,
+            TPS: DEFAULT_TPS,
+            TIS: DEFAULT_TIS
+        };
+        // Reinsertar el placeholder
+        courses[slotCode] = courseData;
+        addedCourses.set(slotCode, currentSlotCourse.semester);
+        // ❗ Los placeholders NO se añaden a occupiedCourseCodes
+
+        renderSemesters();
+        return;
+    }
+
+    // 2. Lógica de Selección/Reemplazo (newCourseCode existe)
+    const newCourse = (type === 'electiva' ? electivas : optativas).find(c => c.Codigo === newCourseCode);
+
+    if (newCourse) {
+        // a. Eliminar el curso activo actual (placeholder o selección previa)
+        deleteActiveCourse();
+
+        // b. Crear el nuevo curso con datos del catálogo
+        const courseData = {
+            code: newCourse.Codigo,
+            name: newCourse.Asignatura,
+            prerequisite: newCourse.Prerequisito || '',
+            color: currentSlotCourse.color,
+            semester: currentSlotCourse.semester,
+            creditos: newCourse.Creditos ?? DEFAULT_CREDITOS,
+            TPS: newCourse.TPS ?? DEFAULT_TPS,
+            TIS: newCourse.TIS ?? DEFAULT_TIS
+        };
+
+        // c. Integrar el nuevo curso
+        courses[newCourse.Codigo] = courseData;
+        addedCourses.set(newCourse.Codigo, courseData.semester);
+        occupiedCourseCodes.add(newCourse.Codigo); // ❗ Añadir el nuevo curso como ocupado
+
+        localStorage.setItem(`selected-${slotCode}-code`, newCourseCode); // Guardar con la clave del slot
+        localStorage.setItem(`course-${newCourse.Codigo}`, "false");
+
+        // d. Rerenderizar
+        renderSemesters();
+    }
+}
+
+function openCourseSelectorModal(type, slotCode, targetDiv) {
+
+    if (currentSelector) {
+        currentSelector.remove();
+        currentSelector = null;
+    }
+
+    const catalogue = type === 'electiva' ? electivas : optativas;
+
+    // Crear el contenedor principal del selector (Estilos directos)
+    const selectorContainer = document.createElement('div');
+    selectorContainer.className = 'course-selector-dropdown';
+    selectorContainer.style.position = 'absolute';
+    selectorContainer.style.zIndex = '100';
+    selectorContainer.style.width = '300px';
+    selectorContainer.style.backgroundColor = 'white';
+    selectorContainer.style.border = '1px solid #ccc';
+    selectorContainer.style.borderRadius = '4px';
+    selectorContainer.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+    selectorContainer.style.maxHeight = '300px';
+    selectorContainer.style.overflowY = 'auto';
+    selectorContainer.style.top = '100%';
+    selectorContainer.style.left = '0';
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Buscar curso...';
+    searchInput.style.padding = '8px';
+    searchInput.style.width = '90%';
+    searchInput.style.margin = '5px 5%';
+    searchInput.style.border = '1px solid #ddd';
+    selectorContainer.appendChild(searchInput);
+
+    const listContainer = document.createElement('div');
+    listContainer.className = 'course-selector-list';
+    selectorContainer.appendChild(listContainer);
+
+    const renderList = (filter = '') => {
+        listContainer.innerHTML = '';
+        const normalizedFilter = filter.toLowerCase();
+
+        // Opción para deseleccionar
+        const deselectItem = document.createElement('div');
+        deselectItem.className = 'selector-item deselect-item';
+        deselectItem.textContent = 'Seleccione un curso... / Deseleccionar';
+        deselectItem.style.padding = '8px';
+        deselectItem.style.cursor = 'pointer';
+        deselectItem.style.fontWeight = 'bold';
+        deselectItem.style.backgroundColor = '#e0f2fe';
+        deselectItem.onclick = () => {
+            handleCourseSelectionInCard(type, slotCode, null);
+            selectorContainer.remove();
+            currentSelector = null;
+        };
+        listContainer.appendChild(deselectItem);
+
+        const filteredList = catalogue.filter(c => {
+            const courseCode = c.Codigo;
+            // ❗ FILTRADO: Ocultar si el curso ya está ocupado en la malla
+            const isOccupied = occupiedCourseCodes.has(courseCode);
+            const matchesFilter = c.Asignatura.toLowerCase().includes(normalizedFilter) ||
+                courseCode.toLowerCase().includes(normalizedFilter);
+
+            return !isOccupied && matchesFilter;
+        });
+
+        filteredList.forEach(course => {
+            const item = document.createElement('div');
+            item.className = 'selector-item';
+            item.textContent = `${course.Asignatura} (${course.Codigo})`;
+
+            item.style.padding = '8px';
+            item.style.cursor = 'pointer';
+            item.style.borderBottom = '1px solid #eee';
+            item.onmouseover = () => item.style.backgroundColor = '#f4f4f4';
+            item.onmouseout = () => item.style.backgroundColor = 'white';
+
+            item.onclick = () => {
+                handleCourseSelectionInCard(type, slotCode, course.Codigo);
+                selectorContainer.remove();
+                currentSelector = null;
+            };
+            listContainer.appendChild(item);
+        });
+
+        if (filteredList.length === 0 && filter) {
+            const noResults = document.createElement('div');
+            noResults.textContent = 'No se encontraron resultados.';
+            noResults.style.padding = '8px';
+            listContainer.appendChild(noResults);
+        }
+    };
+
+    searchInput.oninput = (e) => {
+        renderList(e.target.value);
+    };
+
+    targetDiv.style.position = 'relative';
+    targetDiv.appendChild(selectorContainer);
+    currentSelector = selectorContainer;
+
+    renderList();
+    searchInput.focus();
+
+    document.addEventListener('click', function closeSelector(e) {
+        if (currentSelector && !targetDiv.contains(e.target) && !currentSelector.contains(e.target)) {
+            currentSelector.remove();
+            currentSelector = null;
+            document.removeEventListener('click', closeSelector);
+        }
+    });
+}
+
+
+// =========================================================================
+// RENDERIZADO (Con lógica de Clic Dual y Múltiples Slots)
+// =========================================================================
+
 function renderSemesters() {
     const grid = document.getElementById('semester-grid');
     grid.innerHTML = '';
 
-    // 1. Crear los 10 semestres normales (1 a 10)
     for (let i = 1; i <= 10; i++) {
         const semester = document.createElement('div');
         semester.className = 'semester';
@@ -124,119 +416,168 @@ function renderSemesters() {
         grid.appendChild(semester);
     }
 
-    // 2. Crear el bloque de Asignaturas Propedéuticas (Semestre 11 o P)
-    // Usaremos el valor '11' para hacer referencia al Semestre Propedéutico
     const propedeutic = document.createElement('div');
     propedeutic.className = 'semester mt-10';
     propedeutic.setAttribute('data-semester', 11);
-    propedeutic.style.gridColumn = "1 / -1"; // Ocupar todo el ancho
+    propedeutic.style.gridColumn = "1 / -1";
     propedeutic.innerHTML = `<h3 class="text-center mb-4 text-lg font-semibold">Asignaturas Propedéuticas</h3>
         <div id="courses-semester-11" class="flex flex-wrap justify-center gap-4 mt-4"></div>`;
     grid.appendChild(propedeutic);
 
-
-    // 3. Renderizar todos los cursos (Semestres 1-10 y 11)
+    // ✅ NUEVO: agrupar y ordenar los cursos por color antes de renderizar
+    const semesterCoursesMap = new Map();
     addedCourses.forEach((semester, code) => {
         const course = courses[code];
         if (!course) return;
+        if (!semesterCoursesMap.has(semester)) semesterCoursesMap.set(semester, []);
+        semesterCoursesMap.get(semester).push(course);
+    });
 
-        // ❗ La corrección clave: Asegurarse de buscar el ID de contenedor correcto.
-        const containerId = `courses-semester-${semester}`;
-        const container = document.getElementById(containerId);
+    // Definimos el orden deseado de las clases por color
+    const colorOrder = ["course-green", "course-blue", "course-purple", "course-red"];
 
-        // Si el contenedor no existe (por ejemplo, si el semestre viene como 'P' en lugar de '11')
-        if (!container) {
-            console.error(`Contenedor no encontrado para el semestre: ${semester}. Verifique que el backend devuelva 11 para Propedéuticas.`);
-            return; // Detiene el procesamiento de este curso
-        }
-
-        const courseDiv = document.createElement('div');
-        courseDiv.className = `course ${course.color}`;
-        courseDiv.setAttribute("data-code", course.code);
-
-        const wasCompletedInStorage = localStorage.getItem(`course-${course.code}`) === "true";
-        if (wasCompletedInStorage) {
-            courseDiv.classList.add("completed");
-        }
-
-        // Ahora el requisito de semestre 11 debe funcionar
-        if (course.prerequisite && !isCompletedByName(course.prerequisite)) {
-            courseDiv.classList.add("disabled");
-        }
-
-        const TPS = course.TPS || 0;
-        const TIS = course.TIS || 0;
-        const creditos = course.creditos || 0;
-        const TPT = TPS * 16;
-        const TIT = TIS * 16;
-
-        courseDiv.innerHTML = `<div class="course-title">${course.name}</div>
-            <div class="course-code">${course.code}</div>
-            <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
-                <div class="grid grid-cols-3 text-sm text-center h-20">
-                    <div class="border-r flex flex-col justify-between">
-                        <div class="p-1 border-b supIzq">${TPS}</div>
-                        <div class="p-1 infIzq">${TPT}</div>
-                    </div>
-                    <div class="border-r flex flex-col justify-between">
-                        <div class="p-1 border-b supDer">${TIS}</div>
-                        <div class="p-1 infDer">${TIT}</div>
-                    </div>
-                    <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
-                </div>
-            </div>`;
-
-        courseDiv.addEventListener("click", () => {
-            if (courseDiv.classList.contains("disabled")) return;
-
-            const isNowCompleted = courseDiv.classList.toggle("completed");
-            const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
-
-            if (isNowCompleted) {
-                courseDiv.style.setProperty("--check-color", borderColor);
-            } else {
-                courseDiv.style.removeProperty("--check-color");
-            }
-
-            localStorage.setItem(`course-${course.code}`, isNowCompleted ? "true" : "false");
-            updateDependencies(course.code);
-            computeSemesterSums();
+    semesterCoursesMap.forEach((courseList, semester) => {
+        // Ordenar según colorOrder
+        courseList.sort((a, b) => {
+            const aIndex = colorOrder.findIndex(c => a.color === c);
+            const bIndex = colorOrder.findIndex(c => b.color === c);
+            return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
         });
 
-        // ❗ Aquí se produce el append, ahora el 'container' ya existe para el semestre 11.
-        container.appendChild(courseDiv);
+        const container = document.getElementById(`courses-semester-${semester}`);
+        if (!container) return;
 
-        if (wasCompletedInStorage) {
-            const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
-            courseDiv.style.setProperty("--check-color", borderColor);
-        }
+        // Renderizar cada curso en el orden correcto
+        courseList.forEach(course => {
+            const courseDiv = document.createElement('div');
+            courseDiv.className = `course ${course.color}`;
+            courseDiv.setAttribute("data-code", course.code);
+
+            const wasCompletedInStorage = localStorage.getItem(`course-${course.code}`) === "true";
+            if (wasCompletedInStorage) courseDiv.classList.add("completed");
+            if (course.prerequisite && !isCompletedByName(course.prerequisite)) courseDiv.classList.add("disabled");
+
+            const TPS = course.TPS || 0;
+            const TIS = course.TIS || 0;
+            const creditos = course.creditos || 0;
+            const TPT = TPS * 16;
+            const TIT = TIS * 16;
+
+            courseDiv.innerHTML = `<div class="course-title">${course.name}</div>
+                <div class="course-code">${course.code}</div>
+                <div class="credit-grid mt-2 border border-gray-300 rounded overflow-hidden">
+                    <div class="grid grid-cols-3 text-sm text-center h-20">
+                        <div class="border-r flex flex-col justify-between">
+                            <div class="p-1 border-b supIzq">${TPS}</div>
+                            <div class="p-1 infIzq">${TPT}</div>
+                        </div>
+                        <div class="border-r flex flex-col justify-between">
+                            <div class="p-1 border-b supDer">${TIS}</div>
+                            <div class="p-1 infDer">${TIT}</div>
+                        </div>
+                        <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
+                    </div>
+                </div>`;
+
+            // (mantiene toda la lógica de clics igual)
+            const isPlaceholder = course.name.toLowerCase().includes('electiva') || course.name.toLowerCase().includes('optativa');
+            const isSelectedCourse = Object.keys(localStorage).some(key => key.startsWith('selected-') && localStorage.getItem(key) === course.code);
+
+            if (isPlaceholder || isSelectedCourse) {
+                courseDiv.classList.add('course-selector');
+                courseDiv.classList.remove("disabled");
+
+                let uniqueSlotCode;
+                let type;
+                if (isPlaceholder) {
+                    uniqueSlotCode = course.code;
+                    type = course.name.toLowerCase().includes('electiva') ? 'electiva' : 'optativa';
+                } else {
+                    const selectionKey = Object.keys(localStorage).find(key => key.startsWith('selected-') && localStorage.getItem(key) === course.code);
+                    uniqueSlotCode = selectionKey ? selectionKey.replace('selected-', '').replace('-code', '') : course.code;
+
+                    const originalSlotCourse = Object.values(courses).find(c => c.code === uniqueSlotCode);
+                    type = originalSlotCourse?.name.toLowerCase().includes('electiva') ? 'electiva' : 'optativa';
+                }
+
+                courseDiv.addEventListener("click", () => {
+                    if (isPlaceholder) {
+                        openCourseSelectorModal(type, uniqueSlotCode, courseDiv);
+                    } else {
+                        if (courseDiv.classList.contains("disabled")) return;
+
+                        const isNowCompleted = courseDiv.classList.toggle("completed");
+                        const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
+
+                        if (isNowCompleted) {
+                            courseDiv.style.setProperty("--check-color", borderColor);
+                        } else {
+                            courseDiv.style.removeProperty("--check-color");
+                        }
+
+                        localStorage.setItem(`course-${course.code}`, isNowCompleted ? "true" : "false");
+                        updateDependencies(course.code);
+                        computeSemesterSums();
+                    }
+                });
+
+                if (isPlaceholder) {
+                    courseDiv.querySelector('.course-title').textContent = (course.name || course.code) + " (Seleccionar)";
+                    localStorage.setItem(`course-${course.code}`, "false");
+                    courseDiv.classList.remove("completed");
+                }
+            } else {
+                courseDiv.addEventListener("click", () => {
+                    if (courseDiv.classList.contains("disabled")) return;
+
+                    const isNowCompleted = courseDiv.classList.toggle("completed");
+                    const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
+
+                    if (isNowCompleted) {
+                        courseDiv.style.setProperty("--check-color", borderColor);
+                    } else {
+                        courseDiv.style.removeProperty("--check-color");
+                    }
+
+                    localStorage.setItem(`course-${course.code}`, isNowCompleted ? "true" : "false");
+                    updateDependencies(course.code);
+                    computeSemesterSums();
+                });
+            }
+
+            container.appendChild(courseDiv);
+
+            if (wasCompletedInStorage) {
+                const borderColor = window.getComputedStyle(courseDiv).borderLeftColor;
+                courseDiv.style.setProperty("--check-color", borderColor);
+            }
+        });
     });
 
     Object.values(courses).forEach(c => updateDependencies(c.code));
     computeSemesterSums();
 }
 
+// =========================================================================
+// LÓGICA DE PRERREQUISITOS Y SUMAS (Se mantienen sin cambios)
+// =========================================================================
+
 function isCompletedByName(prereqString) {
     if (!prereqString || prereqString.trim() === "") return true;
 
-    // Dividir la cadena de prerrequisitos por coma (,) y limpiar espacios
     const requiredPrereqs = prereqString.split(',').map(p => p.trim()).filter(p => p.length > 0);
 
-    // Iterar sobre cada prerrequisito requerido
     const allCompleted = requiredPrereqs.every(reqName => {
-        // Buscar el curso correspondiente por nombre o código
         const c = Object.values(courses).find(x =>
             x.name.toLowerCase() === reqName.toLowerCase() ||
             x.code.toLowerCase() === reqName.toLowerCase()
         );
 
-        // Si el curso no existe en la lista (error de tipeo), lo consideramos "no completado" por seguridad
         if (!c) {
             console.warn(`Prerrequisito no encontrado en la lista maestra: ${reqName}`);
             return false;
         }
 
-        // Verificar el estado de completado en localStorage
         return localStorage.getItem(`course-${c.code}`) === "true";
     });
 
@@ -248,26 +589,21 @@ function updateDependencies(code) {
     const enablerDiv = document.querySelector(`[data-code="${code}"]`);
     const enablerColor = enablerDiv ? window.getComputedStyle(enablerDiv).borderLeftColor : "#86efac";
 
-    // Obtener el nombre o código del curso que acaba de cambiar de estado
     const currentCourseName = courses[code]?.name || code;
 
     Object.values(courses).forEach(course => {
 
-        // ❗ NUEVA LÓGICA: Verificar si el curso actual (code) es uno de los prerrequisitos
         const prereqList = (course.prerequisite || '').split(',').map(p => p.trim().toLowerCase());
         const dependsOnCurrent = prereqList.includes(currentCourseName.toLowerCase()) || prereqList.includes(code.toLowerCase());
 
-        // Si el curso actual (code) es un prerrequisito del curso que estamos evaluando
         if (dependsOnCurrent) {
             const div = document.querySelector(`[data-code="${course.code}"]`);
             if (!div) return;
 
-            // ❗ Reevaluar el estado de habilitación usando la NUEVA función de validación
             const allPrereqsMet = isCompletedByName(course.prerequisite);
             const existingTag = div.querySelector(".enabler-tag");
 
             if (allPrereqsMet) {
-                // Habilitar
                 if (div.classList.contains("disabled")) {
                     div.classList.remove("disabled");
                     div.classList.add("available");
@@ -275,21 +611,18 @@ function updateDependencies(code) {
                     setTimeout(() => div.classList.remove("available"), 1000);
                 }
                 if (!existingTag) {
-                    // Solo añadir el tag si es necesario (ejemplo visual)
                     const tag = document.createElement("div");
                     tag.className = "enabler-tag";
                     tag.textContent = code;
                     div.appendChild(tag);
                 }
             } else {
-                // Deshabilitar (si le falta algún prerrequisito)
                 div.classList.add("disabled");
                 if (div.classList.contains("completed")) div.classList.remove("completed");
                 localStorage.setItem(`course-${course.code}`, "false");
                 if (existingTag) existingTag.remove();
             }
 
-            // Continuar la recursividad para las dependencias de este curso
             updateDependencies(course.code);
         }
     });
@@ -329,5 +662,3 @@ function computeSemesterSums() {
         }
     }
 }
-
-window.onload = fetchMallas;
