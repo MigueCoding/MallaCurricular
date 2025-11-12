@@ -29,5 +29,7 @@ namespace MallaCurricular.Models
         public virtual DbSet<MallaCurso> MallaCursos { get; set; }
         public virtual DbSet<Malla> Mallas { get; set; }
         public virtual DbSet<Usuario> Usuarios { get; set; }
+        public virtual DbSet<Electiva> Electivas { get; set; }
+        public virtual DbSet<Optativa> Optativas { get; set; }
     }
 }

@@ -14,7 +14,22 @@ namespace MallaCurricular.Controllers
 
         public MallasController()
         {
-            _mallaService = new clsMalla(new MallaRepositorio(), new MallaCursoRepositorio());
+            // NOTA: Para una arquitectura robusta, usa un contenedor IoC.
+
+            // 1. Crear una única instancia del contexto DB
+            var dbContext = new MallaDBEntities4();
+
+            // 2. Corregir la inyección de clsMalla para los 4 argumentos requeridos
+            // ASUMIMOS que todos los repositorios ahora aceptan MallaDBEntities4
+            _mallaService = new clsMalla(
+                // Repositorios existentes (ahora aceptan dbContext)
+                new MallaRepositorio(dbContext),
+                new MallaCursoRepositorio(dbContext),
+
+                // Nuevos repositorios requeridos por la firma del constructor de clsMalla
+                new ElectivaRepositorio(dbContext),
+                new OptativaRepositorio(dbContext)
+            );
         }
 
         // GET: api/mallas
@@ -41,6 +56,7 @@ namespace MallaCurricular.Controllers
 
             var mallaCursos = mallaDto.Courses.Select(c => new MallaCurso
             {
+                // Asumiendo que MallaCurso tiene CursoCodigo (string) y Semestre (int)
                 CursoCodigo = c.Codigo,
                 Semestre = c.Semestre
             }).ToList();
@@ -48,6 +64,7 @@ namespace MallaCurricular.Controllers
             var error = _mallaService.CrearMalla(malla, mallaCursos);
             if (error != null)
                 return BadRequest(error.ToString());
+
             return Ok(new { message = "Malla guardada exitosamente", mallaId = malla.Id });
         }
 
