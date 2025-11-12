@@ -660,5 +660,51 @@ function computeSemesterSums() {
             `;
             cont.appendChild(box);
         }
+
+        // ✅ Actualizar el bloqueo global cada vez que cambien los estados de los cursos
+        updateGlobalSemesterLock();
+    }
+}
+
+// Función para verificar si todos los cursos del semestre 1 al 6 están completados
+function allLowerSemestersCompleted() {
+    for (let i = 1; i <= 6; i++) {
+        const cont = document.getElementById(`courses-semester-${i}`);
+        if (!cont) continue;
+
+        const coursesInSemester = cont.querySelectorAll(".course");
+        for (let courseDiv of coursesInSemester) {
+            // Si el curso no está completado y no es un placeholder de electiva/optativa
+            if (!courseDiv.classList.contains("completed") &&
+                !courseDiv.querySelector(".course-title").textContent.toLowerCase().includes("electiva") &&
+                !courseDiv.querySelector(".course-title").textContent.toLowerCase().includes("optativa")) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Función que bloquea/desbloquea los semestres 7 al 10 según el progreso
+function updateGlobalSemesterLock() {
+    const allLowerDone = allLowerSemestersCompleted();
+
+    for (let i = 7; i <= 10; i++) {
+        const cont = document.getElementById(`courses-semester-${i}`);
+        if (!cont) continue;
+
+        const coursesInSemester = cont.querySelectorAll(".course");
+
+        coursesInSemester.forEach(courseDiv => {
+            if (allLowerDone) {
+                // ✅ Si ya completó todo el 1 al 6, desbloquear los cursos
+                courseDiv.classList.remove("disabled");
+            } else {
+                // 🚫 Si aún hay materias pendientes en 1-6, deshabilitar estos cursos
+                if (!courseDiv.classList.contains("completed")) {
+                    courseDiv.classList.add("disabled");
+                }
+            }
+        });
     }
 }

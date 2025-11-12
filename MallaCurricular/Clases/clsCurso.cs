@@ -81,25 +81,23 @@ namespace MallaCurricular.Services
         // Asume que el DTO de entrada tiene una propiedad List<string> PrerequisitoCodigos
         public string ActualizarCurso(string id, Curso cursoActualizado, List<string> prerequisitoCodigos)
         {
-            var cursoExistente = _cursoRepositorio.GetById(id);
+            var cursoExistente = _cursoRepositorio.GetById(id); // ¡Objeto rastreado!
             if (cursoExistente == null)
                 return "Curso no encontrado.";
 
-            if (!coloresValidos.Contains(cursoActualizado.Color))
-                return "Color inválido.";
-
-            // 1. Actualizar propiedades simples
+            // 1. Actualizar propiedades simples en el objeto rastreado:
             cursoExistente.Asignatura = cursoActualizado.Asignatura;
             cursoExistente.Color = cursoActualizado.Color;
             cursoExistente.Creditos = cursoActualizado.Creditos;
             cursoExistente.TIS = cursoActualizado.TIS;
             cursoExistente.TPS = cursoActualizado.TPS;
+            cursoExistente.Tipo = cursoActualizado.Tipo;
 
-            // 2. Actualizar relación M:M (Prerequisitos)
+            // 2. Actualizar relación M:M (Prerequisitos) en el objeto rastreado
             var erroresPrerequisito = ValidarYAsignarPrerequisitos(cursoExistente, prerequisitoCodigos);
             if (erroresPrerequisito != null) return erroresPrerequisito;
 
-            // La propiedad obsoleta cursoExistente.Prerequisito ya NO se usa/asigna.
+            // 3. El repositorio solo necesita hacer SaveChanges en este objeto rastreado.
             _cursoRepositorio.Update(cursoExistente);
             return null;
         }

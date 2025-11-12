@@ -20,18 +20,28 @@ namespace MallaCurricular.Repositories
         public IEnumerable<Curso> GetAll()
         {
             return _db.Cursos
-                      .Include(c => c.PrerequisitosQueTengo) // Carga la colección M:M
-                      .ToList();
+                        .Include(c => c.PrerequisitosQueTengo) // Carga la colección M:M
+                        .ToList();
         }
 
         /// <summary>
-        /// Obtiene un curso por ID, cargando explícitamente la colección de prerequisitos.
+        /// Obtiene un curso por ID, cargando explícitamente la colección de prerrequisitos.
         /// </summary>
         public Curso GetById(string id)
         {
             return _db.Cursos
-                      .Include(c => c.PrerequisitosQueTengo) // Carga la colección M:M
-                      .FirstOrDefault(c => c.Codigo == id);
+                        .Include(c => c.PrerequisitosQueTengo) // Carga la colección M:M
+                        .FirstOrDefault(c => c.Codigo == id);
+        }
+
+        /// <summary>
+        /// Obtiene un curso por ID sin cargar colecciones de navegación.
+        /// Útil para referenciar entidades (prerrequisitos) en el servicio.
+        /// </summary>
+        public Curso GetByIdSimple(string id)
+        {
+            // No incluye colecciones, solo el curso base.
+            return _db.Cursos.FirstOrDefault(c => c.Codigo == id);
         }
 
         public void Add(Curso curso)
@@ -44,36 +54,28 @@ namespace MallaCurricular.Repositories
 
         public void Update(Curso curso)
         {
-            // El curso que llega aquí ya debe tener la colección PrerequisitosQueTengo actualizada por clsCurso.
-            // Para actualizar una relación M:M en EF Database First:
-            // 1. Necesitas adjuntar la entidad 'curso' al contexto.
-            // 2. Necesitas asegurarte de que EF sepa qué cambios hubo en la colección M:M.
+            // 🚨 CORRECCIÓN COMPLETA: Usamos Attach y State para decirle a EF que la entidad
+            // que viene del Servicio ya está lista y rastreada, o necesita ser rastreada.
 
-            // Método simple (Asumiendo que el curso tiene solo los cambios simples en propiedades):
-            var existingCurso = GetById(curso.Codigo);
-            if (existingCurso != null)
+            // 1. Marcar la entidad principal como modificada.
+            // Usamos el código Find para buscar la entidad en el contexto local (si ya la cargó el GetById)
+            var entry = _db.Entry(curso);
+
+            // 2. Si la entidad no está rastreada, la adjuntamos. Si lo está, esto no hace nada.
+            if (entry.State == EntityState.Detached)
             {
-                // Actualizar propiedades simples:
-                existingCurso.Asignatura = curso.Asignatura;
-                existingCurso.Creditos = curso.Creditos;
-                existingCurso.TIS = curso.TIS;
-                existingCurso.TPS = curso.TPS;
-                // existingCurso.Prerequisito = curso.Prerequisito; <-- ELIMINADO: Ya no existe
-                existingCurso.Color = curso.Color;
-
-                // Para actualizar la relación M:M (PrerequisitosQueTengo), la lógica debe manejar:
-                // 1. Limpiar la colección existente.
-                // 2. Asignar los nuevos cursos de la colección 'curso.PrerequisitosQueTengo'.
-                // Esta lógica se implementó correctamente en clsCurso.cs antes de llamar a Update.
-
-                // Si la instancia 'curso' que entra ya es la que se modificó y tiene los nuevos
-                // PrerequisitosQueTengo, adjuntamos y marcamos como modificado.
-                // Si usamos el patrón Unit of Work o si clsCurso modifica la entidad cargada, esto es suficiente.
-
-                // Si se sigue el patrón de modificar el existente (como abajo) y clsCurso hizo el trabajo de
-                // actualizar la colección 'PrerequisitosQueTengo' del objeto 'existingCurso', solo guardamos:
-                _db.SaveChanges();
+                _db.Cursos.Attach(curso);
             }
+
+            // 3. Establecer el estado de la entidad principal a Modified para actualizar las propiedades simples.
+            // Nota: El servicio debe haber cargado el objeto para que esto funcione correctamente.
+            entry.State = EntityState.Modified;
+
+            // 4. Los cambios en la colección M:M (PrerequisitosQueTengo) ya fueron manejados
+            // por la Capa de Servicio, que limpió y rellenó la colección del objeto 'curso'.
+            // EF detectará estos cambios automáticamente al guardar.
+
+            _db.SaveChanges();
         }
 
         public void Delete(Curso cursoExistente)

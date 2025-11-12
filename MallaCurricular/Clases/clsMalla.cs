@@ -3,7 +3,7 @@ using MallaCurricular.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Data.Entity; // Necesario para usar .Include()
+using System.Data.Entity; 
 
 namespace MallaCurricular.Services
 {
@@ -11,10 +11,9 @@ namespace MallaCurricular.Services
     {
         private readonly IMallaRepositorio _mallaRepositorio;
         private readonly IMallaCursoRepositorio _mallaCursoRepositorio;
-        private readonly IElectivaRepositorio _electivaRepositorio; // NUEVO
-        private readonly IOptativaRepositorio _optativaRepositorio; // NUEVO
+        private readonly IElectivaRepositorio _electivaRepositorio; 
+        private readonly IOptativaRepositorio _optativaRepositorio; 
 
-        // Constructor actualizado para inyectar los nuevos repositorios
         public clsMalla(IMallaRepositorio mallaRepositorio,
                         IMallaCursoRepositorio mallaCursoRepositorio,
                         IElectivaRepositorio electivaRepositorio,
@@ -26,9 +25,7 @@ namespace MallaCurricular.Services
             _optativaRepositorio = optativaRepositorio;
         }
 
-        // --------------------------------------------------
         // MÉTODOS EXISTENTES
-        // --------------------------------------------------
 
         public IEnumerable<object> ObtenerTodos()
         {
@@ -65,7 +62,6 @@ namespace MallaCurricular.Services
                         {
                             c.Codigo,
                             c.Asignatura,
-                            // Concatena todos los Códigos de los prerrequisitos separados por coma.
                             Prerequisito = string.Join(",", c.PrerequisitosQueTengo.Select(p => p.Codigo)),
                             c.Color,
                             Semestre = mc.Semestre,
@@ -104,13 +100,7 @@ namespace MallaCurricular.Services
             return null;
         }
 
-        // --------------------------------------------------
-        // NUEVOS MÉTODOS PARA CATÁLOGOS (ELECTIVAS Y OPTATIVAS)
-        // --------------------------------------------------
-
-        /// <summary>
         /// Obtiene la lista completa de Electivas disponibles.
-        /// </summary>
         public IEnumerable<object> ObtenerCatalogoElectivas()
         {
             // Mapeo simple de las propiedades necesarias para el catálogo de la vista.
@@ -125,9 +115,6 @@ namespace MallaCurricular.Services
             }).ToList();
         }
 
-        /// <summary>
-        /// Obtiene la lista completa de Optativas disponibles.
-        /// </summary>
         public IEnumerable<object> ObtenerCatalogoOptativas()
         {
             // Mapeo simple de las propiedades necesarias para el catálogo de la vista.

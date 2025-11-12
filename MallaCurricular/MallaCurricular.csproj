@@ -266,6 +266,7 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="Models\MER.png" />
     <Content Include="Web\Content\bootstrap-grid.css" />
     <Content Include="Web\Content\bootstrap-grid.min.css" />
     <Content Include="Web\Content\bootstrap-grid.rtl.css" />

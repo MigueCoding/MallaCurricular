@@ -83,7 +83,7 @@ function showMallaSection() {
 
 
 // ----------------------------------------------------------------------
-// --- Funciones del Buscador en Tiempo Real (Modificada la Generación HTML) ---
+// --- Funciones del Buscador en Tiempo Real ---
 
 /**
  * Genera el HTML para el custom select con buscador.
@@ -105,7 +105,6 @@ function createCustomSelect(semester) {
         .map(c => `<div class="custom-option p-2 hover:bg-blue-100 cursor-pointer whitespace-nowrap" data-value="${c.code}" onclick="selectCustomOption(this, '${semester}', '${c.code}')">${c.name} (${c.code})</div>`)
         .join('');
 
-    // ✅ MODIFICACIÓN CLAVE: Se cambió el ancho a un valor fijo de 400px.
     return `
         <div class="custom-select-container relative mb-4">
             <button type="button" class="custom-select-button course-select p-2 border border-gray-300 rounded-md w-full text-left bg-white text-gray-500 hover:text-gray-700" onclick="toggleCustomDropdown(this)">
@@ -187,7 +186,7 @@ function addCourseLogic(courseCode, semester) {
 
 
 // ----------------------------------------------------------------------
-// --- Funciones de la Malla Curricular (Sin Cambios) ---
+// --- Funciones de la Malla Curricular ---
 
 async function fetchCourses() {
     const errorMessage = document.getElementById('error-message');
@@ -216,7 +215,8 @@ async function fetchCourses() {
                 color: course.Color,
                 credits: course.Creditos,
                 tps: course.TPS,
-                tis: course.TIS
+                tis: course.TIS,
+                type: course.Tipo // Aseguramos que 'Tipo' esté disponible
             };
         });
 
@@ -229,6 +229,19 @@ async function fetchCourses() {
             opt.textContent = `${c.name} (${c.code})`;
             prereqSelect.appendChild(opt);
         });
+
+        // También actualizamos el select de modificación
+        if (document.getElementById('update-prerequisite')) {
+            const updatePrereqSelect = document.getElementById('update-prerequisite');
+            updatePrereqSelect.innerHTML = `<option value="">Ninguno</option>`;
+            Object.values(courses).forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.code;
+                opt.textContent = `${c.name} (${c.code})`;
+                updatePrereqSelect.appendChild(opt);
+            });
+        }
+
 
         renderSemesters();
     } catch (error) {
@@ -429,12 +442,14 @@ async function exportToPDF() {
     const saveBtn = document.querySelector('.save-btn');
     const colorPalette = document.querySelector('.color-palette');
     const logoutBtn = document.querySelector('.logout-btn');
+    const updateBtn = document.querySelector('.filters button:nth-child(2)'); // Ajustar selector para el nuevo botón
 
     const courseSelects = document.querySelectorAll('.custom-select-container');
     const removeButtons = document.querySelectorAll('.remove-btn');
     const summaryBoxes = document.querySelectorAll('.semester-summary');
 
-    [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn].forEach(el => {
+    // Ocultar elementos de UI antes de exportar
+    [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn, updateBtn].forEach(el => {
         if (el) el.style.display = 'none';
     });
     courseSelects.forEach(sel => sel.style.display = 'none');
@@ -480,7 +495,8 @@ async function exportToPDF() {
             errorMsg.style.display = 'block';
         }
     } finally {
-        [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn].forEach(el => {
+        // Restaurar elementos de UI después de exportar
+        [filtersSection, retryBtn, exportBtn, saveBtn, colorPalette, logoutBtn, updateBtn].forEach(el => {
             if (el) el.style.display = 'block';
         });
         courseSelects.forEach(sel => sel.style.display = 'block');
@@ -606,13 +622,220 @@ function computeForSemester(semesterKey) {
 }
 
 
-// --- Inicialización ---
+// ----------------------------------------------------------------------
+// --- FUNCIONES NUEVAS: Modificar Asignatura ---
+// ----------------------------------------------------------------------
+
+/**
+ * Abre el modal de modificación de curso y lo inicializa.
+ */
+function openUpdateCourseModal() {
+    const modal = document.getElementById('update-course-modal');
+    modal.classList.remove('hidden');
+    document.getElementById('update-error-message').style.display = 'none';
+
+    // 1. Resetear formulario
+    document.getElementById('update-course-form').reset();
+
+    // 2. Poblar el select de cursos (solo los que existen)
+    const courseSelect = document.getElementById('update-course-code');
+    courseSelect.innerHTML = '<option value="">Selecciona un curso...</option>';
+
+    // 3. Poblar el select de prerrequisitos (se refresca con fetchCourses, pero lo hacemos aquí también)
+    const prereqSelect = document.getElementById('update-prerequisite');
+    prereqSelect.innerHTML = `<option value="">Ninguno</option>`;
+
+    Object.values(courses).forEach(c => {
+        // Opción para seleccionar el curso a editar
+        const courseOpt = document.createElement('option');
+        courseOpt.value = c.code;
+        courseOpt.textContent = `${c.name} (${c.code})`;
+        courseSelect.appendChild(courseOpt);
+
+        // Opción para el prerrequisito
+        const prereqOpt = document.createElement('option');
+        prereqOpt.value = c.code;
+        prereqOpt.textContent = `${c.name} (${c.code})`;
+        prereqSelect.appendChild(prereqOpt);
+    });
+}
+
+/**
+ * Cierra el modal de modificación de curso.
+ */
+function closeUpdateCourseModal() {
+    document.getElementById('update-course-modal').classList.add('hidden');
+}
+
+/**
+ * Rellena el formulario de actualización con los datos del curso seleccionado.
+ * @param {string} courseCode - El código del curso seleccionado.
+ */
+function fillUpdateForm(courseCode) {
+    document.getElementById('update-error-message').style.display = 'none';
+
+    if (!courseCode || !courses[courseCode]) {
+        document.getElementById('update-course-form').reset();
+        return;
+    }
+
+    const course = courses[courseCode];
+
+    // Rellenar los campos
+    document.getElementById('update-name').value = course.name;
+    document.getElementById('update-color').value = course.color;
+    document.getElementById('update-tps').value = course.tps;
+    document.getElementById('update-tis').value = course.tis;
+    document.getElementById('update-type').value = course.type || 'Teorica';
+    document.getElementById('update-credits').value = course.credits;
+
+    // Rellenar prerrequisito
+    const prereqCode = (course.prerequisiteCodes && course.prerequisiteCodes.length > 0) ? course.prerequisiteCodes[0] : '';
+    document.getElementById('update-prerequisite').value = prereqCode;
+}
+
+/**
+ * Maneja la lógica de actualización del curso enviando los datos a la API.
+ * @param {Event} event - El evento de envío del formulario.
+ */
+async function handleUpdateCourse(event) {
+    event.preventDefault();
+
+    const errorMessage = document.getElementById('update-error-message');
+    errorMessage.style.display = 'none';
+
+    const courseCode = document.getElementById('update-course-code').value;
+    const name = document.getElementById('update-name').value.trim();
+    const prerequisiteCode = document.getElementById('update-prerequisite').value;
+    const color = document.getElementById('update-color').value;
+    const tps = parseInt(document.getElementById('update-tps').value);
+    const tis = parseInt(document.getElementById('update-tis').value);
+    const tipo = document.getElementById('update-type').value;
+    const creditos = parseInt(document.getElementById('update-credits').value);
+
+    if (!courseCode) {
+        errorMessage.textContent = 'Por favor, selecciona la asignatura a modificar.';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    if (!name || !color || !tipo || isNaN(tps) || isNaN(tis) || isNaN(creditos)) {
+        errorMessage.textContent = 'Por favor, completa todos los campos obligatorios del formulario.';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    const payload = {
+        Asignatura: name,
+        Color: color,
+        TPS: tps,
+        TIS: tis,
+        Tipo: tipo,
+        Creditos: creditos,
+        PrerequisitoCodigos: prerequisiteCode ? [prerequisiteCode] : []
+    };
+
+    try {
+        // ✅ CORRECCIÓN: Agregar el 'courseCode' a la URL para que la ruta sea válida
+        const response = await fetch(`${API_BASE_URL}/api/cursos/actualizar/${courseCode}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload) // Ahora el payload solo contiene los campos a actualizar
+        });
+
+        if (!response.ok) {
+            let errorText = `Error HTTP: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                if (errorData?.message) errorText = errorData.message;
+            } catch { }
+            throw new Error(errorText);
+        }
+
+        alert('Asignatura modificada exitosamente.');
+        closeUpdateCourseModal();
+        await fetchCourses(); // Recargar todos los cursos para actualizar la malla
+    } catch (error) {
+        console.error('Error al modificar el curso:', error);
+        errorMessage.textContent = `Error al modificar el curso: ${error.message}`;
+        errorMessage.style.display = 'block';
+    }
+}
+
+async function deleteCourse() {
+    const errorMessage = document.getElementById('update-error-message');
+    errorMessage.style.display = 'none';
+
+    const courseCode = document.getElementById('update-course-code').value;
+
+    if (!courseCode) {
+        errorMessage.textContent = 'Por favor, selecciona la asignatura a eliminar.';
+        errorMessage.style.display = 'block';
+        return;
+    }
+
+    // 1. Confirmación de seguridad
+    if (!confirm(`¿Estás seguro de que quieres eliminar la asignatura con código ${courseCode}?\nEsta acción es irreversible y afectará las mallas que la contengan.`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/cursos/eliminar/${courseCode}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            let errorText = `Error HTTP: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                if (errorData?.message) errorText = errorData.message;
+            } catch {
+                if (response.status === 400 || response.status === 500) {
+                    errorText = await response.text(); // Intentar leer el cuerpo como texto si no es JSON
+                }
+            }
+            throw new Error(errorText);
+        }
+
+        // Si la eliminación fue exitosa
+        alert(`Asignatura ${courseCode} eliminada exitosamente.`);
+        closeUpdateCourseModal();
+
+        // 2. Limpiar el progreso si el curso eliminado estaba en la malla actual
+        addedCourses.delete(courseCode);
+
+        // 3. Recargar la lista de cursos global y el renderizado
+        await fetchCourses();
+
+    } catch (error) {
+        console.error('Error al eliminar el curso:', error);
+        errorMessage.textContent = `Error al eliminar el curso: ${error.message}`;
+        errorMessage.style.display = 'block';
+    }
+}
+
+
+
+// --- Inicialización (Modificada para incluir el listener de actualización) ---
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-form').addEventListener('submit', handleLogin);
+
+    const updateForm = document.getElementById('update-course-form');
+    if (updateForm) {
+        updateForm.addEventListener('submit', handleUpdateCourse);
+    }
+
     checkAuthAndRender();
 
     document.addEventListener('click', (event) => {
+        // Cierra los dropdowns de selección de curso
         if (!event.target.closest('.custom-select-container')) {
             document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.add('hidden'));
         }

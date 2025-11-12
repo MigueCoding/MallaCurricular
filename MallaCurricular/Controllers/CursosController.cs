@@ -127,7 +127,7 @@ namespace MallaCurricular.Controllers
         }
 
         // --------------------------------------------------------------------------------
-        // MÉTODOS POST/PUT
+        // MÉTODOS POST/PUT/DELETE
         // --------------------------------------------------------------------------------
 
         // POST: api/cursos/crear
@@ -143,7 +143,7 @@ namespace MallaCurricular.Controllers
                 // Extracción de datos del JSON
                 var prerequisitoCodigosToken = data["PrerequisitoCodigos"];
                 List<string> prerequisitoCodigos = prerequisitoCodigosToken?.ToObject<List<string>>()
-                                                         ?? new List<string>();
+                                                               ?? new List<string>();
 
                 Curso curso = data.ToObject<Curso>();
 
@@ -185,7 +185,7 @@ namespace MallaCurricular.Controllers
 
                 var prerequisitoCodigosToken = data["PrerequisitoCodigos"];
                 List<string> prerequisitoCodigos = prerequisitoCodigosToken?.ToObject<List<string>>()
-                                                         ?? new List<string>();
+                                                               ?? new List<string>();
 
                 Curso cursoActualizado = data.ToObject<Curso>();
 
@@ -202,6 +202,37 @@ namespace MallaCurricular.Controllers
             catch (Exception ex)
             {
                 return InternalServerError(new Exception("Error al actualizar el curso: " + ex.Message));
+            }
+        }
+
+        // ❗ NUEVO MÉTODO: DELETE api/cursos/eliminar/{id}
+        [HttpDelete]
+        [Route("eliminar/{id}")]
+        public IHttpActionResult DeleteCurso(string id)
+        {
+            try
+            {
+                // Verifica que el ID no sea nulo o vacío
+                if (string.IsNullOrEmpty(id))
+                {
+                    return BadRequest("El código del curso a eliminar no puede ser vacío.");
+                }
+
+                var error = _cursoService.EliminarCurso(id);
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    // Si hay un error, lo devuelve como un BadRequest
+                    return BadRequest(error);
+                }
+
+                // Éxito: retorna un mensaje de confirmación
+                return Ok(new { message = $"Curso con código {id} eliminado exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores generales del servidor
+                return InternalServerError(new Exception("Error al eliminar el curso: " + ex.Message));
             }
         }
     }

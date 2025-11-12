@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </head>
+
 <body>
     <div id="login-section" class="login-container">
         <img src="logo2020.png" alt="ITM Logo" class="mx-auto mb-6 w-32" />
@@ -36,7 +37,7 @@
             <div class="success-message" id="success-message"></div>
             <div class="filter-group">
                 <label class="filter-label">Semestre</label>
-                <select class="filter-select" id="semester-filter">
+                <select class="filter-select" id="semester-filter" onchange="applyFilters()">
                     <option value="all">Todos los Semestres</option>
                     <option value="1">Semestre 1</option>
                     <option value="2">Semestre 2</option>
@@ -55,7 +56,7 @@
                 <label class="filter-label">Opciones</label>
                 <div class="space-y-2">
                     <label class="flex items-center">
-                        <input type="checkbox" id="show-prerequisites" class="mr-2 rounded text-blue-600">
+                        <input type="checkbox" id="show-prerequisites" class="mr-2 rounded text-blue-600" onchange="applyFilters()">
                         Mostrar Prerrequisitos
                     </label>
                 </div>
@@ -128,6 +129,7 @@
 
 
             <button class="submit-btn" onclick="createCourse()">Crear Asignatura</button>
+            <button class="submit-btn bg-yellow-500 hover:bg-yellow-600" onclick="openUpdateCourseModal()">Modificar Asignatura</button>
             <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
 
             <div class="color-palette">
@@ -169,8 +171,73 @@
 
     <script src="Scripts/script.js"></script>
     <script>
-        // Inicializa la carga de mallas al cargar la ventana
-        window.onload = fetchMallas;
     </script>
+    <div id="update-course-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-4">Modificar/Eliminar Asignatura</h2>
+            <div class="error-message" id="update-error-message" style="display: none;"></div>
+            <form id="update-course-form">
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Seleccionar Asignatura</label>
+                    <select id="update-course-code" class="form-select w-full border border-gray-300 p-2 rounded-md" required onchange="fillUpdateForm(this.value)">
+                        <option value="">Selecciona un curso...</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Asignatura</label>
+                    <input type="text" id="update-name" class="form-input w-full border border-gray-300 p-2 rounded-md" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Prerrequisito</label>
+                    <select id="update-prerequisite" class="form-select w-full border border-gray-300 p-2 rounded-md">
+                        <option value="">Ninguno</option>
+                    </select>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Tipo De Asignatura</label>
+                    <select id="update-color" class="form-select w-full border border-gray-300 p-2 rounded-md" required>
+                        <option value="course-green">Ciencias Básicas</option>
+                        <option value="course-blue">Ciencias Básicas Tecnología - Ingeniería</option>
+                        <option value="course-purple">Formación Profesional</option>
+                        <option value="course-red">Formación Complementaria</option>
+                    </select>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Trabajo Presencial Semanal (TPS)</label>
+                    <input type="number" id="update-tps" class="form-input w-full border border-gray-300 p-2 rounded-md" min="0" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Trabajo Independiente Semanal (TIS)</label>
+                    <input type="number" id="update-tis" class="form-input w-full border border-gray-300 p-2 rounded-md" min="0" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Tipo</label>
+                    <select id="update-type" class="form-select w-full border border-gray-300 p-2 rounded-md" required>
+                        <option value="Teorica">Teórica</option>
+                        <option value="Teorico-Practica">Teórico-Práctica</option>
+                        <option value="Practica">Práctica</option>
+                    </select>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label block text-sm font-medium text-gray-700">Créditos</label>
+                    <input type="number" id="update-credits" class="form-input w-full border border-gray-300 p-2 rounded-md" min="1" required>
+                </div>
+                <div class="flex justify-between space-x-2 mt-4">
+
+                    <div class="flex space-x-2">
+                        <button type="button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" onclick="closeUpdateCourseModal()">Cancelar</button>
+                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Actualizar Curso</button>
+                        <button type="button"
+                                onclick="deleteCourse()"
+                                id="delete-course-btn"
+                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                            🗑️ Eliminar Asignatura
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
