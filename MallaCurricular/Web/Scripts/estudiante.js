@@ -2,16 +2,15 @@
 const addedCourses = new Map();
 let electivas = [];
 let optativas = [];
-let currentSelector = null; // Para rastrear el selector activo
-let occupiedCourseCodes = new Set(); // ❗ NUEVA LISTA: Códigos de cursos ya en la malla
+let currentSelector = null;
+let occupiedCourseCodes = new Set();
 
-// Valores por defecto para Electivas/Optativas no especificadas en catálogo
-// NOTA: Estos valores DEBEN SER '0' si la intención es que los valores del endpoint
-// tomen precedencia, incluso cuando sean 0. Ya no deberían usarse si el endpoint
-// siempre los provee, pero los mantendremos en 0 por seguridad.
-const DEFAULT_CREDITOS = 0; // Cambiado de 2 a 0 por seguridad
-const DEFAULT_TPS = 0;      // Cambiado de 2 a 0 por seguridad
-const DEFAULT_TIS = 0;      // Cambiado de 4 a 0 por seguridad
+let occupiedElectivasCodes = new Set();
+let occupiedOptativasCodes = new Set();
+
+const DEFAULT_CREDITOS = 0;
+const DEFAULT_TPS = 0;
+const DEFAULT_TIS = 0;
 
 // =========================================================================
 // FUNCIONES DE CARGA Y FETCH
@@ -60,7 +59,6 @@ async function fetchElectivasAndOptativas() {
     }
 }
 
-
 async function fetchCoursesByMalla() {
     const mallaId = document.getElementById('malla-select').value;
     const grid = document.getElementById("semester-grid");
@@ -83,7 +81,9 @@ async function fetchCoursesByMalla() {
 
         courses = {};
         addedCourses.clear();
-        occupiedCourseCodes.clear(); // ❗ Limpiar la lista de ocupados
+        occupiedCourseCodes.clear();
+        occupiedElectivasCodes.clear();
+        occupiedOptativasCodes.clear();
 
         data.forEach(course => {
             courses[course.Codigo] = {
@@ -93,34 +93,30 @@ async function fetchCoursesByMalla() {
                 color: course.Color,
                 semester: course.Semestre,
                 creditos: course.Creditos,
-                // ✅ CORRECCIÓN 1: Asignación directa, ya que el endpoint lo garantiza.
                 TPS: course.TPS,
                 TIS: course.TIS
             };
             addedCourses.set(course.Codigo, course.Semestre);
-            occupiedCourseCodes.add(course.Codigo); // ❗ Añadir todos los códigos iniciales
+            occupiedCourseCodes.add(course.Codigo);
         });
 
-        // ADAPTACIÓN PARA MÚLTIPLES SLOTS DE ELECTIVAS/OPTATIVAS
         Object.values(courses).forEach(course => {
             const isElectivaSlot = course.name.toLowerCase().includes('electiva');
             const isOptativaSlot = course.name.toLowerCase().includes('optativa');
 
             if (isElectivaSlot || isOptativaSlot) {
                 const type = isElectivaSlot ? 'electiva' : 'optativa';
-                const slotCode = course.code; // El código de la tarjeta base es el identificador único.
+                const slotCode = course.code;
                 const selectedCode = localStorage.getItem(`selected-${slotCode}-code`);
 
-                // 1. Si hay una selección previa guardada para este slot
                 if (selectedCode) {
                     const catalogue = type === 'electiva' ? electivas : optativas;
                     const selectedCourse = catalogue.find(c => c.Codigo === selectedCode);
 
                     if (selectedCourse) {
-                        // Reemplazar el curso placeholder con el curso seleccionado
                         delete courses[slotCode];
                         addedCourses.delete(slotCode);
-                        occupiedCourseCodes.delete(slotCode); // ❗ El placeholder ya no está ocupado
+                        occupiedCourseCodes.delete(slotCode);
 
                         const courseData = {
                             code: selectedCourse.Codigo,
@@ -128,33 +124,32 @@ async function fetchCoursesByMalla() {
                             prerequisite: selectedCourse.Prerequisito || '',
                             color: course.color,
                             semester: course.semester,
-                            // ✅ CORRECCIÓN 2: Asignación directa. Usar ?? 0 o solo el valor.
-                            // Aquí usamos la coalescencia nula (??) para manejar si el campo no existe.
-                            // Nota: En este punto, `selectedCourse.Creditos` no debería ser null si el endpoint funciona.
                             creditos: selectedCourse.Creditos ?? DEFAULT_CREDITOS,
                             TPS: selectedCourse.TPS ?? DEFAULT_TPS,
-                            TIS: selectedCourse.TIS ?? DEFAULT_TIS
+                            TIS: selectedCourse.TIS ?? DEFAULT_TIS,
+                            courseType: type
                         };
 
                         courses[selectedCourse.Codigo] = courseData;
                         addedCourses.set(selectedCourse.Codigo, courseData.semester);
-                        occupiedCourseCodes.add(selectedCourse.Codigo); // ❗ Añadir el curso seleccionado como ocupado
+                        occupiedCourseCodes.add(selectedCourse.Codigo);
+
+                        if (type === 'electiva') {
+                            occupiedElectivasCodes.add(selectedCourse.Codigo);
+                        } else {
+                            occupiedOptativasCodes.add(selectedCourse.Codigo);
+                        }
                     }
                 } else {
-                    // 2. Si es un placeholder y NO hay selección
-                    // ✅ CORRECCIÓN 3: Reemplazar || DEFAULT_X por ?? DEFAULT_X para evitar que 0 se interprete como vacío.
                     course.creditos = course.creditos ?? DEFAULT_CREDITOS;
                     course.TPS = course.TPS ?? DEFAULT_TPS;
                     course.TIS = course.TIS ?? DEFAULT_TIS;
-
-                    // ❗ Los placeholders NO cuentan como cursos "ocupados" del catálogo
-                    //    Ya se añadieron, ahora los eliminamos.
+                    course.courseType = type;
                     occupiedCourseCodes.delete(slotCode);
                 }
             }
         });
 
-        // Creación de resumen y leyenda
         const summaryBox = document.createElement("div");
         summaryBox.className = "summary-box mt-4";
         summaryBox.innerHTML = `
@@ -187,7 +182,6 @@ async function fetchCoursesByMalla() {
             <div><span class="inline-block w-4 h-4 bg-[#b6ffff] rounded-sm mr-2"></span> Asignatura que la habilitó</div>`;
         summaryContainer.appendChild(colorLegend);
 
-
         renderSemesters();
     } catch (err) {
         grid.innerHTML = `<p class="text-center text-red-600">${err.message}</p>`;
@@ -196,16 +190,12 @@ async function fetchCoursesByMalla() {
 }
 
 // =========================================================================
-// LÓGICA DE SELECCIÓN INTERACTIVA (Manejo por Slot Único)
+// LÓGICA DE SELECCIÓN INTERACTIVA (SEPARADA POR TIPO)
 // =========================================================================
 
 function handleCourseSelectionInCard(type, slotCode, newCourseCode) {
-    // slotCode es el código original de la tarjeta (e.g., 'ELI101')
     const previousSelectedCode = localStorage.getItem(`selected-${slotCode}-code`);
-
-    // El código del curso que está actualmente visible en el slot (puede ser el placeholder o un curso seleccionado)
     const activeCourseCode = previousSelectedCode || slotCode;
-
     const currentSlotCourse = courses[activeCourseCode];
 
     if (!currentSlotCourse) {
@@ -213,28 +203,29 @@ function handleCourseSelectionInCard(type, slotCode, newCourseCode) {
         return;
     }
 
-    // Lógica de Eliminación centralizada
     const deleteActiveCourse = () => {
         if (courses[activeCourseCode]) {
-            // ❗ Eliminar de la lista de ocupados ANTES de eliminar de courses
             occupiedCourseCodes.delete(activeCourseCode);
-            delete courses[activeCourseCode]; // ✅ CORRECCIÓN APLICADA AQUÍ
+
+            const courseType = courses[activeCourseCode].courseType || type;
+            if (courseType === 'electiva') {
+                occupiedElectivasCodes.delete(activeCourseCode);
+            } else if (courseType === 'optativa') {
+                occupiedOptativasCodes.delete(activeCourseCode);
+            }
+
+            delete courses[activeCourseCode];
             addedCourses.delete(activeCourseCode);
             localStorage.removeItem(`course-${activeCourseCode}`);
         }
     };
 
-
-    // 1. Lógica de Deselección (Volver al Placeholder)
     if (!newCourseCode) {
-        // a. Eliminar el curso que está actualmente activo (seleccionado o placeholder)
         deleteActiveCourse();
+        localStorage.removeItem(`selected-${slotCode}-code`);
 
-        localStorage.removeItem(`selected-${slotCode}-code`); // Limpiar la selección específica del slot
-
-        // b. Restaurar el curso Placeholder con sus datos originales/por defecto
         const courseData = {
-            code: slotCode, // Volvemos al código original del slot
+            code: slotCode,
             name: currentSlotCourse.name.includes('Electiva') || currentSlotCourse.name.includes('Optativa')
                 ? currentSlotCourse.name
                 : `${type.charAt(0).toUpperCase() + type.slice(1)} I`,
@@ -243,25 +234,22 @@ function handleCourseSelectionInCard(type, slotCode, newCourseCode) {
             semester: currentSlotCourse.semester,
             creditos: DEFAULT_CREDITOS,
             TPS: DEFAULT_TPS,
-            TIS: DEFAULT_TIS
+            TIS: DEFAULT_TIS,
+            courseType: type
         };
-        // Reinsertar el placeholder
+
         courses[slotCode] = courseData;
         addedCourses.set(slotCode, currentSlotCourse.semester);
-        // ❗ Los placeholders NO se añaden a occupiedCourseCodes
 
         renderSemesters();
         return;
     }
 
-    // 2. Lógica de Selección/Reemplazo (newCourseCode existe)
     const newCourse = (type === 'electiva' ? electivas : optativas).find(c => c.Codigo === newCourseCode);
 
     if (newCourse) {
-        // a. Eliminar el curso activo actual (placeholder o selección previa)
         deleteActiveCourse();
 
-        // b. Crear el nuevo curso con datos del catálogo
         const courseData = {
             code: newCourse.Codigo,
             name: newCourse.Asignatura,
@@ -270,32 +258,36 @@ function handleCourseSelectionInCard(type, slotCode, newCourseCode) {
             semester: currentSlotCourse.semester,
             creditos: newCourse.Creditos ?? DEFAULT_CREDITOS,
             TPS: newCourse.TPS ?? DEFAULT_TPS,
-            TIS: newCourse.TIS ?? DEFAULT_TIS
+            TIS: newCourse.TIS ?? DEFAULT_TIS,
+            courseType: type
         };
 
-        // c. Integrar el nuevo curso
         courses[newCourse.Codigo] = courseData;
         addedCourses.set(newCourse.Codigo, courseData.semester);
-        occupiedCourseCodes.add(newCourse.Codigo); // ❗ Añadir el nuevo curso como ocupado
+        occupiedCourseCodes.add(newCourse.Codigo);
 
-        localStorage.setItem(`selected-${slotCode}-code`, newCourseCode); // Guardar con la clave del slot
+        if (type === 'electiva') {
+            occupiedElectivasCodes.add(newCourse.Codigo);
+        } else {
+            occupiedOptativasCodes.add(newCourse.Codigo);
+        }
+
+        localStorage.setItem(`selected-${slotCode}-code`, newCourseCode);
         localStorage.setItem(`course-${newCourse.Codigo}`, "false");
 
-        // d. Rerenderizar
         renderSemesters();
     }
 }
 
 function openCourseSelectorModal(type, slotCode, targetDiv) {
-
     if (currentSelector) {
         currentSelector.remove();
         currentSelector = null;
     }
 
     const catalogue = type === 'electiva' ? electivas : optativas;
+    const occupiedSet = type === 'electiva' ? occupiedElectivasCodes : occupiedOptativasCodes;
 
-    // Crear el contenedor principal del selector (Estilos directos)
     const selectorContainer = document.createElement('div');
     selectorContainer.className = 'course-selector-dropdown';
     selectorContainer.style.position = 'absolute';
@@ -327,7 +319,6 @@ function openCourseSelectorModal(type, slotCode, targetDiv) {
         listContainer.innerHTML = '';
         const normalizedFilter = filter.toLowerCase();
 
-        // Opción para deseleccionar
         const deselectItem = document.createElement('div');
         deselectItem.className = 'selector-item deselect-item';
         deselectItem.textContent = 'Seleccione un curso... / Deseleccionar';
@@ -344,8 +335,7 @@ function openCourseSelectorModal(type, slotCode, targetDiv) {
 
         const filteredList = catalogue.filter(c => {
             const courseCode = c.Codigo;
-            // ❗ FILTRADO: Ocultar si el curso ya está ocupado en la malla
-            const isOccupied = occupiedCourseCodes.has(courseCode);
+            const isOccupied = occupiedSet.has(courseCode);
             const matchesFilter = c.Asignatura.toLowerCase().includes(normalizedFilter) ||
                 courseCode.toLowerCase().includes(normalizedFilter);
 
@@ -399,9 +389,8 @@ function openCourseSelectorModal(type, slotCode, targetDiv) {
     });
 }
 
-
 // =========================================================================
-// RENDERIZADO (Con lógica de Clic Dual y Múltiples Slots)
+// RENDERIZADO (CON BOTÓN ESPECÍFICO PARA CAMBIAR)
 // =========================================================================
 
 function renderSemesters() {
@@ -424,7 +413,6 @@ function renderSemesters() {
         <div id="courses-semester-11" class="flex flex-wrap justify-center gap-4 mt-4"></div>`;
     grid.appendChild(propedeutic);
 
-    // ✅ NUEVO: agrupar y ordenar los cursos por color antes de renderizar
     const semesterCoursesMap = new Map();
     addedCourses.forEach((semester, code) => {
         const course = courses[code];
@@ -433,11 +421,9 @@ function renderSemesters() {
         semesterCoursesMap.get(semester).push(course);
     });
 
-    // Definimos el orden deseado de las clases por color
     const colorOrder = ["course-green", "course-blue", "course-purple", "course-red"];
 
     semesterCoursesMap.forEach((courseList, semester) => {
-        // Ordenar según colorOrder
         courseList.sort((a, b) => {
             const aIndex = colorOrder.findIndex(c => a.color === c);
             const bIndex = colorOrder.findIndex(c => b.color === c);
@@ -447,11 +433,12 @@ function renderSemesters() {
         const container = document.getElementById(`courses-semester-${semester}`);
         if (!container) return;
 
-        // Renderizar cada curso en el orden correcto
         courseList.forEach(course => {
             const courseDiv = document.createElement('div');
             courseDiv.className = `course ${course.color}`;
             courseDiv.setAttribute("data-code", course.code);
+            // ✅ NUEVO: Hacer position relative para posicionar el botón
+            courseDiv.style.position = 'relative';
 
             const wasCompletedInStorage = localStorage.getItem(`course-${course.code}`) === "true";
             if (wasCompletedInStorage) courseDiv.classList.add("completed");
@@ -479,31 +466,79 @@ function renderSemesters() {
                     </div>
                 </div>`;
 
-            // (mantiene toda la lógica de clics igual)
             const isPlaceholder = course.name.toLowerCase().includes('electiva') || course.name.toLowerCase().includes('optativa');
             const isSelectedCourse = Object.keys(localStorage).some(key => key.startsWith('selected-') && localStorage.getItem(key) === course.code);
 
+            // ✅ CAMBIO PRINCIPAL: Sistema con botón específico para cambiar
             if (isPlaceholder || isSelectedCourse) {
                 courseDiv.classList.add('course-selector');
                 courseDiv.classList.remove("disabled");
 
                 let uniqueSlotCode;
                 let type;
+
                 if (isPlaceholder) {
                     uniqueSlotCode = course.code;
-                    type = course.name.toLowerCase().includes('electiva') ? 'electiva' : 'optativa';
+                    type = course.courseType || (course.name.toLowerCase().includes('electiva') ? 'electiva' : 'optativa');
                 } else {
-                    const selectionKey = Object.keys(localStorage).find(key => key.startsWith('selected-') && localStorage.getItem(key) === course.code);
-                    uniqueSlotCode = selectionKey ? selectionKey.replace('selected-', '').replace('-code', '') : course.code;
+                    const selectionKey = Object.keys(localStorage).find(
+                        key => key.startsWith('selected-') && localStorage.getItem(key) === course.code
+                    );
+                    uniqueSlotCode = selectionKey ?
+                        selectionKey.replace('selected-', '').replace('-code', '') :
+                        course.code;
 
-                    const originalSlotCourse = Object.values(courses).find(c => c.code === uniqueSlotCode);
-                    type = originalSlotCourse?.name.toLowerCase().includes('electiva') ? 'electiva' : 'optativa';
+                    type = course.courseType || 'electiva';
                 }
 
-                courseDiv.addEventListener("click", () => {
-                    if (isPlaceholder) {
-                        openCourseSelectorModal(type, uniqueSlotCode, courseDiv);
-                    } else {
+                // ✅ NUEVO: Crear botón de cambio en la esquina superior derecha
+                const changeButton = document.createElement('button');
+                changeButton.className = 'change-course-button';
+                changeButton.innerHTML = '✏️';
+                changeButton.title = isPlaceholder ? 'Seleccionar curso' : 'Cambiar selección';
+                changeButton.style.cssText = `
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    width: 15px;
+                    height: 15px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 2px solid #3b82f6;
+                    cursor: pointer;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10;
+                    transition: all 0.2s;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                `;
+
+                // Efectos hover para el botón
+                changeButton.addEventListener('mouseenter', () => {
+                    changeButton.style.transform = 'scale(1.1)';
+                    changeButton.style.borderColor = '#2563eb';
+                    changeButton.style.boxShadow = '0 4px 6px rgba(0,0,0,0.15)';
+                });
+
+                changeButton.addEventListener('mouseleave', () => {
+                    changeButton.style.transform = 'scale(1)';
+                    changeButton.style.borderColor = '#3b82f6';
+                    changeButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                });
+
+                // ✅ Evento del botón: abre el selector
+                changeButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevenir que dispare el clic del curso
+                    openCourseSelectorModal(type, uniqueSlotCode, courseDiv);
+                });
+
+                courseDiv.appendChild(changeButton);
+
+                // ✅ SIMPLIFICADO: Clic en el curso solo marca como completada (NO abre selector)
+                if (!isPlaceholder) {
+                    courseDiv.addEventListener("click", () => {
                         if (courseDiv.classList.contains("disabled")) return;
 
                         const isNowCompleted = courseDiv.classList.toggle("completed");
@@ -518,15 +553,24 @@ function renderSemesters() {
                         localStorage.setItem(`course-${course.code}`, isNowCompleted ? "true" : "false");
                         updateDependencies(course.code);
                         computeSemesterSums();
-                    }
-                });
+                    });
+                } else {
+                    // Si es placeholder, el clic también puede abrir el selector (opcional)
+                    courseDiv.addEventListener("click", () => {
+                        openCourseSelectorModal(type, uniqueSlotCode, courseDiv);
+                    });
+                }
 
+                // Actualizar texto del placeholder
                 if (isPlaceholder) {
-                    courseDiv.querySelector('.course-title').textContent = (course.name || course.code) + " (Seleccionar)";
+                    courseDiv.querySelector('.course-title').textContent =
+                        (course.name || course.code) + " (Clic para seleccionar)";
                     localStorage.setItem(`course-${course.code}`, "false");
                     courseDiv.classList.remove("completed");
                 }
+
             } else {
+                // Cursos normales: clic simple marca como completada
                 courseDiv.addEventListener("click", () => {
                     if (courseDiv.classList.contains("disabled")) return;
 
@@ -559,7 +603,7 @@ function renderSemesters() {
 }
 
 // =========================================================================
-// LÓGICA DE PRERREQUISITOS Y SUMAS (Se mantienen sin cambios)
+// LÓGICA DE PRERREQUISITOS Y SUMAS
 // =========================================================================
 
 function isCompletedByName(prereqString) {
@@ -592,7 +636,6 @@ function updateDependencies(code) {
     const currentCourseName = courses[code]?.name || code;
 
     Object.values(courses).forEach(course => {
-
         const prereqList = (course.prerequisite || '').split(',').map(p => p.trim().toLowerCase());
         const dependsOnCurrent = prereqList.includes(currentCourseName.toLowerCase()) || prereqList.includes(code.toLowerCase());
 
@@ -661,12 +704,10 @@ function computeSemesterSums() {
             cont.appendChild(box);
         }
 
-        // ✅ Actualizar el bloqueo global cada vez que cambien los estados de los cursos
         updateGlobalSemesterLock();
     }
 }
 
-// Función para verificar si todos los cursos del semestre 1 al 6 están completados
 function allLowerSemestersCompleted() {
     for (let i = 1; i <= 6; i++) {
         const cont = document.getElementById(`courses-semester-${i}`);
@@ -674,7 +715,6 @@ function allLowerSemestersCompleted() {
 
         const coursesInSemester = cont.querySelectorAll(".course");
         for (let courseDiv of coursesInSemester) {
-            // Si el curso no está completado y no es un placeholder de electiva/optativa
             if (!courseDiv.classList.contains("completed") &&
                 !courseDiv.querySelector(".course-title").textContent.toLowerCase().includes("electiva") &&
                 !courseDiv.querySelector(".course-title").textContent.toLowerCase().includes("optativa")) {
@@ -685,7 +725,6 @@ function allLowerSemestersCompleted() {
     return true;
 }
 
-// Función que bloquea/desbloquea los semestres 7 al 10 según el progreso
 function updateGlobalSemesterLock() {
     const allLowerDone = allLowerSemestersCompleted();
 
@@ -697,10 +736,8 @@ function updateGlobalSemesterLock() {
 
         coursesInSemester.forEach(courseDiv => {
             if (allLowerDone) {
-                // ✅ Si ya completó todo el 1 al 6, desbloquear los cursos
                 courseDiv.classList.remove("disabled");
             } else {
-                // 🚫 Si aún hay materias pendientes en 1-6, deshabilitar estos cursos
                 if (!courseDiv.classList.contains("completed")) {
                     courseDiv.classList.add("disabled");
                 }
