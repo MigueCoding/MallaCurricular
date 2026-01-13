@@ -283,7 +283,12 @@
     <Content Include="Web\Content\bootstrap.min.css" />
     <Content Include="Web\Content\bootstrap.rtl.css" />
     <Content Include="Web\Content\bootstrap.rtl.min.css" />
+    <Content Include="Web\Content\login.css" />
+    <Content Include="Web\Content\plana.css" />
     <Content Include="Web\Content\estudiante.css" />
+    <Content Include="Web\register.html" />
+    <Content Include="Web\login.html" />
+    <Content Include="Web\plana.html" />
     <Content Include="Web\logo2020.png" />
     <Content Include="Web\Content\Site.css" />
     <Content Include="Web\Content\style.css" />
@@ -296,6 +301,8 @@
     <Content Include="Web\Scripts\bootstrap.esm.min.js" />
     <Content Include="Web\Scripts\bootstrap.js" />
     <Content Include="Web\Scripts\bootstrap.min.js" />
+    <Content Include="Web\Scripts\login.js" />
+    <Content Include="Web\Scripts\plana.js" />
     <Content Include="Web\Scripts\estudiante.js" />
     <None Include="Web\Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Web\Scripts\jquery-3.7.0.js" />
@@ -303,6 +310,7 @@
     <Content Include="Web\Scripts\jquery-3.7.0.slim.js" />
     <Content Include="Web\Scripts\jquery-3.7.0.slim.min.js" />
     <Content Include="Web\Scripts\modernizr-2.8.3.js" />
+    <Content Include="Web\Scripts\Register.js" />
     <Content Include="Web\Scripts\script.js" />
     <EntityDeploy Include="Models\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - ITM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="Content/Login.css">
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen">
+
+    <div class="login-container bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-green-600">
+        <div class="text-center mb-8">
+            <img src="logo2020.png" alt="Logo ITM" class="w-32 mx-auto mb-4">
+            <h1 class="text-2xl font-bold text-gray-800">Crear Cuenta</h1>
+            <p class="text-gray-500 text-sm">Regístrate para gestionar tu malla</p>
+        </div>
+
+        <form id="register-form" class="space-y-5">
+            <div>
+                <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico</label>
+                <input type="email" id="email" name="email" required
+                       placeholder="Ingresa tu correo institucional"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition">
+            </div>
+
+            <div>
+                <label for="carnet" class="block text-sm font-semibold text-gray-700 mb-1">Carnet</label>
+                <input type="text" id="carnet" name="carnet" required
+                       placeholder="Ej: 202110050"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-semibold text-gray-700 mb-1">Contraseña</label>
+                <input type="password" id="password" name="password" required
+                       placeholder="********"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition">
+            </div>
+
+            <div id="register-error" class="hidden text-red-500 text-sm text-center font-medium">
+                Hubo un error al crear la cuenta. Inténtalo de nuevo.
+            </div>
+
+            <button type="submit" id="btn-register"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg transition duration-300 transform hover:scale-[1.02]">
+                Registrarse
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="Login.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium transition">
+                ¿Ya tienes cuenta? Inicia sesión
+            </a>
+        </div>
+    </div>
+
+    <script src="Scripts/Register.js"></script>
+</body>
+</html>

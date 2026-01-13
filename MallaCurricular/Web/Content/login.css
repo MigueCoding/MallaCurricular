@@ -1,0 +1,36 @@
+/* Animación de entrada para el contenedor */
+.login-container {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilo para los inputs al enfocarlos */
+input:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Mejora visual para dispositivos móviles */
+@media (max-width: 480px) {
+    .login-container {
+        margin: 20px;
+        padding: 24px;
+    }
+}
+
+/* Botón con efecto de carga */
+button:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    transform: none !important;
+}
