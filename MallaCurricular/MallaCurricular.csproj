@@ -284,12 +284,14 @@
     <Content Include="Web\Content\bootstrap.rtl.css" />
     <Content Include="Web\Content\bootstrap.rtl.min.css" />
     <Content Include="Web\Content\estudiante.css" />
+    <Content Include="Web\Content\Profesor.css" />
     <Content Include="Web\logo2020.png" />
     <Content Include="Web\Content\Site.css" />
     <Content Include="Web\Content\style.css" />
     <Content Include="Web\Estudiante.html" />
     <Content Include="Web\index.html" />
     <Content Include="Areas\HelpPage\Views\Auth\Login.cshtml" />
+    <Content Include="Web\Profesor.html" />
     <Content Include="Web\Scripts\bootstrap.bundle.js" />
     <Content Include="Web\Scripts\bootstrap.bundle.min.js" />
     <Content Include="Web\Scripts\bootstrap.esm.js" />
@@ -303,6 +305,7 @@
     <Content Include="Web\Scripts\jquery-3.7.0.slim.js" />
     <Content Include="Web\Scripts\jquery-3.7.0.slim.min.js" />
     <Content Include="Web\Scripts\modernizr-2.8.3.js" />
+    <Content Include="Web\Scripts\Profesor.js" />
     <Content Include="Web\Scripts\script.js" />
     <EntityDeploy Include="Models\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>

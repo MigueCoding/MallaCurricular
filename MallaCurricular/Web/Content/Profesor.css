@@ -1,0 +1,40 @@
+﻿body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #f3f4f6;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar-item {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+}
+
+    .sidebar-item.active {
+        border-left-color: #1e40af;
+        background-color: #f1f5f9;
+    }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Rubricas */
+.rubric-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Botones */
+button {
+    cursor: pointer;
+}
