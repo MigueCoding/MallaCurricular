@@ -43,7 +43,8 @@
             <p class="text-blue-200 text-sm">Seleccione una asignatura</p>
         </header>
         <!-- VISTA CENTRAL DE LA MATERIA -->
-        <div id="subject-preview" class="flex-1 flex items-center justify-center hidden">
+        <div id="subject-preview" class="flex-1 overflow-y-auto hidden">
+
             <div class="bg-white rounded-2xl shadow-xl border max-w-xl w-full p-10 text-center space-y-6 animate-fade-in">
 
                 <div>
@@ -76,6 +77,13 @@
         <!-- EDITOR -->
         <section id="editor-container" class="flex-1 overflow-y-auto p-6 hidden">
             <div class="max-w-4xl mx-auto space-y-6">
+                <!-- BOTÓN VOLVER -->
+                <div class="flex items-center">
+                    <button onclick="backToSelected()"
+                            class="text-sm font-bold text-blue-700 hover:underline flex items-center gap-1">
+                        ← Volver a materias
+                    </button>
+                </div>
 
                 <!-- MICROCURRÍCULO -->
                 <div class="bg-white rounded-xl border shadow">
@@ -114,6 +122,7 @@
                         Guardar
                     </button>
                 </div>
+
 
             </div>
         </section>

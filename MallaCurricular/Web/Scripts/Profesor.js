@@ -1,5 +1,7 @@
 ﻿const API_BASE_URL = 'http://localhost:49513';
+
 let courses = {};
+let selectedSubjects = {}; // ← NUEVO
 let currentSubject = null;
 
 /* =========================
@@ -33,13 +35,13 @@ async function fetchCourses() {
 
         renderMaterias();
 
-    } catch (e) {
+    } catch {
         list.innerHTML = `<div class="p-6 text-center text-red-500 text-sm">Error al cargar materias</div>`;
     }
 }
 
 /* =========================
-   RENDER LISTA
+   RENDER SIDEBAR
 ========================= */
 function renderMaterias() {
     const list = document.getElementById('materias-list');
@@ -47,7 +49,13 @@ function renderMaterias() {
 
     Object.values(courses).forEach(course => {
         const item = document.createElement('div');
+
         item.className = 'sidebar-item px-5 py-3 cursor-pointer hover:bg-gray-100';
+
+        // ✅ Si ya está seleccionada → marcar
+        if (selectedSubjects[course.code]) {
+            item.classList.add('active');
+        }
 
         item.innerHTML = `
             <div class="font-bold text-sm text-gray-700">${course.name}</div>
@@ -56,54 +64,144 @@ function renderMaterias() {
             </div>
         `;
 
-        item.onclick = () => selectSubject(course, item);
+        item.onclick = () => addSubject(course);
         list.appendChild(item);
     });
 }
+function addSubject(course) {
+    if (selectedSubjects[course.code]) return;
+
+    selectedSubjects[course.code] = course;
+
+    document.getElementById('empty-state').classList.add('hidden');
+    document.getElementById('subject-preview').classList.remove('hidden');
+
+    renderCenterPanel();
+    renderMaterias(); // 🔥 vuelve a pintar la lista izquierda
+}
+function removeSubject(code) {
+    delete selectedSubjects[code];
+
+    if (currentSubject?.code === code) {
+        currentSubject = null;
+        document.getElementById('editor-container').classList.add('hidden');
+    }
+
+    renderCenterPanel();
+    renderMaterias();
+}
 
 /* =========================
-   SELECCIONAR MATERIA
+   AGREGAR AL PANEL CENTRAL
 ========================= */
-function selectSubject(course, element) {
-    currentSubject = course;
+function addToCenter(course) {
+    if (selectedSubjects[course.code]) return;
 
-    // Resaltar en sidebar
-    document.querySelectorAll('.course-item').forEach(i =>
-        i.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50')
-    );
-    element.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
+    selectedSubjects[course.code] = course;
 
-    // Estados
     document.getElementById('empty-state').classList.add('hidden');
     document.getElementById('editor-container').classList.add('hidden');
     document.getElementById('subject-preview').classList.remove('hidden');
 
-    // Header
-    document.getElementById('header-dinamico').innerHTML = `
-        <h1 class="text-xl font-bold uppercase">${course.name}</h1>
-        <p class="text-xs text-blue-100 font-mono">${course.code}</p>
-    `;
-
-    // Preview data
-    document.getElementById('preview-name').textContent = course.name;
-    document.getElementById('preview-code').textContent = course.code;
-    document.getElementById('preview-credits').textContent = course.credits;
-    document.getElementById('preview-tps').textContent = course.tps;
-    document.getElementById('preview-tis').textContent = course.tis;
+    renderCenterPanel();
 }
-async function openEditor() {
-    if (!currentSubject) return;
+
+/* =========================
+   RENDER PANEL CENTRAL
+========================= */
+function renderCenterPanel() {
+    const container = document.getElementById('subject-preview');
+
+    const subjects = Object.values(selectedSubjects);
+
+    if (!subjects.length) {
+        document.getElementById('subject-preview').classList.add('hidden');
+        document.getElementById('empty-state').classList.remove('hidden');
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-10 w-full max-w-5xl">
+            ${subjects.map(course => `
+                <div class="relative bg-white rounded-xl shadow border p-6 space-y-4">
+
+                    <!-- BOTÓN ELIMINAR -->
+                    <button onclick="removeSubject('${course.code}')"
+                            class="absolute top-3 right-3 text-red-400 hover:text-red-600 text-sm">
+                        ✕
+                    </button>
+
+                    <div>
+                        <h2 class="text-lg font-black uppercase">${course.name}</h2>
+                        <p class="text-xs text-gray-400 font-mono">${course.code}</p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-sm">
+                        <div class="bg-gray-50 rounded p-2 text-center">
+                            <p class="text-xs text-gray-400">CR</p>
+                            <p class="font-bold">${course.credits}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2 text-center">
+                            <p class="text-xs text-gray-400">TPS</p>
+                            <p class="font-bold">${course.tps}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2 text-center">
+                            <p class="text-xs text-gray-400">TIS</p>
+                            <p class="font-bold">${course.tis}</p>
+                        </div>
+                    </div>
+
+                    <button onclick="editSubject('${course.code}')"
+                        class="w-full bg-blue-900 text-white py-2 rounded-lg font-bold hover:bg-blue-800">
+                        Editar
+                    </button>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+function removeSubject(code) {
+    delete selectedSubjects[code];
+
+    if (currentSubject?.code === code) {
+        currentSubject = null;
+        document.getElementById('editor-container').classList.add('hidden');
+    }
+
+    renderCenterPanel();
+    renderMaterias(); // 🔥 actualiza el sidebar
+}
+function backToSelected() {
+    // Oculta el editor
+    document.getElementById('editor-container').classList.add('hidden');
+
+    // Muestra el panel central con las materias seleccionadas
+    document.getElementById('subject-preview').classList.remove('hidden');
+
+    // Limpia la materia actual en edición
+    currentSubject = null;
+
+    // Restaura el header
+    document.getElementById('header-dinamico').innerHTML = `
+        <h1 class="text-2xl font-bold">Gestión Académica</h1>
+        <p class="text-blue-200 text-sm">Materias seleccionadas</p>
+    `;
+}
+/* =========================
+   EDITAR UNA MATERIA
+========================= */
+async function editSubject(code) {
+    currentSubject = selectedSubjects[code];
 
     document.getElementById('subject-preview').classList.add('hidden');
     document.getElementById('editor-container').classList.remove('hidden');
 
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/planificacion/${currentSubject.code}`);
-        const data = res.ok ? await res.json() : { Microcurriculo: '', Rubricas: [] };
-        fillEditor(data);
-    } catch {
-        fillEditor({ Microcurriculo: '', Rubricas: [] });
-    }
+    document.getElementById('header-dinamico').innerHTML = `
+        <h1 class="text-xl font-bold uppercase">${currentSubject.name}</h1>
+        <p class="text-xs text-blue-100 font-mono">${currentSubject.code}</p>
+    `;
+
+    loadPlanificacion(code);
 }
 
 /* =========================
