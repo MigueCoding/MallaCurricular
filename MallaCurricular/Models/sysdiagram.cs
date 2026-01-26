@@ -12,15 +12,12 @@ namespace MallaCurricular.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Usuario
+    public partial class sysdiagram
     {
-        public int id_usuario { get; set; }
-        public string nombre { get; set; }
-        public string email { get; set; }
-        public string contrasena { get; set; }
-        public int id_rol { get; set; }
-        public Nullable<System.DateTime> fecha_registro { get; set; }
-    
-        public virtual Role Role { get; set; }
+        public string name { get; set; }
+        public int principal_id { get; set; }
+        public int diagram_id { get; set; }
+        public Nullable<int> version { get; set; }
+        public byte[] definition { get; set; }
     }
 }

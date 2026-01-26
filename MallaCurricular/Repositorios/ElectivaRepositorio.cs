@@ -9,10 +9,10 @@ namespace MallaCurricular.Repositories
     public class ElectivaRepositorio : IElectivaRepositorio
     {
         // El contexto se debe inyectar, no crear aquí
-        private readonly MallaDBEntities4 _db;
+        private readonly MallaDBEntities _db;
 
         // 1. Inyección de dependencias a través del constructor
-        public ElectivaRepositorio(MallaDBEntities4 dbContext)
+        public ElectivaRepositorio(MallaDBEntities dbContext)
         {
             _db = dbContext;
         }

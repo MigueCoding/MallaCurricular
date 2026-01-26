@@ -7,10 +7,10 @@ namespace MallaCurricular.Repositories
     public class MallaCursoRepositorio : IMallaCursoRepositorio
     {
         // 1. Ahora el campo es de solo lectura y recibe la instancia del contexto.
-        private readonly MallaDBEntities4 _db;
+        private readonly MallaDBEntities _db;
 
-        // 2. CONSTRUCTOR CORREGIDO: Acepta MallaDBEntities4 como argumento.
-        public MallaCursoRepositorio(MallaDBEntities4 dbContext)
+        // 2. CONSTRUCTOR CORREGIDO: Acepta MallaDBEntities como argumento.
+        public MallaCursoRepositorio(MallaDBEntities dbContext)
         {
             _db = dbContext;
         }

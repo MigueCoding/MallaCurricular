@@ -7,11 +7,11 @@ namespace MallaCurricular.Repositories
 {
     public class CursoRepositorio : ICursoRepositorio
     {
-        private readonly MallaDBEntities4 _db;
+        private readonly MallaDBEntities _db;
 
-        public CursoRepositorio(MallaDBEntities4 dbContext)
+        public CursoRepositorio(MallaDBEntities dbContext)
         {
-            _db = new MallaDBEntities4();
+            _db = new MallaDBEntities();
         }
 
         /// <summary>

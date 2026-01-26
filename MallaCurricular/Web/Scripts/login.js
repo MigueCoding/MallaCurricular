@@ -5,8 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        // Obtener valores de los inputs
+        // Nota: Asegúrate de que en tu HTML los IDs sean 'username' (para email) y 'password'
+        const emailValue = document.getElementById('username').value;
+        const passwordValue = document.getElementById('password').value;
         const btnSubmit = document.getElementById('btn-submit');
 
         // Estado de carga
@@ -15,20 +17,44 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMsg.classList.add('hidden');
 
         try {
-            // Ejemplo de validación local (reemplazar con fetch a tu API)
-            if (username === 'admin' && password === '123') {
-                // Guardar sesión (ejemplo simple)
-                localStorage.setItem('userAuthenticated', 'true');
+            // PETICIÓN AL CONTROLADOR C#
+            const response = await fetch('/Login/Autenticar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // Enviamos los datos como JSON
+                body: JSON.stringify({
+                    email: emailValue,
+                    password: passwordValue
+                })
+            });
 
-                // Redirigir a la malla
-                window.location.href = 'plana.html';
+            const data = await response.json();
+
+            if (data.success) {
+                // 1. Guardar datos importantes en localStorage (opcional, para el frontend)
+                localStorage.setItem('userName', data.nombre);
+                localStorage.setItem('userRole', data.idRol);
+
+                // 2. Redirigir según la URL que envió el servidor
+                window.location.href = data.redirectUrl;
             } else {
-                throw new Error('Credenciales inválidas');
+                // Mostrar mensaje de error del servidor
+                errorMsg.textContent = data.message;
+                errorMsg.classList.remove('hidden');
+                resetButton(btnSubmit);
             }
         } catch (err) {
+            console.error('Error en login:', err);
+            errorMsg.textContent = 'Error de conexión con el servidor.';
             errorMsg.classList.remove('hidden');
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Iniciar Sesión';
+            resetButton(btnSubmit);
         }
     });
+
+    function resetButton(btn) {
+        btn.disabled = false;
+        btn.textContent = 'Iniciar Sesión';
+    }
 });

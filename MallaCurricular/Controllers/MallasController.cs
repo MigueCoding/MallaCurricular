@@ -17,10 +17,10 @@ namespace MallaCurricular.Controllers
             // NOTA: Para una arquitectura robusta, usa un contenedor IoC.
 
             // 1. Crear una única instancia del contexto DB
-            var dbContext = new MallaDBEntities4();
+            var dbContext = new MallaDBEntities();
 
             // 2. Corregir la inyección de clsMalla para los 4 argumentos requeridos
-            // ASUMIMOS que todos los repositorios ahora aceptan MallaDBEntities4
+            // ASUMIMOS que todos los repositorios ahora aceptan MallaDBEntities
             _mallaService = new clsMalla(
                 // Repositorios existentes (ahora aceptan dbContext)
                 new MallaRepositorio(dbContext),

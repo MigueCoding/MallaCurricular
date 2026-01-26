@@ -7,10 +7,10 @@ namespace MallaCurricular.Repositories
 {
     public class OptativaRepositorio : IOptativaRepositorio
     {
-        private readonly MallaDBEntities4 _db;
+        private readonly MallaDBEntities _db;
 
         // Inyección de dependencias a través del constructor
-        public OptativaRepositorio(MallaDBEntities4 dbContext)
+        public OptativaRepositorio(MallaDBEntities dbContext)
         {
             _db = dbContext;
         }

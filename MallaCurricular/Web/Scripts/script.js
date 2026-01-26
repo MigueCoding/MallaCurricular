@@ -3,81 +3,7 @@ const addedCourses = new Map();
 const API_BASE_URL = 'http://localhost:49513'; // Asegúrate de que este puerto sea el correcto
 
 // --- Funciones de Autenticación (Sin Cambios) ---
-
-async function handleLogin(event) {
-    event.preventDefault();
-
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    const loginErrorMessage = document.getElementById('login-error-message');
-    loginErrorMessage.style.display = 'none';
-
-    const formData = new URLSearchParams();
-    formData.append('Email', email);
-    formData.append('Contrasena', password);
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/Auth/Login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json'
-            },
-            body: formData.toString()
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('userId', data.userId);
-                localStorage.setItem('userName', data.userName);
-
-                showMallaSection();
-                fetchCourses();
-            } else {
-                loginErrorMessage.textContent = data.message || 'Credenciales incorrectas.';
-                loginErrorMessage.style.display = 'block';
-            }
-        } else {
-            if (response.headers.get('Content-Type')?.includes('text/html')) {
-                loginErrorMessage.textContent = `Error de validación en el servidor. Verifica tus datos.`;
-            } else {
-                const errorData = await response.json();
-                loginErrorMessage.textContent = errorData.message || `Error en el servidor: ${response.status} ${response.statusText}`;
-            }
-            loginErrorMessage.style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Error durante el inicio de sesión:', error);
-        loginErrorMessage.textContent = `No se pudo conectar al servidor: ${error.message}. Asegúrate de que el backend esté ejecutándose.`;
-        loginErrorMessage.style.display = 'block';
-    }
-}
-
-function logout() {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
-    showLoginSection();
-}
-
-function checkAuthAndRender() {
-    if (localStorage.getItem('isAuthenticated') === 'true') {
-        showMallaSection();
-        fetchCourses();
-    } else {
-        showLoginSection();
-    }
-}
-
-function showLoginSection() {
-    document.getElementById('login-section').classList.remove('hidden');
-    document.getElementById('malla-section').classList.add('hidden');
-}
-
 function showMallaSection() {
-    document.getElementById('login-section').classList.add('hidden');
     document.getElementById('malla-section').classList.remove('hidden');
 }
 
@@ -427,6 +353,16 @@ function applyFilters() {
     });
 }
 
+function logout() {
+    // 1. Limpiar datos de sesión (si los hay)
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+
+    // 2. Redireccionar a plana.html
+    window.location.href = 'login.html';
+}
+
 async function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({
@@ -434,6 +370,8 @@ async function exportToPDF() {
         unit: 'mm',
         format: 'a4'
     });
+
+
 
     const coursesSection = document.querySelector('.courses');
     const filtersSection = document.querySelector('.filters');
@@ -819,25 +757,30 @@ async function deleteCourse() {
         errorMessage.style.display = 'block';
     }
 }
-
-
-
-// --- Inicialización (Modificada para incluir el listener de actualización) ---
+// --- Inicialización (Limpia sin Login) ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    // 1. Forzar visibilidad de la malla (quita el 'hidden' de Tailwind)
+    const mallaSection = document.getElementById('malla-section');
+    if (mallaSection) {
+        mallaSection.classList.remove('hidden');
+    }
 
+    // 2. Listener para actualizar cursos (si el formulario existe)
     const updateForm = document.getElementById('update-course-form');
     if (updateForm) {
         updateForm.addEventListener('submit', handleUpdateCourse);
     }
 
-    checkAuthAndRender();
+    // 3. Cargar datos de la API inmediatamente
+    fetchCourses();
 
+    // 4. Lógica para cerrar dropdowns al hacer clic fuera
     document.addEventListener('click', (event) => {
-        // Cierra los dropdowns de selección de curso
         if (!event.target.closest('.custom-select-container')) {
-            document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown').forEach(d => {
+                d.classList.add('hidden');
+            });
         }
     });
 });

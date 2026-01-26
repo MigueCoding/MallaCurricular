@@ -10,17 +10,13 @@
 namespace MallaCurricular.Models
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class Usuario
+    public partial class sp_helpdiagrams_Result
     {
-        public int id_usuario { get; set; }
-        public string nombre { get; set; }
-        public string email { get; set; }
-        public string contrasena { get; set; }
-        public int id_rol { get; set; }
-        public Nullable<System.DateTime> fecha_registro { get; set; }
-    
-        public virtual Role Role { get; set; }
+        public string Database { get; set; }
+        public string Name { get; set; }
+        public int ID { get; set; }
+        public string Owner { get; set; }
+        public int OwnerID { get; set; }
     }
 }

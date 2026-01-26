@@ -46,8 +46,8 @@ namespace MallaCurricular.Services
         {
             var mallaCursos = _mallaCursoRepositorio.GetByMallaId(mallaId);
 
-            // Se usa el contexto directamente (asumiendo que MallaDBEntities4 existe y es accesible)
-            using (var db = new MallaDBEntities4())
+            // Se usa el contexto directamente (asumiendo que MallaDBEntities existe y es accesible)
+            using (var db = new MallaDBEntities())
             {
                 var cursosConPrerequisitos = db.Cursos
                     .Include(c => c.PrerequisitosQueTengo) // Cargar la colección de navegación M:M
@@ -76,7 +76,7 @@ namespace MallaCurricular.Services
         public string CrearMalla(Malla malla, List<MallaCurso> mallaCursos)
         {
             // Validar que los cursos existan y los semestres sean válidos
-            var db = new MallaDBEntities4();
+            var db = new MallaDBEntities();
             foreach (var mc in mallaCursos)
             {
                 if (db.Cursos.FirstOrDefault(c => c.Codigo == mc.CursoCodigo) == null)

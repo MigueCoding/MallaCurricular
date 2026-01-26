@@ -22,7 +22,7 @@ namespace MallaCurricular.Controllers
             // (como Unity, Autofac, etc.) para gestionar estas dependencias automáticamente.
 
             // 1. Crear una única instancia del contexto DB
-            var dbContext = new MallaDBEntities4();
+            MallaDBEntities dbContext = new MallaDBEntities();
 
             // 2. Inyección para clsCurso (asumiendo que CursoRepositorio ahora acepta el contexto)
             _cursoService = new clsCurso(new CursoRepositorio(dbContext));
