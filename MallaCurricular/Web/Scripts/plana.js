@@ -1,4 +1,4 @@
-﻿let courses = {};
+let courses = {};
 const addedCourses = new Map();
 let electivas = [];
 let optativas = [];
@@ -136,6 +136,7 @@ function renderSummaryAndLegends(container) {
             <div><span class="inline-block w-4 h-4 bg-[#3b82f6] rounded-sm mr-2"></span> Ciencias Básicas Tecnología - Ingeniería</div>
             <div><span class="inline-block w-4 h-4 bg-[#8b5cf6] rounded-sm mr-2"></span> Formación Profesional</div>
             <div><span class="inline-block w-4 h-4 bg-[#ef4444] rounded-sm mr-2"></span> Formación Complementaria</div>
+            <div><span class="inline-block w-4 h-4 bg-[#b6ffff] rounded-sm mr-2"></span> Asignatura que la habilitó</div>
         </div>
     `;
 }

@@ -1,42 +1,98 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script>if(!localStorage.getItem('userId')) { window.location.href = 'login.html'; }</script>
     <meta charset="UTF-8" />
     <title>Malla Curricular - ITM (Estudiante)</title>
-    <link rel="stylesheet" href="Content/estudiante.css">
+    <!-- Usa plana.css para igualar la estética original pedida -->
+    <link rel="stylesheet" href="Content/plana.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-btn { padding: 10px 20px; font-weight: bold; border-bottom: 2px solid transparent; }
+        .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #1d4ed8; }
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        .tabs-header { background: white; border-bottom: 1px solid #ccc; display: flex; justify-content: center; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; z-index: 10; }
+        .top-bar { background: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="filters">
-            <img src="logo2020.png" alt="ITM Logo" />
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
-            <div class="error-message" id="error-message"></div>
-
-            <div class="filter-group mb-6">
-                <label class="filter-label">Malla Curricular</label>
-                <select class="filter-select w-full border rounded p-1" id="malla-select" onchange="fetchCoursesByMalla()">
-                    <option value="">Seleccione una malla</option>
-                </select>
-            </div>
-
-            <div id="summary-container"></div>
-        </div>
-
-        <div class="courses">
-            <div class="header">
-                <h1 id="malla-title">Malla Curricular - ITM</h1>
-                <p id="malla-version" style="font-size: 0.9rem; margin-top: 4px; color: #e0e7ff;"></p>
-            </div>
-
-            <div class="semester-grid" id="semester-grid"></div>
+    
+    <!-- Navbar / Top bar -->
+    <div class="top-bar">
+        <div style="font-weight: bold; color: #333;">Portal Estudiantil ITM</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span id="student-name" style="font-size: 14px; color: #555;"></span>
+            <button onclick="logout()" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
         </div>
     </div>
 
-    <script src="Scripts/estudiante.js"></script>
+    <!-- Tabs -->
+    <div class="tabs-header">
+        <button onclick="switchTab('malla')" id="tab-malla" class="tab-btn active">Mi Malla Curricular</button>
+        <button onclick="switchTab('asignaturas')" id="tab-asignaturas" class="tab-btn">Mis Cursos (Compromisos)</button>
+    </div>
+
+    <!-- TAB 1: MALLA (Clone of plana.html) -->
+    <div id="content-malla" style="flex: 1; overflow-y: auto;">
+        <div class="container">
+            <div class="filters">
+                <img src="logo2020.png" alt="ITM Logo" />
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
+                <div class="error-message" id="error-message" style="display:none; color:red;"></div>
+
+                <div class="filter-group mb-6">
+                    <label class="filter-label" style="font-weight:bold;">Malla Curricular</label>
+                    <select class="filter-select w-full border rounded p-1" id="malla-select" onchange="fetchCoursesByMalla()">
+                        <option value="">Seleccione una malla</option>
+                    </select>
+                </div>
+
+                <div id="summary-container"></div>
+            </div>
+
+            <div class="courses">
+                <div class="header">
+                    <h1 id="malla-title">Malla Curricular - ITM</h1>
+                    <p id="malla-version" style="font-size: 0.9rem; margin-top: 4px; color: #e0e7ff;"></p>
+                </div>
+
+                <div class="semester-grid" id="semester-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: COMPROMISOS ACADÉMICOS -->
+    <div id="content-asignaturas" style="flex: 1; overflow-y: auto; display: none; background: #f3f4f6; padding: 30px;">
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Compromisos Académicos y Avisos</h2>
+            <div id="mis-asignaturas-list" class="space-y-6">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script src="Scripts/estudiante.js?v=5"></script>
     <script>
-        // Inicializa la carga de mallas al cargar la ventana
-        window.onload = fetchMallas;
+        document.getElementById('student-name').textContent = "Estudiante: " + (localStorage.getItem('userName') || '');
+        window.onload = () => {
+            fetchMallas();
+            fetchMisAsignaturas();
+        };
+
+        function switchTab(tabId) {
+            document.getElementById('tab-malla').classList.remove('active');
+            document.getElementById('tab-asignaturas').classList.remove('active');
+            document.getElementById('content-malla').style.display = 'none';
+            document.getElementById('content-asignaturas').style.display = 'none';
+
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('content-' + tabId).style.display = 'block';
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
     </script>
 </body>
 </html>

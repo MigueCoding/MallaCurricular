@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+ï»¿document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const errorMsg = document.getElementById('login-error');
 
@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         // Obtener valores de los inputs
-        // Nota: Asegúrate de que en tu HTML los IDs sean 'username' (para email) y 'password'
+        // Nota: AsegÃºrate de que en tu HTML los IDs sean 'username' (para email) y 'password'
         const emailValue = document.getElementById('username').value;
         const passwordValue = document.getElementById('password').value;
         const btnSubmit = document.getElementById('btn-submit');
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMsg.classList.add('hidden');
 
         try {
-            // PETICIÓN AL CONTROLADOR C#
+            // PETICIÃ“N AL CONTROLADOR C#
             const response = await fetch('/Login/Autenticar', {
                 method: 'POST',
                 headers: {
@@ -34,10 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.success) {
                 // 1. Guardar datos importantes en localStorage (opcional, para el frontend)
+                localStorage.setItem('userId', data.userId);
                 localStorage.setItem('userName', data.nombre);
                 localStorage.setItem('userRole', data.idRol);
 
-                // 2. Redirigir según la URL que envió el servidor
+                // 2. Redirigir segÃºn la URL que enviÃ³ el servidor
                 window.location.href = data.redirectUrl;
             } else {
                 // Mostrar mensaje de error del servidor
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             console.error('Error en login:', err);
-            errorMsg.textContent = 'Error de conexión con el servidor.';
+            errorMsg.textContent = 'Error de conexiÃ³n con el servidor.';
             errorMsg.classList.remove('hidden');
             resetButton(btnSubmit);
         }
@@ -55,6 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetButton(btn) {
         btn.disabled = false;
-        btn.textContent = 'Iniciar Sesión';
+        btn.textContent = 'Iniciar SesiÃ³n';
     }
 });

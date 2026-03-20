@@ -1,4 +1,4 @@
-﻿let courses = {};
+let courses = {};
 const addedCourses = new Map();
 let electivas = [];
 let optativas = [];
@@ -745,3 +745,129 @@ function updateGlobalSemesterLock() {
         });
     }
 }
+// --- NUEVAS FUNCIONES PARA ESTUDIANTE ---
+async function fetchMisAsignaturas() {
+    const estudianteId = localStorage.getItem('userId');
+    if(!estudianteId) return;
+    try {
+        const res = await fetch('http://localhost:49513/api/grupos/mis-inscripciones?estudianteId=' + estudianteId);
+        const inscripciones = await res.json();
+        renderMisAsignaturas(inscripciones);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function parseNovedades(novedadesStr) {
+    try {
+        let parsed = JSON.parse(novedadesStr || "{}");
+        if(parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            return {
+                avisos: parsed.avisos || "",
+                evaluaciones: parsed.evaluaciones || [],
+                respuestas: parsed.respuestas || []
+            };
+        }
+    } catch(e) {}
+    return { avisos: novedadesStr || "", evaluaciones: [], respuestas: [] };
+}
+
+function renderMisAsignaturas(inscripciones) {
+    const list = document.getElementById('mis-asignaturas-list');
+    list.innerHTML = '';
+    const estudianteId = localStorage.getItem('userId');
+
+    if(!inscripciones || inscripciones.length === 0) {
+        list.innerHTML = '<p class="text-gray-500 italic">No tienes asignaturas matriculadas actualmente.</p>';
+        return;
+    }
+    inscripciones.forEach(ins => {
+        const d = document.createElement('div');
+        d.className = "bg-white p-6 rounded-xl shadow border border-blue-100";
+        
+        let data = parseNovedades(ins.Novedades);
+        let myResponse = data.respuestas.find(r => String(r.estudianteId) === String(estudianteId));
+        let myState = myResponse ? myResponse.estado : "En Espera";
+        let stateColor = myState === "Aceptado" ? "green" : myState === "Rechazado" ? "red" : "gray";
+
+        // Build Table
+        let tableRows = '';
+        data.evaluaciones.forEach((ev, idx) => {
+            tableRows += `
+                <tr class="border-b hover:bg-gray-50 text-sm">
+                    <td class="p-2 text-center">${idx + 1}</td>
+                    <td class="p-2">${ev.aeae}</td>
+                    <td class="p-2">${ev.tia}</td>
+                    <td class="p-2 font-bold text-center">${ev.valor}%</td>
+                    <td class="p-2 text-center text-gray-500">${ev.fecha}</td>
+                </tr>
+            `;
+        });
+        
+        // Actions HTML
+        let actionsHtml = `
+            <div class="mt-4 p-4 border rounded bg-gray-50">
+                <h4 class="font-bold mb-2 text-gray-700">Mi Respuesta al Compromiso:</h4>
+                <div class="flex gap-4 items-center flex-wrap">
+                    <select id="estado-${ins.GrupoId}" class="border p-2 rounded bg-white font-bold" style="color: ${stateColor}">
+                        <option value="En Espera" ${myState==='En Espera'?'selected':''}>En Espera</option>
+                        <option value="Aceptado" ${myState==='Aceptado'?'selected':''}>Aceptado</option>
+                        <option value="Rechazado" ${myState==='Rechazado'?'selected':''}>Rechazado</option>
+                    </select>
+                    <input type="text" id="obs-${ins.GrupoId}" class="border p-2 rounded flex-1 min-w-[200px]" placeholder="Añadir observaciones al docente..." value="${myResponse ? (myResponse.observacion || '') : ''}">
+                    <button onclick="responderCompromiso(${ins.GrupoId})" class="bg-blue-600 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-700 transition">Enviar Respuesta</button>
+                </div>
+            </div>
+        `;
+
+        d.innerHTML = `
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b pb-4">
+                <div>
+                    <h3 class="font-black text-xl text-blue-900">${ins.CursoNombre || 'Asignatura Desconocida'}</h3>
+                    <p class="text-sm font-bold text-gray-500">${ins.GrupoNombre || ''}</p>
+                </div>
+                <div class="mt-2 md:mt-0 bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase">
+                    Prof: ${ins.ProfesorNombre || 'Sin Profesor'}
+                </div>
+            </div>
+
+            ${data.evaluaciones.length > 0 ? `
+            <div class="mb-4 overflow-x-auto text-gray-700">
+                <h4 class="font-bold text-blue-900 mb-2 mt-6">📋 Compromiso Académico:</h4>
+                <table class="w-full text-left border rounded shadow-sm">
+                    <thead class="bg-[#3b82f6] text-white text-sm">
+                        <tr><th class="p-2 text-center">N°</th><th class="p-2">Actividad (AEAE)</th><th class="p-2">Tarea (TIA)</th><th class="p-2 text-center">Valor</th><th class="p-2 text-center">Fecha sugerida</th></tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+            ${actionsHtml}
+            ` : '<p class="text-gray-400 italic text-sm mt-4 text-center border p-4 rounded bg-gray-50">El docente aún no ha publicado el cuadro de compromiso académico.</p>'}
+        `;
+        list.appendChild(d);
+    });
+}
+
+async function responderCompromiso(grupoId) {
+    const estudianteId = localStorage.getItem('userId');
+    const estado = document.getElementById(`estado-${grupoId}`).value;
+    const observacion = document.getElementById(`obs-${grupoId}`).value;
+
+    try {
+        const res = await fetch('http://localhost:49513/api/grupos/responder-compromiso', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ GrupoId: grupoId, EstudianteId: estudianteId, Estado: estado, Observacion: observacion })
+        });
+        
+        if(res.ok) {
+            alert('¡Respuesta guardada con éxito en el sistema!');
+            fetchMisAsignaturas(); // refresh
+        } else {
+            alert('Error al enviar la respuesta al servidor.');
+        }
+    } catch(e) {
+        alert('Error de conexión con el backend.');
+    }
+}
+

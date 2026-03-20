@@ -1,6 +1,7 @@
-﻿using MallaCurricular.Models;
-using MallaCurricular.Repositories;
-using MallaCurricular.Services;
+﻿using MallaCurricular.Infrastructure.Data;
+using MallaCurricular.Infrastructure.Repositories;
+using MallaCurricular.Core.Domain.Interfaces;
+using MallaCurricular.Core.Application.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
@@ -83,3 +84,4 @@ namespace MallaCurricular.Controllers
         public int Semestre { get; set; }
     }
 }
+

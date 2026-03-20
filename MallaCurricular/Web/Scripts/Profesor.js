@@ -1,300 +1,194 @@
-﻿const API_BASE_URL = 'http://localhost:49513';
-
-let courses = {};
-let selectedSubjects = {}; // ← NUEVO
+const API_BASE_URL = 'http://localhost:49513';
 let currentSubject = null;
+let grupos = [];
+let compromisosData = { avisos: "", evaluaciones: [], respuestas: [] };
+let currentInscritos = [];
 
-/* =========================
-   CARGA INICIAL
-========================= */
 document.addEventListener('DOMContentLoaded', () => {
-    fetchCourses();
+    const userId = localStorage.getItem("userId");
+    const userName = localStorage.getItem("userName");
+    
+    if(!userId) {
+        window.location.href = "login.html";
+        return;
+    }
+    
+    document.getElementById("profesor-name").textContent = "Prof. " + userName;
+    fetchGrupos(userId);
 });
 
-/* =========================
-   OBTENER MATERIAS
-========================= */
-async function fetchCourses() {
+async function fetchGrupos(profesorId) {
     const list = document.getElementById('materias-list');
-    list.innerHTML = `<div class="p-6 text-center text-gray-400 text-sm">Cargando materias...</div>`;
+    list.innerHTML = `<div class="p-6 text-center text-gray-400 text-sm">Cargando...</div>`;
 
     try {
-        const res = await fetch(`${API_BASE_URL}/api/cursos/todos`);
-        const data = await res.json();
-
-        courses = {};
-        data.forEach(c => {
-            courses[c.Codigo] = {
-                code: c.Codigo,
-                name: c.Asignatura,
-                credits: c.Creditos,
-                tps: c.TPS,
-                tis: c.TIS
-            };
-        });
-
-        renderMaterias();
-
+        const res = await fetch(`${API_BASE_URL}/api/grupos/mis-grupos?profesorId=${profesorId}`);
+        grupos = await res.json();
+        renderGrupos();
     } catch {
-        list.innerHTML = `<div class="p-6 text-center text-red-500 text-sm">Error al cargar materias</div>`;
+        list.innerHTML = `<div class="p-6 text-center text-red-500 text-sm">Error al cargar grupos</div>`;
     }
 }
 
-/* =========================
-   RENDER SIDEBAR
-========================= */
-function renderMaterias() {
+function renderGrupos() {
     const list = document.getElementById('materias-list');
     list.innerHTML = '';
-
-    Object.values(courses).forEach(course => {
-        const item = document.createElement('div');
-
-        item.className = 'sidebar-item px-5 py-3 cursor-pointer hover:bg-gray-100';
-
-        // ✅ Si ya está seleccionada → marcar
-        if (selectedSubjects[course.code]) {
-            item.classList.add('active');
-        }
-
-        item.innerHTML = `
-            <div class="font-bold text-sm text-gray-700">${course.name}</div>
-            <div class="text-[10px] text-gray-400 font-mono">
-                ${course.code} · ${course.credits} créditos
-            </div>
-        `;
-
-        item.onclick = () => addSubject(course);
-        list.appendChild(item);
-    });
-}
-function addSubject(course) {
-    if (selectedSubjects[course.code]) return;
-
-    selectedSubjects[course.code] = course;
-
-    document.getElementById('empty-state').classList.add('hidden');
-    document.getElementById('subject-preview').classList.remove('hidden');
-
-    renderCenterPanel();
-    renderMaterias(); // 🔥 vuelve a pintar la lista izquierda
-}
-function removeSubject(code) {
-    delete selectedSubjects[code];
-
-    if (currentSubject?.code === code) {
-        currentSubject = null;
-        document.getElementById('editor-container').classList.add('hidden');
-    }
-
-    renderCenterPanel();
-    renderMaterias();
-}
-
-/* =========================
-   AGREGAR AL PANEL CENTRAL
-========================= */
-function addToCenter(course) {
-    if (selectedSubjects[course.code]) return;
-
-    selectedSubjects[course.code] = course;
-
-    document.getElementById('empty-state').classList.add('hidden');
-    document.getElementById('editor-container').classList.add('hidden');
-    document.getElementById('subject-preview').classList.remove('hidden');
-
-    renderCenterPanel();
-}
-
-/* =========================
-   RENDER PANEL CENTRAL
-========================= */
-function renderCenterPanel() {
-    const container = document.getElementById('subject-preview');
-
-    const subjects = Object.values(selectedSubjects);
-
-    if (!subjects.length) {
-        document.getElementById('subject-preview').classList.add('hidden');
-        document.getElementById('empty-state').classList.remove('hidden');
+    if(grupos.length === 0) {
+        list.innerHTML = `<div class="p-6 text-center text-gray-500 text-sm">No tienes grupos.</div>`;
         return;
     }
 
-    container.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-10 w-full max-w-5xl">
-            ${subjects.map(course => `
-                <div class="relative bg-white rounded-xl shadow border p-6 space-y-4">
+    grupos.forEach(g => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item px-5 py-4 border-b cursor-pointer hover:bg-blue-50';
+        if (currentSubject && currentSubject.Id === g.Id) item.classList.add('bg-blue-100');
 
-                    <!-- BOTÓN ELIMINAR -->
-                    <button onclick="removeSubject('${course.code}')"
-                            class="absolute top-3 right-3 text-red-400 hover:text-red-600 text-sm">
-                        ✕
-                    </button>
-
-                    <div>
-                        <h2 class="text-lg font-black uppercase">${course.name}</h2>
-                        <p class="text-xs text-gray-400 font-mono">${course.code}</p>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 text-sm">
-                        <div class="bg-gray-50 rounded p-2 text-center">
-                            <p class="text-xs text-gray-400">CR</p>
-                            <p class="font-bold">${course.credits}</p>
-                        </div>
-                        <div class="bg-gray-50 rounded p-2 text-center">
-                            <p class="text-xs text-gray-400">TPS</p>
-                            <p class="font-bold">${course.tps}</p>
-                        </div>
-                        <div class="bg-gray-50 rounded p-2 text-center">
-                            <p class="text-xs text-gray-400">TIS</p>
-                            <p class="font-bold">${course.tis}</p>
-                        </div>
-                    </div>
-
-                    <button onclick="editSubject('${course.code}')"
-                        class="w-full bg-blue-900 text-white py-2 rounded-lg font-bold hover:bg-blue-800">
-                        Editar
-                    </button>
-                </div>
-            `).join('')}
-        </div>
-    `;
+        item.innerHTML = `
+            <div class="font-bold text-sm text-blue-900">${g.Asignatura}</div>
+            <div class="text-xs text-gray-600 font-bold mt-1">${g.Nombre} <span class="text-gray-400 font-normal">(${g.CursoCodigo})</span></div>
+        `;
+        item.onclick = () => selectGrupo(g);
+        list.appendChild(item);
+    });
 }
-function removeSubject(code) {
-    delete selectedSubjects[code];
 
-    if (currentSubject?.code === code) {
-        currentSubject = null;
-        document.getElementById('editor-container').classList.add('hidden');
-    }
-
-    renderCenterPanel();
-    renderMaterias(); // 🔥 actualiza el sidebar
+function parseNovedades(novedadesStr) {
+    try {
+        let parsed = JSON.parse(novedadesStr || "{}");
+        if(parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            return {
+                avisos: parsed.avisos || "",
+                evaluaciones: parsed.evaluaciones || [],
+                respuestas: parsed.respuestas || []
+            };
+        }
+    } catch(e) {}
+    // Fallback if it was old raw text
+    return { avisos: novedadesStr || "", evaluaciones: [], respuestas: [] };
 }
-function backToSelected() {
-    // Oculta el editor
-    document.getElementById('editor-container').classList.add('hidden');
 
-    // Muestra el panel central con las materias seleccionadas
-    document.getElementById('subject-preview').classList.remove('hidden');
-
-    // Limpia la materia actual en edición
-    currentSubject = null;
-
-    // Restaura el header
-    document.getElementById('header-dinamico').innerHTML = `
-        <h1 class="text-2xl font-bold">Gestión Académica</h1>
-        <p class="text-blue-200 text-sm">Materias seleccionadas</p>
-    `;
-}
-/* =========================
-   EDITAR UNA MATERIA
-========================= */
-async function editSubject(code) {
-    currentSubject = selectedSubjects[code];
-
-    document.getElementById('subject-preview').classList.add('hidden');
+async function selectGrupo(g) {
+    currentSubject = g;
+    document.getElementById('empty-state').classList.add('hidden');
     document.getElementById('editor-container').classList.remove('hidden');
 
-    document.getElementById('header-dinamico').innerHTML = `
-        <h1 class="text-xl font-bold uppercase">${currentSubject.name}</h1>
-        <p class="text-xs text-blue-100 font-mono">${currentSubject.code}</p>
-    `;
+    document.getElementById('header-subject-name').textContent = g.Asignatura;
+    document.getElementById('header-group-name').textContent = g.Nombre + " | " + g.CursoCodigo;
 
-    loadPlanificacion(code);
+    compromisosData = parseNovedades(g.Novedades);
+
+    renderEvaluationsTable();
+    
+    // Fetch students to match with responses
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/grupos/estudiantes-inscritos/${g.Id}`);
+        currentInscritos = await res.json();
+    } catch(e) { currentInscritos = []; }
+    
+    renderStudentsResponses();
+    renderGrupos(); // update active class
 }
 
-/* =========================
-   CARGAR PLANIFICACIÓN
-========================= */
-async function loadPlanificacion(code) {
+function renderEvaluationsTable() {
+    const tbody = document.getElementById('evaluations-body');
+    tbody.innerHTML = '';
+    let total = 0;
+
+    compromisosData.evaluaciones.forEach((ev, index) => {
+        total += parseInt(ev.valor) || 0;
+        const tr = document.createElement('tr');
+        tr.className = "border-b hover:bg-gray-50";
+        tr.innerHTML = `
+            <td class="p-3">${index + 1}</td>
+            <td class="p-2"><input type="text" class="w-full border p-1 rounded" value="${ev.aeae}" onchange="updateEv(${index}, 'aeae', this.value)"></td>
+            <td class="p-2"><input type="text" class="w-full border p-1 rounded" value="${ev.tia}" onchange="updateEv(${index}, 'tia', this.value)"></td>
+            <td class="p-2"><input type="number" class="w-20 border p-1 rounded text-center" value="${ev.valor}" onchange="updateEv(${index}, 'valor', this.value)"></td>
+            <td class="p-2"><input type="date" class="w-full border p-1 rounded" value="${ev.fecha}" onchange="updateEv(${index}, 'fecha', this.value)"></td>
+            <td class="p-2 text-center text-red-500 font-bold cursor-pointer hover:underline" onclick="removeEvaluationRow(${index})">X</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    const sumEl = document.getElementById('total-percent');
+    sumEl.textContent = total + "%";
+    sumEl.className = total === 100 ? "p-3 text-green-600 font-black" : "p-3 text-red-600 font-black";
+}
+
+function addEvaluationRow() {
+    compromisosData.evaluaciones.push({ aeae: "", tia: "", valor: 0, fecha: "" });
+    renderEvaluationsTable();
+}
+
+function removeEvaluationRow(index) {
+    compromisosData.evaluaciones.splice(index, 1);
+    renderEvaluationsTable();
+}
+
+function updateEv(index, field, value) {
+    if(field === 'valor') compromisosData.evaluaciones[index][field] = parseInt(value) || 0;
+    else compromisosData.evaluaciones[index][field] = value;
+    renderEvaluationsTable();
+}
+
+function renderStudentsResponses() {
+    const tbody = document.getElementById('students-responses-body');
+    tbody.innerHTML = '';
+
+    if(currentInscritos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 italic">No hay estudiantes matriculados en este grupo.</td></tr>`;
+        return;
+    }
+
+    currentInscritos.forEach(est => {
+        // Find existing response targeting this ID
+        const resp = compromisosData.respuestas.find(r => String(r.estudianteId) === String(est.EstudianteId));
+        
+        let estado = resp ? resp.estado : "En Espera";
+        let colorEstado = estado === "Aceptado" ? "bg-green-100 text-green-800" : 
+                          estado === "Rechazado" ? "bg-red-100 text-red-800" : "bg-gray-200 text-gray-700";
+
+        const tr = document.createElement('tr');
+        tr.className = "border-b hover:bg-gray-50";
+        tr.innerHTML = `
+            <td class="p-3 text-xs uppercase text-gray-800 font-bold">${est.Nombre}</td>
+            <td class="p-3"><span class="px-3 py-1 rounded-full text-xs font-bold ${colorEstado}">${estado}</span></td>
+            <td class="p-3 text-gray-500 text-xs">${resp?.fecha || '-'}</td>
+            <td class="p-3 text-gray-600 text-xs italic">${resp?.observacion || ''}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function saveAllChanges() {
+    if (!currentSubject) return;
+
+    // Calculate total
+    const total = compromisosData.evaluaciones.reduce((sum, ev) => sum + (parseInt(ev.valor) || 0), 0);
+    if(total !== 100 && compromisosData.evaluaciones.length > 0) {
+        if(!confirm("Advertencia: La suma de porcentajes NO es 100%. ¿Desea guardar de todas formas?")) return;
+    }
+
+    const payload = JSON.stringify(compromisosData);
+
     try {
-        const res = await fetch(`${API_BASE_URL}/api/planificacion/${code}`);
-        const data = res.ok ? await res.json() : {};
-
-        document.getElementById('micro-content').value = data.Microcurriculo || '';
-        document.getElementById('rubric-rows').innerHTML = '';
-
-        if (data.Rubricas?.length) {
-            data.Rubricas.forEach(r => addRubricRow(r.NombreActividad, r.Porcentaje));
+        const res = await fetch(`${API_BASE_URL}/api/grupos/novedades/${currentSubject.Id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ Novedades: payload })
+        });
+        
+        if(res.ok) {
+            alert('¡Compromiso Académico actualizado exitosamente!');
+            currentSubject.Novedades = payload; // local cache update
         } else {
-            addRubricRow();
+            alert("Error al guardar en el servidor");
         }
-
-        updateTotal();
-
-    } catch {
-        document.getElementById('micro-content').value = '';
-        addRubricRow();
+    } catch(err) {
+        alert("Error de red: " + err);
     }
 }
 
-/* =========================
-   RÚBRICAS
-========================= */
-function addRubricRow(nombre = '', porcentaje = '') {
-    const row = document.createElement('div');
-    row.className = 'flex gap-2 items-center';
-
-    row.innerHTML = `
-        <input class="flex-1 p-2 border rounded text-sm" placeholder="Actividad" value="${nombre}">
-        <input type="number" class="w-20 p-2 border rounded text-sm text-center" value="${porcentaje}" oninput="updateTotal()">
-        <span class="text-xs">%</span>
-        <button onclick="this.parentElement.remove();updateTotal()" class="text-red-400">✕</button>
-    `;
-
-    document.getElementById('rubric-rows').appendChild(row);
-}
-
-function updateTotal() {
-    let total = 0;
-    document.querySelectorAll('#rubric-rows input[type="number"]').forEach(i => {
-        total += parseFloat(i.value) || 0;
-    });
-
-    document.getElementById('total-badge').textContent = `Total: ${total}%`;
-}
-
-/* =========================
-   GUARDAR
-========================= */
-async function saveChanges() {
-    if (!currentSubject) return;
-
-    const rows = document.querySelectorAll('#rubric-rows > div');
-    const rubricas = [];
-
-    rows.forEach(r => {
-        const inputs = r.querySelectorAll('input');
-        if (inputs[0].value.trim()) {
-            rubricas.push({
-                NombreActividad: inputs[0].value,
-                Porcentaje: parseFloat(inputs[1].value) || 0
-            });
-        }
-    });
-
-    const payload = {
-        CodigoMateria: currentSubject.code,
-        Microcurriculo: document.getElementById('micro-content').value,
-        Rubricas: rubricas
-    };
-
-    await fetch(`${API_BASE_URL}/api/planificacion`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-
-    alert('✅ Guardado correctamente');
-}
-
-/* =========================
-   BUSCADOR
-========================= */
-function filterMaterias() {
-    const q = document.getElementById('search-materia').value.toLowerCase();
-    document.querySelectorAll('#materias-list > div').forEach(i => {
-        i.style.display = i.innerText.toLowerCase().includes(q) ? '' : 'none';
-    });
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
 }

@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
-using MallaCurricular.Models;
-using MallaCurricular.Repositorios;
+using MallaCurricular.Infrastructure.Data;
+using MallaCurricular.Infrastructure.Repositories;
+using MallaCurricular.Core.Domain.Interfaces;
 
 namespace MallaCurricular.Controllers
 {
@@ -44,7 +45,7 @@ namespace MallaCurricular.Controllers
                     switch (usuario.id_rol)
                     {
                         case 1:
-                            urlDestino = "/web/index.html";
+                            urlDestino = "/web/Jefe.html";
                             break;
                         case 2:
                             urlDestino = "/web/profesor.html";
@@ -60,6 +61,7 @@ namespace MallaCurricular.Controllers
                     return Json(new
                     {
                         success = true,
+                        userId = usuario.id_usuario,
                         nombre = usuario.nombre,
                         rol = usuario.id_rol,
                         redirectUrl = urlDestino

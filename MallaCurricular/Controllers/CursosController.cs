@@ -1,6 +1,7 @@
-﻿using MallaCurricular.Models;
-using MallaCurricular.Repositories;
-using MallaCurricular.Services;
+﻿using MallaCurricular.Infrastructure.Data;
+using MallaCurricular.Infrastructure.Repositories;
+using MallaCurricular.Core.Domain.Interfaces;
+using MallaCurricular.Core.Application.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -237,3 +238,4 @@ namespace MallaCurricular.Controllers
         }
     }
 }
+

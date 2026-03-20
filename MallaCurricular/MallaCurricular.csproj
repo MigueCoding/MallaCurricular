@@ -178,8 +178,8 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Clases\clsMalla.cs" />
-    <Compile Include="Clases\clsCurso.cs" />
+    <Compile Include="Core\Application\Services\clsMalla.cs" />
+    <Compile Include="Core\Application\Services\clsCurso.cs" />
     <Compile Include="Controllers\CursosController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
@@ -187,64 +187,75 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Curso.cs">
+    <Compile Include="Infrastructure\Data\Curso.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Electiva.cs">
+    <Compile Include="Infrastructure\Data\Electiva.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Malla.cs">
+    <Compile Include="Infrastructure\Data\Malla.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\MallaCurso.cs">
+    <Compile Include="Infrastructure\Data\MallaCurso.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Model1.Context.cs">
+    <Compile Include="Infrastructure\Data\Model1.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.Context.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Model1.cs">
+    <Compile Include="Infrastructure\Data\Model1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Model1.Designer.cs">
+    <Compile Include="Infrastructure\Data\Model1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Models\Optativa.cs">
+    <Compile Include="Infrastructure\Data\Optativa.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Role.cs">
+    <Compile Include="Infrastructure\Data\Role.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\sp_helpdiagramdefinition_Result.cs">
+    <Compile Include="Infrastructure\Data\sp_helpdiagramdefinition_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\sp_helpdiagrams_Result.cs">
+    <Compile Include="Infrastructure\Data\sp_helpdiagrams_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\sysdiagram.cs">
+    <Compile Include="Infrastructure\Data\sysdiagram.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Usuario.cs">
+    <Compile Include="Infrastructure\Data\Usuario.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\UsuarioLogin.cs" />
+    <Compile Include="Infrastructure\Data\Grupos.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\Inscripcione.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\UsuarioLogin.cs" />
+    <Compile Include="Core\Domain\Interfaces\IGruposRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\GruposRepositorio.cs" />
+    <Compile Include="Core\Domain\Interfaces\IInscripcioneRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\InscripcioneRepositorio.cs" />
+    <Compile Include="Controllers\GruposController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositorios\IOptativaRepositorio.cs" />
-    <Compile Include="Repositorios\ElectivaRepositorio.cs" />
-    <Compile Include="Repositorios\IElectivaRepositorio.cs" />
-    <Compile Include="Repositorios\OptativaRepositorio.cs" />
-    <Compile Include="Repositorios\MallaCursoRepositorio.cs" />
-    <Compile Include="Repositorios\IMallaCursoRepositorio.cs" />
-    <Compile Include="Repositorios\CursoRepositorio.cs" />
-    <Compile Include="Repositorios\MallaRepositorio.cs" />
-    <Compile Include="Repositorios\IMallaRepositorio.cs" />
-    <Compile Include="Repositorios\ICursoRepositorio.cs" />
-    <Compile Include="Repositorios\UsuarioRepositorio.cs" />
+    <Compile Include="Core\Domain\Interfaces\IOptativaRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\ElectivaRepositorio.cs" />
+    <Compile Include="Core\Domain\Interfaces\IElectivaRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\OptativaRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\MallaCursoRepositorio.cs" />
+    <Compile Include="Core\Domain\Interfaces\IMallaCursoRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\CursoRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\MallaRepositorio.cs" />
+    <Compile Include="Core\Domain\Interfaces\IMallaRepositorio.cs" />
+    <Compile Include="Core\Domain\Interfaces\ICursoRepositorio.cs" />
+    <Compile Include="Infrastructure\Repositories\UsuarioRepositorio.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
@@ -269,13 +280,13 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
-    <Content Include="Models\MER.png" />
-    <Content Include="Models\Model1.Context.tt">
+    <Content Include="Infrastructure\Data\MER.png" />
+    <Content Include="Infrastructure\Data\Model1.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>Model1.edmx</DependentUpon>
       <LastGenOutput>Model1.Context.cs</LastGenOutput>
     </Content>
-    <Content Include="Models\Model1.tt">
+    <Content Include="Infrastructure\Data\Model1.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>Model1.edmx</DependentUpon>
       <LastGenOutput>Model1.cs</LastGenOutput>
@@ -319,11 +330,11 @@
     <Content Include="Web\Scripts\login.js" />
     <Content Include="Web\Scripts\plana.js" />
     <Content Include="Web\Scripts\estudiante.js" />
-    <EntityDeploy Include="Models\Model1.edmx">
+    <EntityDeploy Include="Infrastructure\Data\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
     </EntityDeploy>
-    <Content Include="Models\Model1.edmx.diagram">
+    <Content Include="Infrastructure\Data\Model1.edmx.diagram">
       <DependentUpon>Model1.edmx</DependentUpon>
     </Content>
     <None Include="Web\Scripts\jquery-3.7.0.intellisense.js" />
@@ -403,3 +414,5 @@
   <Target Name="AfterBuild">
   </Target> -->
 </Project>
+
+
