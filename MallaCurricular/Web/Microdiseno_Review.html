@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <script>if (!localStorage.getItem('userId')) { window.location.href = 'login.html'; }</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisión de Microdiseño - ITM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 15mm;
+            color: #1a1a1a;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1px;
+        }
+
+        td,
+        th {
+            border: 1px solid #71717a;
+            padding: 3px 6px;
+            font-size: 10px;
+            vertical-align: middle;
+        }
+
+        .bg-label {
+            background-color: #f4f4f5;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .input-doc {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 10px;
+            padding: 2px;
+        }
+
+        .section-num {
+            font-weight: bold;
+            font-size: 11px;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            color: white;
+            border-bottom: 1px solid #334155;
+            z-index: 1000;
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            .a4-container {
+                margin: 0;
+                box-shadow: none;
+                width: 100%;
+                padding: 10mm;
+            }
+        }
+    </style>
+</head>
+
+<body class="pt-16 pb-10">
+
+    <nav class="nav-bar no-print">
+        <div class="flex items-center gap-3">
+            <div class="h-8 w-1 bg-amber-500 rounded"></div>
+            <div>
+                <h1 class="font-bold text-sm">Panel de Revisión (Jefe de Programa)</h1>
+                <span id="badge-estado" class="text-[10px] font-bold uppercase tracking-wider text-amber-200">Pendiente</span>
+            </div>
+        </div>
+        <div class="flex gap-3 items-center">
+            <button onclick="goBack()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 text-sm font-bold rounded shadow transition-all flex items-center gap-1">
+                <span>←</span> Volver
+            </button>
+            <div id="action-buttons" class="flex gap-2">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </nav>
+
+    <div class="a4-container" id="doc-container">
+        <!-- FORMATO FDE 058 HEADER -->
+        <table class="mb-5">
+            <tr>
+                <td rowspan="3" class="w-[20%] text-center">
+                    <img src="LOGO ITM 2020-02.png" alt="ITM" class="h-14 mx-auto opacity-100">
+                </td>
+                <td rowspan="3" class="text-center font-bold text-sm uppercase">MICRODISEÑO CURRICULAR</td>
+                <td class="bg-gray-50 font-bold w-16">Código</td>
+                <td class="w-20">FDE 058</td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold">Versión</td>
+                <td>05</td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold">Fecha</td>
+                <td>30-07-2024</td>
+            </tr>
+        </table>
+
+        <!-- IDENTIFICACIÓN -->
+        <span class="section-num">1. IDENTIFICACIÓN DE LA ASIGNATURA</span>
+        <table>
+            <tr>
+                <td class="bg-label w-[140px]">Nombre de la Asignatura:</td>
+                <td colspan="2"><input type="text" id="asig-nombre" class="input-doc font-bold" readonly></td>
+                <td class="bg-label w-[100px]">Programa (s):</td>
+                <td><input type="text" id="txt-programas" class="input-doc" readonly></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Facultad:</td>
+                <td colspan="4"><input type="text" id="sel-facultad" class="input-doc" readonly></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Modalidad del programa:</td>
+                <td colspan="4"><input type="text" id="sel-modalidad" class="input-doc" readonly></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Área de formación:</td>
+                <td colspan="4"><input type="text" id="txt-area" class="input-doc" readonly></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Código de asignatura:</td>
+                <td colspan="2"><input type="text" id="asig-codigo" class="input-doc" readonly></td>
+                <td class="bg-label">Plan de estudios:</td>
+                <td><input type="text" id="txt-plandeestudios" class="input-doc" readonly></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Correquisitos:</td>
+                <td colspan="2"><input type="text" id="txt-correq" class="input-doc" readonly></td>
+                <td class="bg-label">Prerrequisitos:</td>
+                <td><input type="text" id="txt-prereq" class="input-doc" readonly></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Créditos de la asignatura</td>
+                <td class="w-12 text-center font-bold"><input type="text" id="num-creditos" class="input-doc text-center" readonly></td>
+                <td class="bg-label text-center">Tipo de crédito:</td>
+                <td colspan="2"><input type="text" id="sel-tipocredito" class="input-doc" readonly></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Tipo de asignatura:</td>
+                <td colspan="4"><input type="text" id="sel-tipoasignatura" class="input-doc" readonly></td>
+            </tr>
+        </table>
+
+        <table class="mt-1">
+            <tr class="text-center font-bold bg-gray-50 uppercase" style="font-size: 8px;">
+                <td>H. Teóricas</td>
+                <td>H. Teo-Prac</td>
+                <td>H. Prácticas</td>
+                <td>H. Indep.</td>
+                <td>H. Presenciales</td>
+                <td>H. Encuentros Físicos</td>
+                <td>H. Sincrónicas</td>
+            </tr>
+            <tr class="text-center h-8">
+                <td><input type="text" id="num-hteoricas" class="input-doc text-center" readonly></td>
+                <td><input type="text" id="num-hteoprac" class="input-doc text-center" readonly></td>
+                <td><input type="text" id="num-hprac" class="input-doc text-center" readonly></td>
+                <td><input type="text" id="num-hindep" class="input-doc text-center" readonly></td>
+                <td><input type="text" id="num-hpres" class="input-doc text-center" readonly></td>
+                <td><input type="text" id="num-hfisicos" class="input-doc text-center" readonly></td>
+                <td><input type="text" id="num-hsinc" class="input-doc text-center" readonly></td>
+            </tr>
+        </table>
+
+        <span class="section-num uppercase">2. Justificación</span>
+        <div class="border border-black p-2 min-h-[50px]">
+            <p id="txt-justificacion" class="text-[10px] whitespace-pre-wrap"></p>
+        </div>
+
+        <span class="section-num uppercase">3. COMPETENCIA(S) Y RESULTADOS DE APRENDIZAJE</span>
+        <table>
+            <tr class="bg-label text-center uppercase">
+                <td class="w-1/2">Competencia del programa</td>
+                <td>Resultado (s) de aprendizaje</td>
+            </tr>
+            <tr>
+                <td class="p-2 min-h-[60px]"><p id="txt-competencias" class="text-[10px] whitespace-pre-wrap"></p></td>
+                <td class="p-2 min-h-[60px]"><p id="txt-resultados-aprendizaje" class="text-[10px] whitespace-pre-wrap"></p></td>
+            </tr>
+        </table>
+
+        <span class="section-num uppercase">4. SABERES</span>
+        <table>
+            <tr class="bg-label text-center uppercase">
+                <td class="w-[25%]">Saberes</td>
+                <td>Criterios de desempeño</td>
+                <td>Evidencias</td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold p-1">DECLARATIVOS</td>
+                <td class="p-1"><p id="txt-saber-dec-crit" class="text-[9px] whitespace-pre-wrap"></p></td>
+                <td class="p-1"><p id="txt-saber-dec-evi" class="text-[9px] whitespace-pre-wrap"></p></td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold p-1">PROCEDIMENTALES</td>
+                <td class="p-1"><p id="txt-saber-pro-crit" class="text-[9px] whitespace-pre-wrap"></p></td>
+                <td class="p-1"><p id="txt-saber-pro-evi" class="text-[9px] whitespace-pre-wrap"></p></td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold p-1">ACTITUDINALES</td>
+                <td class="p-1"><p id="txt-saber-act-crit" class="text-[9px] whitespace-pre-wrap"></p></td>
+                <td class="p-1"><p id="txt-saber-act-evi" class="text-[9px] whitespace-pre-wrap"></p></td>
+            </tr>
+        </table>
+
+        <span class="section-num uppercase">5. METODOLOGÍA, MATERIALES Y RECURSOS</span>
+        <table>
+            <tr><td class="bg-label uppercase">Metodología / Diagnóstico</td></tr>
+            <tr><td class="p-2 text-[10px]"><p id="txt-diagnostico" class="whitespace-pre-wrap"></p></td></tr>
+            <tr><td class="bg-label uppercase">Estrategias Metodológicas</td></tr>
+            <tr><td class="p-2 text-[10px]"><p id="txt-metodologia" class="whitespace-pre-wrap"></p></td></tr>
+            <tr><td class="bg-label uppercase">Trabajo Independiente</td></tr>
+            <tr><td class="p-2 text-[10px]"><p id="txt-trabajoindep" class="whitespace-pre-wrap"></p></td></tr>
+        </table>
+
+        <span class="section-num uppercase">6. EVALUACIÓN</span>
+        <table>
+            <tr class="bg-label text-center uppercase">
+                <td class="w-[40%]">Evento Evaluativo</td>
+                <td class="w-[10%]">%</td>
+                <td>Estrategias e instrumentos</td>
+            </tr>
+            <tbody id="eval-body"></tbody>
+        </table>
+
+        <span class="section-num uppercase">Bibliografía</span>
+        <div class="border border-black p-2 min-h-[40px]">
+            <p id="txt-bibliografia" class="text-[9px] whitespace-pre-wrap"></p>
+        </div>
+
+        <!-- CONTROL DE DOCUMENTO -->
+        <table class="mt-6">
+            <tr class="h-10 text-[9px] align-bottom">
+                <td class="w-1/2"><strong>Elaborado por:</strong> <span id="txt-elaborado"></span></td>
+                <td><strong>Revisado por:</strong> <span id="txt-revisado"></span></td>
+            </tr>
+            <tr class="h-10 text-[9px] align-bottom">
+                <td><strong>Aprobado por:</strong> <span id="txt-aprobado"></span></td>
+                <td class="bg-gray-50 p-1 flex justify-between items-center text-[8px]">
+                    <span>MODALIDAD: <span id="txt-modalidad-info"></span></span>
+                    <span>FECHA: <span id="txt-fecha-info"></span></span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-rechazo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[2000] no-print px-4">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
+            <h2 class="text-lg font-bold text-slate-800 mb-1">Rechazar Microdiseño</h2>
+            <p class="text-xs text-slate-500 mb-4">Por favor escriba las observaciones detalladas para el docente.</p>
+            <textarea id="txt-motivo-rechazo" class="w-full border border-slate-300 rounded-lg p-3 text-sm h-32 mb-4 outline-none focus:ring-2 focus:ring-red-500" placeholder="Escriba aquí los errores encontrados..."></textarea>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModalRechazo()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button onclick="submitRechazo()" class="px-5 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-lg">Confirmar Rechazo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="Scripts/microdiseno_review.js?v=1"></script>
+</body>
+</html>

@@ -102,7 +102,7 @@ function renderEvaluationsTable() {
             <td class="p-3">${index + 1}</td>
             <td class="p-2"><input type="text" class="w-full border p-1 rounded" value="${ev.aeae}" onchange="updateEv(${index}, 'aeae', this.value)"></td>
             <td class="p-2"><input type="text" class="w-full border p-1 rounded" value="${ev.tia}" onchange="updateEv(${index}, 'tia', this.value)"></td>
-            <td class="p-2"><input type="number" class="w-20 border p-1 rounded text-center" value="${ev.valor}" onchange="updateEv(${index}, 'valor', this.value)"></td>
+            <td class="p-2"><input type="number" max="20" class="w-20 border p-1 rounded text-center" value="${ev.valor}" onchange="updateEv(${index}, 'valor', this.value)"></td>
             <td class="p-2"><input type="date" class="w-full border p-1 rounded" value="${ev.fecha}" onchange="updateEv(${index}, 'fecha', this.value)"></td>
             <td class="p-2 text-center text-red-500 font-bold cursor-pointer hover:underline" onclick="removeEvaluationRow(${index})">X</td>
         `;
@@ -125,8 +125,16 @@ function removeEvaluationRow(index) {
 }
 
 function updateEv(index, field, value) {
-    if(field === 'valor') compromisosData.evaluaciones[index][field] = parseInt(value) || 0;
-    else compromisosData.evaluaciones[index][field] = value;
+    if(field === 'valor') {
+        let val = parseInt(value) || 0;
+        if(val > 20) {
+            alert('El porcentaje de un momento evaluativo no puede superar el 20%.');
+            val = 20;
+        }
+        compromisosData.evaluaciones[index][field] = val;
+    } else {
+        compromisosData.evaluaciones[index][field] = value;
+    }
     renderEvaluationsTable();
 }
 
@@ -191,4 +199,10 @@ async function saveAllChanges() {
 function logout() {
     localStorage.clear();
     window.location.href = "login.html";
+}
+
+function openMicrodiseno() {
+    if (!currentSubject) return;
+    const url = `Microdiseno.html?cursoCodigo=${encodeURIComponent(currentSubject.CursoCodigo)}&asigNombre=${encodeURIComponent(currentSubject.Asignatura)}&semestre=2026-I`;
+    window.open(url, '_blank');
 }

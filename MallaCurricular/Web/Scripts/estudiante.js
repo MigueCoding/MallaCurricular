@@ -464,6 +464,12 @@ function renderSemesters() {
                         </div>
                         <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
                     </div>
+                </div>
+                    <a href="Microdiseno_View.html?cursoCode=${encodeURIComponent(course.code || course.Codigo || "")}&cursoCodigo=${encodeURIComponent(course.code || course.Codigo || "")}" 
+                       target="_blank"
+                       class="text-[9px] bg-white/40 hover:bg-white/60 px-2 py-0.5 rounded font-bold uppercase tracking-tighter transition-colors block text-center">
+                       📄 Ver Microdiseño
+                    </a>
                 </div>`;
 
             const isPlaceholder = course.name.toLowerCase().includes('electiva') || course.name.toLowerCase().includes('optativa');
@@ -826,8 +832,13 @@ function renderMisAsignaturas(inscripciones) {
                     <h3 class="font-black text-xl text-blue-900">${ins.CursoNombre || 'Asignatura Desconocida'}</h3>
                     <p class="text-sm font-bold text-gray-500">${ins.GrupoNombre || ''}</p>
                 </div>
-                <div class="mt-2 md:mt-0 bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase">
-                    Prof: ${ins.ProfesorNombre || 'Sin Profesor'}
+                <div class="mt-2 md:mt-0 flex gap-2">
+                    <div class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase my-auto">
+                        Prof: ${ins.ProfesorNombre || 'Sin Profesor'}
+                    </div>
+                    <button onclick="window.open('Microdiseno_View.html?cursoCode=${encodeURIComponent(ins.CursoCodigo || '')}&cursoCodigo=${encodeURIComponent(ins.CursoCodigo || '')}', '_blank')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded shadow transition">
+                        📄 Ver Microdiseño
+                    </button>
                 </div>
             </div>
 

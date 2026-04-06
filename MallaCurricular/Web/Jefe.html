@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <script>if(!localStorage.getItem('userId')) { window.location.href = 'login.html'; }</script>
@@ -19,6 +19,7 @@
         <div class="flex space-x-6">
             <button onclick="switchJefeTab('malla')" class="hover:underline text-white font-bold" id="tab-malla">Malla Curricular</button>
             <button onclick="switchJefeTab('grupos')" class="hover:underline text-gray-300 font-bold" id="tab-grupos">Gestión de Grupos</button>
+            <button onclick="switchJefeTab('microdisenos')" class="hover:underline text-white font-bold" id="tab-microdisenos">Microdiseños</button>
             <button onclick="logout()" class="ml-8 text-red-300 hover:text-red-500 font-bold">Cerrar Sesión</button>
         </div>
     </div>
@@ -183,6 +184,32 @@
             <button onclick="inscribirEstudiante()" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg shadow font-bold hover:bg-green-700 transition">Inscribir Estudiante</button>
         </div>
     </div>
+    
+    <!-- SECCIÓN MICRODISEÑOS -->
+    <div id="microdisenos-section" class="container hidden p-8 bg-white shadow-xl rounded-xl mx-auto my-8 max-w-6xl border-t-4 border-indigo-600">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Microdiseños por Revisar</h2>
+            <button onclick="fetchMicrodisenosPendientes()" class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border">Actualizar Lista</button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-600 uppercase text-xs font-bold border-b">
+                        <th class="p-4">Asignatura</th>
+                        <th class="p-4">Semestre</th>
+                        <th class="p-4">Elaborado Por</th>
+                        <th class="p-4">Fecha Envío</th>
+                        <th class="p-4">Estado</th>
+                        <th class="p-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="microdisenos-list-body" class="text-sm">
+                    <tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Cargando microdiseños...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 <script src="Scripts/script.js"></script>
     <script>
     </script>
@@ -254,6 +281,7 @@
         </div>
     </div>
 <script src="Scripts/jefe_grupos.js"></script>
+<script src="Scripts/jefe_microdisenos.js"></script>
 </body>
 </html>
 

@@ -3,6 +3,9 @@ using MallaCurricular.Infrastructure.Data;
 using MallaCurricular.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data.Entity.Core.EntityClient;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Http;
 using Newtonsoft.Json.Linq;
@@ -15,6 +18,54 @@ namespace MallaCurricular.Controllers
         private IGruposRepositorio _gruposRepo = new GruposRepositorio();
         private IInscripcioneRepositorio _inscripcionesRepo = new InscripcioneRepositorio();
         private UsuarioRepositorio _usRepo = new UsuarioRepositorio();
+
+        private string GetConnectionString()
+        {
+            var efConnectionString = ConfigurationManager.ConnectionStrings["MallaDBEntities"].ConnectionString;
+            var builder = new EntityConnectionStringBuilder(efConnectionString);
+            return builder.ProviderConnectionString;
+        }
+
+        private string GetNovedadesJson(int grupoId, string textAvisos)
+        {
+            JObject json = new JObject();
+            json["avisos"] = textAvisos ?? "";
+            JArray evs = new JArray();
+            JArray resp = new JArray();
+
+            using(var conn = new SqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                var cmdEv = new SqlCommand("SELECT * FROM MomentosEvaluativos WHERE GrupoId=@g", conn);
+                cmdEv.Parameters.AddWithValue("@g", grupoId);
+                using(var r = cmdEv.ExecuteReader()) {
+                    while(r.Read()) {
+                        JObject n = new JObject();
+                        n["aeae"] = r["EventoEvaluativo"].ToString();
+                        n["tia"] = r["TipoEvento"].ToString();
+                        n["valor"] = r["Ponderacion"].ToString();
+                        n["fecha"] = r["Fecha"].ToString();
+                        evs.Add(n);
+                    }
+                }
+
+                var cmdResp = new SqlCommand("SELECT * FROM RespuestasCompromiso WHERE GrupoId=@g", conn);
+                cmdResp.Parameters.AddWithValue("@g", grupoId);
+                using(var r = cmdResp.ExecuteReader()) {
+                    while(r.Read()) {
+                        JObject n = new JObject();
+                        n["estudianteId"] = r["EstudianteId"].ToString();
+                        n["estado"] = r["Estado"].ToString();
+                        n["observacion"] = r["Observacion"].ToString();
+                        n["fecha"] = r["Fecha"].ToString();
+                        resp.Add(n);
+                    }
+                }
+            }
+            json["evaluaciones"] = evs;
+            json["respuestas"] = resp;
+            return json.ToString();
+        }
 
         // ----------------------------------------------------
         // JEFE
@@ -92,7 +143,7 @@ namespace MallaCurricular.Controllers
                 g.Nombre, 
                 g.CursoCodigo, 
                 Asignatura = g.Curso?.Asignatura, 
-                g.Novedades
+                Novedades = GetNovedadesJson(g.Id, g.Novedades)
             });
             return Ok(data);
         }
@@ -105,8 +156,35 @@ namespace MallaCurricular.Controllers
                 var g = _gruposRepo.GetById(grupoId);
                 if (g == null) return BadRequest("Grupo no encontrado");
                 
-                g.Novedades = data["Novedades"]?.ToString();
+                string payload = data["Novedades"]?.ToString();
+                var json = JObject.Parse(payload ?? "{}");
+                
+                g.Novedades = json["avisos"]?.ToString();
                 _gruposRepo.Update(g);
+
+                using(var conn = new SqlConnection(GetConnectionString()))
+                {
+                    conn.Open();
+                    var cmdDel = new SqlCommand("DELETE FROM MomentosEvaluativos WHERE GrupoId=@g", conn);
+                    cmdDel.Parameters.AddWithValue("@g", grupoId);
+                    cmdDel.ExecuteNonQuery();
+
+                    if (json["evaluaciones"] != null) {
+                        foreach(var ev in (JArray)json["evaluaciones"]) {
+                            var cmdIns = new SqlCommand("INSERT INTO MomentosEvaluativos (GrupoId, EventoEvaluativo, TipoEvento, Ponderacion, Fecha) VALUES (@g, @aeae, @tia, @val, @f)", conn);
+                            cmdIns.Parameters.AddWithValue("@g", grupoId);
+                            cmdIns.Parameters.AddWithValue("@aeae", ev["aeae"]?.ToString() ?? "");
+                            cmdIns.Parameters.AddWithValue("@tia", ev["tia"]?.ToString() ?? "");
+                            
+                            decimal val = 0;
+                            decimal.TryParse(ev["valor"]?.ToString(), out val);
+                            cmdIns.Parameters.AddWithValue("@val", val);
+                            
+                            cmdIns.Parameters.AddWithValue("@f", ev["fecha"]?.ToString() ?? "");
+                            cmdIns.ExecuteNonQuery();
+                        }
+                    }
+                }
                 return Ok(new { success = true });
             } catch (Exception ex) {
                 return BadRequest("Error: " + ex.Message);
@@ -147,30 +225,22 @@ namespace MallaCurricular.Controllers
                 var g = _gruposRepo.GetById(grupoId);
                 if (g == null) return BadRequest("Grupo no encontrado");
 
-                JObject json = null;
-                try {
-                    json = JObject.Parse(g.Novedades ?? "{}");
-                } catch {
-                    json = new JObject();
-                    json["avisos"] = g.Novedades; 
+                using(var conn = new SqlConnection(GetConnectionString()))
+                {
+                    conn.Open();
+                    var cmdDel = new SqlCommand("DELETE FROM RespuestasCompromiso WHERE GrupoId=@g AND EstudianteId=@s", conn);
+                    cmdDel.Parameters.AddWithValue("@g", grupoId);
+                    cmdDel.Parameters.AddWithValue("@s", estudianteId);
+                    cmdDel.ExecuteNonQuery();
+
+                    var cmdIns = new SqlCommand("INSERT INTO RespuestasCompromiso (GrupoId, EstudianteId, Estado, Observacion, Fecha) VALUES (@g, @s, @est, @obs, @f)", conn);
+                    cmdIns.Parameters.AddWithValue("@g", grupoId);
+                    cmdIns.Parameters.AddWithValue("@s", estudianteId);
+                    cmdIns.Parameters.AddWithValue("@est", estado ?? "");
+                    cmdIns.Parameters.AddWithValue("@obs", observacion ?? "");
+                    cmdIns.Parameters.AddWithValue("@f", fecha);
+                    cmdIns.ExecuteNonQuery();
                 }
-
-                if (json["respuestas"] == null) json["respuestas"] = new JArray();
-                JArray respuestas = (JArray)json["respuestas"];
-                
-                var existing = respuestas.FirstOrDefault(r => r["estudianteId"]?.ToString() == estudianteId.ToString());
-                if (existing != null) existing.Remove();
-
-                JObject nuevaResp = new JObject();
-                nuevaResp["estudianteId"] = estudianteId;
-                nuevaResp["estado"] = estado;
-                nuevaResp["fecha"] = fecha;
-                nuevaResp["observacion"] = observacion;
-
-                respuestas.Add(nuevaResp);
-                
-                g.Novedades = json.ToString();
-                _gruposRepo.Update(g);
 
                 return Ok(new { success = true });
             }
@@ -184,13 +254,14 @@ namespace MallaCurricular.Controllers
         [Route("mis-inscripciones")]
         public IHttpActionResult MisInscripciones(int estudianteId)
         {
-            var data = _inscripcionesRepo.GetByEstudianteId(estudianteId).Select(i => new {
+            var data = _inscripcionesRepo.GetByEstudianteId(estudianteId).ToList().Select(i => new {
                 i.Id,
                 i.GrupoId,
+                i.Grupos?.CursoCodigo,
                 GrupoNombre = i.Grupos?.Nombre,
                 CursoNombre = i.Grupos?.Curso?.Asignatura,
                 ProfesorNombre = i.Grupos?.Usuario?.nombre,
-                Novedades = i.Grupos?.Novedades
+                Novedades = GetNovedadesJson(i.GrupoId, i.Grupos?.Novedades)
             });
             return Ok(data);
         }

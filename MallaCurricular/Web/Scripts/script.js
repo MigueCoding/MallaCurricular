@@ -1,4 +1,4 @@
-﻿let courses = {};
+let courses = {};
 const addedCourses = new Map();
 const API_BASE_URL = 'http://localhost:49513'; // Asegúrate de que este puerto sea el correcto
 
@@ -233,6 +233,28 @@ function renderSemesters() {
                 ? `<div class="text-xs mt-1 text-gray-500">Req: ${course.prerequisiteCodes.join(', ')}</div>`
                 : '';
 
+            const userRole = parseInt(localStorage.getItem('userRole'));
+            let microdisenoLink = '';
+            if(userRole) {
+                let targetPage = 'Microdiseno.html';
+                const finalCode = course.code || course.Codigo || courseCode || "";
+                let urlParams = `?cursoCode=${encodeURIComponent(finalCode)}&cursoCodigo=${encodeURIComponent(finalCode)}&semestre=2026-I`;
+                
+                if(userRole === 1) {
+                    targetPage = 'Microdiseno_Review.html';
+                } else if(userRole === 3) {
+                    targetPage = 'Microdiseno_View.html';
+                    urlParams = `?cursoCode=${encodeURIComponent(finalCode)}&cursoCodigo=${encodeURIComponent(finalCode)}`;
+                }
+
+                microdisenoLink = `<div class="mt-2 pt-2 border-t border-black/10">
+                    <a href="${targetPage}${urlParams}" 
+                       class="text-[10px] bg-white/20 hover:bg-white/40 px-2 py-0.5 rounded font-bold uppercase tracking-tighter transition-colors">
+                       Microdiseño
+                    </a>
+                </div>`;
+            }
+
             courseDiv.innerHTML = `
                 <div>
                     <div class="course-title font-semibold">${course.name}</div>
@@ -243,6 +265,7 @@ function renderSemesters() {
                         <span class="tis">TIS: ${course.tis || 0}</span> |
                         <span class="creditos">Créditos: ${course.credits || 0}</span>
                     </div>
+                    ${microdisenoLink}
                 </div>
                 <button class="remove-btn mt-2 bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded" onclick="removeCourse(this, '${courseCode}')">Remover</button>
             `;

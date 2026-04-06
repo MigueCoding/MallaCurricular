@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <script>if (!localStorage.getItem('userId')) { window.location.href = 'login.html'; }</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microdiseño Curricular - ITM (Docente)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 15mm;
+            color: #1a1a1a;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1px;
+        }
+
+        td,
+        th {
+            border: 1px solid #71717a;
+            padding: 3px 6px;
+            font-size: 10px;
+            vertical-align: middle;
+        }
+
+        .bg-label {
+            background-color: #e4e4e7;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .orientacion-box {
+            border: 1px dashed #a1a1aa;
+            background: #f8fafc;
+            padding: 8px;
+            font-size: 10px;
+            margin: 8px 0;
+            line-height: 1.4;
+            color: #4b5563;
+        }
+
+        .input-doc {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 10px;
+            padding: 2px;
+        }
+
+        .input-doc:focus {
+            background-color: #fffbeb;
+        }
+
+        textarea.input-doc {
+            resize: none;
+            min-height: 30px;
+        }
+
+        .section-num {
+            font-weight: bold;
+            font-size: 11px;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 1000;
+            padding: 8px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            .a4-container {
+                margin: 0;
+                box-shadow: none;
+                width: 100%;
+                padding: 10mm;
+            }
+
+            .orientacion-box {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="pt-14 pb-10">
+
+    <nav class="nav-bar no-print">
+        <div class="flex items-center gap-3">
+            <div class="h-8 w-1 bg-blue-600 rounded"></div>
+            <div>
+                <h1 class="font-bold text-gray-800 text-sm" id="header-asig-title">Editor de Microdiseño Curricular</h1>
+                <span id="badge-estado"
+                    class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Borrador</span>
+            </div>
+        </div>
+        <div class="flex gap-2 items-center">
+            <button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200 transition-colors flex items-center gap-1">
+                <span>←</span> Volver
+            </button>
+            <div id="action-buttons" class="flex gap-2"></div>
+        </div>
+    </nav>
+
+    <div class="a4-container" id="doc-container">
+        <!-- FORMATO FDE 058 HEADER -->
+        <table class="mb-5">
+            <tr>
+                <td rowspan="3" class="w-[20%] text-center">
+                    <img src="LOGO ITM 2020-02.png" alt="ITM" class="h-14 mx-auto opacity-100">
+                </td>
+                <td rowspan="3" class="text-center font-bold text-sm">MICRODISEÑO CURRICULAR</td>
+                <td class="bg-gray-50 font-bold w-16">Código</td>
+                <td class="w-20">FDE 058</td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold">Versión</td>
+                <td>05</td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold">Fecha</td>
+                <td>30-07-2024</td>
+            </tr>
+        </table>
+
+        <!-- ALERTAS -->
+        <div id="rechazo-box" class="hidden mb-4 border border-red-300 p-2 bg-red-50 text-red-700 text-[10px] rounded">
+            <span class="font-bold uppercase">Correcciones requeridas:</span>
+            <p id="rechazo-obs" class="mt-1"></p>
+        </div>
+
+        <span class="section-num">1. IDENTIFICACIÓN DE LA ASIGNATURA</span>
+
+        <table class="identification-table">
+            <tr>
+                <td class="bg-label w-[140px]">Nombre de la Asignatura:</td>
+                <td colspan="2"><input type="text" id="asig-nombre" class="input-doc font-bold" readonly></td>
+                <td class="bg-label w-[100px]">Programa (s):</td>
+                <td><input type="text" id="txt-programas" class="input-doc doc-input"></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Facultad:</td>
+                <td colspan="4">
+                    <select id="sel-facultad" class="input-doc doc-input">
+                        <option value="">Seleccione Facultad.</option>
+                        <option value="Artes y Humanidades">Artes y Humanidades</option>
+                        <option value="Ciencias Económicas y Administrativas">Ciencias Económicas y Administrativas
+                        </option>
+                        <option value="Ciencias Exactas y Aplicadas">Ciencias Exactas y Aplicadas</option>
+                        <option value="Ingenierías">Ingenierías</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="bg-label">Modalidad del programa:</td>
+                <td colspan="4">
+                    <select id="sel-modalidad" class="input-doc doc-input">
+                        <option value="">Seleccione Modalidad.</option>
+                        <option value="Presencial">Presencial</option>
+                        <option value="Virtual">Virtual</option>
+                        <option value="A distancia">A distancia</option>
+                        <option value="Híbrida">Híbrida</option>
+                        <option value="Dual">Dual</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="bg-label">Área de formación:</td>
+                <td colspan="4"><input type="text" id="txt-area" class="input-doc doc-input"></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Código de asignatura:</td>
+                <td colspan="2"><input type="text" id="asig-codigo" class="input-doc bg-gray-50" readonly></td>
+                <td class="bg-label">Plan de estudios <span class="text-[8px] font-normal">(solo específicas)</span>:
+                </td>
+                <td><input type="text" id="txt-plandeestudios" class="input-doc doc-input"></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Correquisitos:</td>
+                <td colspan="2"><input type="text" id="txt-correq" class="input-doc doc-input"></td>
+                <td class="bg-label">Prerrequisitos:</td>
+                <td><input type="text" id="txt-prereq" class="input-doc doc-input"></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Créditos de la asignatura</td>
+                <td class="w-12 text-center font-bold"><input type="number" id="num-creditos"
+                        class="input-doc text-center doc-input"></td>
+                <td class="bg-label text-center">Tipo de crédito:</td>
+                <td colspan="2">
+                    <select id="sel-tipocredito" class="input-doc doc-input">
+                        <option value="Obligatorio">Obligatorio</option>
+                        <option value="electivo">electivo</option>
+                        <option value="optativo">optativo</option>
+                        <option value="libre elección">libre elección</option>
+                        <option value="Propedeutico">Propedeutico</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="bg-label">Tipo de asignatura:</td>
+                <td colspan="4">
+                    <select id="sel-tipoasignatura" class="input-doc doc-input">
+                        <option value="">Elija un elemento.</option>
+                        <option value="Teórica">Teórica</option>
+                        <option value="Práctica">Práctica</option>
+                        <option value="Teórico-práctica">Teórico-práctica</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="bg-label">Horas teóricas:</td>
+                <td class="text-center font-bold w-12"><input type="number" id="num-hteoricas"
+                        class="input-doc text-center doc-input"></td>
+                <td class="bg-label text-center">Horas teórico – prácticas:</td>
+                <td class="text-center font-bold w-12"><input type="number" id="num-hteoprac"
+                        class="input-doc text-center doc-input"></td>
+                <td class="bg-label text-center">Horas prácticas:</td>
+                <td class="text-center font-bold w-12 border-l border-black"><input type="number" id="num-hprac"
+                        class="input-doc text-center doc-input"></td>
+                <td class="bg-label text-center">Horas trabajo independiente:</td>
+                <td class="text-center font-bold w-12"><input type="number" id="num-hindep"
+                        class="input-doc text-center doc-input"></td>
+            </tr>
+            <tr>
+                <td class="bg-label">Horas presenciales</td>
+                <td class="text-center font-bold"><input type="number" id="num-hpres"
+                        class="input-doc text-center doc-input"></td>
+                <td class="bg-label text-center">Horas encuentros físicos</td>
+                <td class="text-center font-bold"><input type="number" id="num-hfisicos"
+                        class="input-doc text-center doc-input"></td>
+                <td class="bg-label text-center">Horas sesiones sincrónicas</td>
+                <td colspan="3" class="text-center font-bold"><input type="number" id="num-hsinc"
+                        class="input-doc text-center doc-input"></td>
+            </tr>
+        </table>
+
+        <div class="orientacion-box">
+            <strong>1. Orientaciones sobre cómo desarrollar la identificación de la asignatura:</strong><br>
+            La identificación permite comprender su contexto. Una modalidad como la virtual implica diferencias en
+            planificación...
+            Asignaturas transversales se dejan en blanco los datos del programa. Los créditos deben corresponder al
+            total de horas.
+        </div>
+
+        <span class="section-num uppercase">2. Justificación</span>
+        <div class="border border-black p-1">
+            <textarea id="txt-justificacion" class="input-doc doc-input min-h-[60px]"
+                placeholder="Escriba aquí..."></textarea>
+        </div>
+
+        <div class="orientacion-box">
+            <strong>2) Orientaciones sobre cómo escribir la justificación:</strong> Debe desarrollar la pertinencia...
+            ¿Qué problema o situación del contexto intenta abordar o resolver?
+        </div>
+
+        <span class="section-num uppercase">3. COMPETENCIA(S) Y RESULTADOS DE APRENDIZAJE</span>
+        <table>
+            <tr class="bg-label text-center uppercase">
+                <td class="w-1/2">Competencia del programa a la que aporta la asignatura</td>
+                <td>Resultado (s) de aprendizaje del programa asociados a la competencia</td>
+            </tr>
+            <tr>
+                <td class="p-0"><textarea id="txt-competencias" class="input-doc doc-input min-h-[70px]"
+                        placeholder="Escriba la competencia..."></textarea></td>
+                <td class="p-0"><textarea id="txt-resultados-aprendizaje" class="input-doc doc-input min-h-[70px]"
+                        placeholder="- Escriba el resultado..."></textarea></td>
+            </tr>
+        </table>
+
+        <div class="orientacion-box">
+            <strong>4) Orientaciones sobre las competencias:</strong> Deben ser las definidas en el programa de
+            formación, NO definiremos aquí competencias de asignatura.
+        </div>
+
+        <span class="section-num uppercase">4. SABERES</span>
+        <table>
+            <tr class="bg-label text-center uppercase">
+                <td class="w-[30%]">Saberes</td>
+                <td>Criterios de desempeño / Resultados esperados</td>
+                <td>Evidencias</td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold p-1">DECLARATIVOS: <br><span
+                        class="font-normal text-[8px] italic">Escriba aquí...</span></td>
+                <td class="p-0"><textarea id="txt-saber-dec-crit" class="input-doc doc-input h-full"></textarea></td>
+                <td class="p-0"><textarea id="txt-saber-dec-evi" class="input-doc doc-input h-full"></textarea></td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold p-1">PROCEDIMENTALES: <br><span
+                        class="font-normal text-[8px] italic">Escriba aquí...</span></td>
+                <td class="p-0"><textarea id="txt-saber-pro-crit" class="input-doc doc-input h-full"></textarea></td>
+                <td class="p-0"><textarea id="txt-saber-pro-evi" class="input-doc doc-input h-full"></textarea></td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold p-1">ACTITUDINALES: <br><span
+                        class="font-normal text-[8px] italic">Escriba aquí...</span></td>
+                <td class="p-0"><textarea id="txt-saber-act-crit" class="input-doc doc-input h-full"></textarea></td>
+                <td class="p-0"><textarea id="txt-saber-act-evi" class="input-doc doc-input h-full"></textarea></td>
+            </tr>
+        </table>
+
+        <div class="orientacion-box">
+            <strong>5) Orientaciones sobre los saberes:</strong> Declarativo (conceptual), Procedimentable (acción
+            técnica) y Actitudinal (valores).
+        </div>
+
+        <span class="section-num uppercase">5. METODOLOGÍA, MATERIALES Y RECURSOS</span>
+        <table>
+            <tr>
+                <td class="bg-label uppercase">Metodología</td>
+            </tr>
+            <tr>
+                <td class="bg-gray-100 font-bold text-[9px] uppercase">Diagnóstico aprendizajes previos</td>
+            </tr>
+            <tr>
+                <td class="p-0"><textarea id="txt-diagnostico" class="input-doc doc-input min-h-[40px]"
+                        placeholder="Escriba aquí..."></textarea></td>
+            </tr>
+            <tr>
+                <td class="bg-gray-100 font-bold text-[9px] uppercase">Metodología</td>
+            </tr>
+            <tr>
+                <td class="p-0"><textarea id="txt-metodologia" class="input-doc doc-input min-h-[60px]"
+                        placeholder="Describa la metodología..."></textarea></td>
+            </tr>
+            <tr>
+                <td class="bg-label uppercase">Materiales y Recursos</td>
+            </tr>
+            <tr>
+                <td class="p-0"><textarea id="txt-materiales" class="input-doc doc-input min-h-[40px]"
+                        placeholder="Describa aquí..."></textarea></td>
+            </tr>
+            <tr>
+                <td class="bg-label uppercase text-[9px]">Trabajo Independiente</td>
+            </tr>
+            <tr>
+                <td class="p-0"><textarea id="txt-trabajoindep" class="input-doc doc-input min-h-[40px]"
+                        placeholder="Actividades de trabajo independiente..."></textarea></td>
+            </tr>
+        </table>
+
+        <span class="section-num uppercase">6. EVALUACIÓN</span>
+        <table>
+            <tr class="bg-label text-center uppercase">
+                <td class="w-[40%]">Evaluación</td>
+                <td class="w-[10%]">%</td>
+                <td>Estrategias e instrumentos para evaluar</td>
+                <td class="w-8 doc-block no-print">X</td>
+            </tr>
+            <tbody id="eval-body"></tbody>
+        </table>
+        <button onclick="addEvalLine()"
+            class="no-print mt-2 bg-slate-700 text-white text-[9px] px-2 py-1 rounded doc-block hover:bg-slate-800 transition-colors">+
+            Agregar Evento Evaluativo</button>
+
+        <span class="section-num uppercase">Bibliografía <span class="text-[9px] font-normal italic">(Básica,
+                complementaria y referenciada)</span></span>
+        <div class="border border-black p-1">
+            <textarea id="txt-bibliografia" class="input-doc doc-input min-h-[60px]"
+                placeholder="Apellido, A. A. (Año). Título..."></textarea>
+        </div>
+
+        <!-- CONTROL DE DOCUMENTO - SECCIÓN FINAL -->
+        <table class="mt-8">
+            <tr>
+                <td class="bg-gray-50 font-bold w-1/2">Elaborado por:</td>
+                <td class="bg-gray-50 font-bold">Revisado por:</td>
+            </tr>
+            <tr class="h-12">
+                <td id="txt-elaborado" class="italic align-bottom text-[9px]"></td>
+                <td id="txt-revisado" class="italic align-bottom text-[9px]"></td>
+            </tr>
+            <tr>
+                <td class="bg-gray-50 font-bold">Aprobado por:</td>
+                <td class="bg-gray-100 px-2">
+                    <div class="flex justify-between items-center text-[7px] font-bold">
+                        <div>VERSIÓN: <span id="txt-version">05</span></div>
+                        <div>FECHA: <span id="txt-fecha">30-07-2024</span></div>
+                    </div>
+                </td>
+            </tr>
+            <tr class="h-10 text-[9px]">
+                <td colspan="2" id="txt-aprobado"></td>
+            </tr>
+        </table>
+
+        <div class="text-right text-[8px] mt-4 text-gray-400 italic">Página 1 de 5</div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-rechazo"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[2000] no-print px-4">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-800 mb-2">Rechazar Microdiseño</h2>
+            <p class="text-xs text-slate-500 mb-4">Indique explícitamente la razón para que el docente la corrija.</p>
+            <textarea id="txt-motivo-rechazo"
+                class="w-full border border-slate-300 rounded-lg p-3 text-sm h-32 mb-4 focus:ring-2 focus:ring-red-500 outline-none transition-all"
+                placeholder="Escriba aquí..."></textarea>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModalRechazo()"
+                    class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button onclick="submitRechazo()"
+                    class="px-5 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-lg shadow-red-200 transition-all">Enviar
+                    Rechazo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="Scripts/microdiseno.js?v=4"></script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-﻿using MallaCurricular.Infrastructure.Data;
+using MallaCurricular.Infrastructure.Data;
 using MallaCurricular.Infrastructure.Repositories;
 using MallaCurricular.Core.Domain.Interfaces;
 using MallaCurricular.Core.Application.Services;
@@ -234,6 +234,23 @@ namespace MallaCurricular.Controllers
             {
                 // Manejo de errores generales del servidor
                 return InternalServerError(new Exception("Error al eliminar el curso: " + ex.Message));
+            }
+        }
+
+        // GET: api/cursos/{codigo}
+        [HttpGet]
+        [Route("{codigo}")]
+        public IHttpActionResult GetPorCodigo(string codigo)
+        {
+            try
+            {
+                var curso = _cursoService.ObtenerPorId(codigo);
+                if (curso == null) return NotFound();
+                return Ok(curso);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const errorMsg = document.getElementById('login-error');
 
@@ -36,7 +36,7 @@
                 // 1. Guardar datos importantes en localStorage (opcional, para el frontend)
                 localStorage.setItem('userId', data.userId);
                 localStorage.setItem('userName', data.nombre);
-                localStorage.setItem('userRole', data.idRol);
+                localStorage.setItem('userRole', data.rol);
 
                 // 2. Redirigir según la URL que envió el servidor
                 window.location.href = data.redirectUrl;
