@@ -21,12 +21,29 @@ namespace MallaCurricular.Models
         public DateTime? FechaCreacion { get; set; }
         public DateTime? FechaAprobacion { get; set; }
         public string ContenidoJSON { get; set; }
-
+        
+        public int? CreadorId { get; set; }
+        public int? AvalId { get; set; }
     }
 
     public class RevisionMicrodisenoDTO
     {
         public string Observaciones { get; set; }
         public string RevisorNombre { get; set; }
+    }
+
+    public class MicrodisenoRolesDTO
+    {
+        public string CursoCodigo { get; set; }
+        public int CreadorId { get; set; }
+        public int AvalId { get; set; }
+    }
+
+    public class DocenteMateriaDTO
+    {
+        public int ProfesorId { get; set; }
+        public string ProfesorNombre { get; set; }
+        public string CursoCodigo { get; set; }
+        public string Asignatura { get; set; }
     }
 }

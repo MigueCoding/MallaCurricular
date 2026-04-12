@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const cursoCodigo = params.get('cursoCodigo');
     const semestre = params.get('semestre');
 
-    if(document.getElementById('asig-codigo')) document.getElementById('asig-codigo').value = cursoCodigo || '';
-    if(document.getElementById('sel-modalidad')) document.getElementById('sel-modalidad').value = '';
+    if (document.getElementById('asig-codigo')) document.getElementById('asig-codigo').value = cursoCodigo || '';
+    if (document.getElementById('sel-modalidad')) document.getElementById('sel-modalidad').value = '';
 
-    if(cursoCodigo) {
+    if (cursoCodigo) {
         loadMicrodiseno(cursoCodigo, semestre);
         fetchCourseInfo(cursoCodigo);
     } else {
@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function goBack() {
     const role = parseInt(localStorage.getItem('userRole'));
-    if(role === 1) window.location.href = 'Jefe.html?tab=microdisenos';
-    else if(role === 3) window.location.href = 'estudiante.html';
+    if (role === 1) window.location.href = 'Jefe.html?tab=microdisenos';
+    else if (role === 3) window.location.href = 'estudiante.html';
     else window.location.href = 'profesor.html';
 }
 
@@ -30,17 +30,17 @@ async function fetchCourseInfo(codigo) {
     try {
         const res = await fetch(`${API_BASE_URL}/api/cursos/${encodeURIComponent(codigo)}`);
         console.log('Fetch response status:', res.status);
-        if(res.ok) {
+        if (res.ok) {
             const curso = await res.json();
             console.log('Course data received:', curso);
-            if(document.getElementById('asig-nombre')) {
+            if (document.getElementById('asig-nombre')) {
                 document.getElementById('asig-nombre').value = curso.Asignatura || '';
             }
-            if(document.getElementById('header-asig-title')) {
+            if (document.getElementById('header-asig-title')) {
                 document.getElementById('header-asig-title').textContent = 'Microdiseño: ' + (curso.Asignatura || '');
             }
         }
-    } catch(err) { console.error('Error fetching course info:', err); }
+    } catch (err) { console.error('Error fetching course info:', err); }
 }
 
 async function loadMicrodiseno(codigo, semestre) {
@@ -48,15 +48,24 @@ async function loadMicrodiseno(codigo, semestre) {
     try {
         const res = await fetch(`${API_BASE_URL}/api/microdisenos/${encodeURIComponent(codigo)}/${encodeURIComponent(semestre)}`);
         console.log('Load microdiseno status:', res.status);
-        if(res.ok) {
+        if (res.ok) {
             const data = await res.json();
             currentMicrodiseno = data;
             fillForm(data);
         } else if (res.status === 404) {
-            currentMicrodiseno = { Id: 0, CursoCodigo: codigo, Semestre: semestre, Estado: 'Borrador' };
+            let creadorId = 0, avalId = 0;
+            try {
+                const rRes = await fetch(`${API_BASE_URL}/api/microdisenos/roles/${encodeURIComponent(codigo)}`);
+                if (rRes.ok) {
+                    const roles = await rRes.json();
+                    creadorId = roles.CreadorId;
+                    avalId = roles.AvalId;
+                }
+            } catch (e) { }
+            currentMicrodiseno = { Id: 0, CursoCodigo: codigo, Semestre: semestre, Estado: 'Borrador', CreadorId: creadorId, AvalId: avalId };
             fillForm(currentMicrodiseno);
-        } 
-    } catch(err) { console.error(err); }
+        }
+    } catch (err) { console.error(err); }
 }
 
 
@@ -67,13 +76,13 @@ function fillForm(m) {
     document.getElementById('sel-tipoasignatura').value = m.TipoAsignatura || '';
 
     let c = {};
-    if(m.ContenidoJSON) {
-        try { c = JSON.parse(m.ContenidoJSON); } catch(e){}
+    if (m.ContenidoJSON) {
+        try { c = JSON.parse(m.ContenidoJSON); } catch (e) { }
     }
 
     // Mapping new fields
-    const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
-    
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+
     setVal('txt-programas', c.programas);
     setVal('txt-area', c.area);
     setVal('txt-plandeestudios', c.plandeestudios);
@@ -92,7 +101,7 @@ function fillForm(m) {
     setVal('txt-justificacion', c.justificacion);
     setVal('txt-competencias', c.competencias);
     setVal('txt-resultados-aprendizaje', c.resultadosAprendizaje);
-    
+
     setVal('txt-saber-dec-crit', c.saberDecCrit);
     setVal('txt-saber-dec-evi', c.saberDecEvi);
     setVal('txt-saber-pro-crit', c.saberProCrit);
@@ -104,7 +113,7 @@ function fillForm(m) {
     setVal('txt-metodologia', c.metodologia);
     setVal('txt-materiales', c.materiales);
     setVal('txt-trabajoindep', c.trabajoindep);
-    
+
     setVal('txt-bibliografia', c.bibliografia);
 
     currentEvaluaciones = c.evaluaciones || [];
@@ -114,7 +123,7 @@ function fillForm(m) {
     document.getElementById('txt-elaborado').textContent = m.ElaboradoPor || localStorage.getItem('userName') || '';
     document.getElementById('txt-revisado').textContent = m.RevisadoPor || '';
     document.getElementById('txt-version').textContent = m.Version || '05';
-    document.getElementById('txt-fecha').textContent = m.FechaAprobacion ? m.FechaAprobacion.substring(0,10) : '30-07-2024';
+    document.getElementById('txt-fecha').textContent = m.FechaAprobacion ? m.FechaAprobacion.substring(0, 10) : '30-07-2024';
     document.getElementById('txt-aprobado').textContent = m.AprobadoPor || '';
 
     checkStateUI();
@@ -122,7 +131,7 @@ function fillForm(m) {
 
 function renderEvaluaciones() {
     const tbody = document.getElementById('eval-body');
-    if(!tbody) return;
+    if (!tbody) return;
     tbody.innerHTML = '';
     currentEvaluaciones.forEach((ev, idx) => {
         const tr = document.createElement('tr');
@@ -167,7 +176,7 @@ function gatherData() {
     c.justificacion = getVal('txt-justificacion');
     c.competencias = getVal('txt-competencias');
     c.resultadosAprendizaje = getVal('txt-resultados-aprendizaje');
-    
+
     c.saberDecCrit = getVal('txt-saber-dec-crit');
     c.saberDecEvi = getVal('txt-saber-dec-evi');
     c.saberProCrit = getVal('txt-saber-pro-crit');
@@ -179,12 +188,16 @@ function gatherData() {
     c.metodologia = getVal('txt-metodologia');
     c.materiales = getVal('txt-materiales');
     c.trabajoindep = getVal('txt-trabajoindep');
-    
+
     c.bibliografia = getVal('txt-bibliografia');
     c.evaluaciones = currentEvaluaciones;
 
     currentMicrodiseno.ContenidoJSON = JSON.stringify(c);
 }
+
+// Global user attributes
+const currentUserId = parseInt(localStorage.getItem('userId')) || 0;
+const userRole = parseInt(localStorage.getItem('userRole')) || 0;
 
 function checkStateUI() {
     const st = currentMicrodiseno.Estado || 'Borrador';
@@ -192,17 +205,19 @@ function checkStateUI() {
     const btns = document.getElementById('action-buttons');
     const inputs = document.querySelectorAll('.doc-input');
     const blocks = document.querySelectorAll('.doc-block');
-    
+
     badge.textContent = st;
     badge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ";
-    
+
     const rechazoEl = document.getElementById('rechazo-box');
-    if(rechazoEl) rechazoEl.classList.add('hidden');
+    if (rechazoEl) rechazoEl.classList.add('hidden');
 
     let htmlBtns = '';
-    
-    badge.classList.add(st === 'Borrador' ? "bg-gray-200" : (st === 'Rechazado' ? "bg-red-200" : "bg-yellow-200"));
-    badge.classList.add(st === 'Borrador' ? "text-gray-800" : (st === 'Rechazado' ? "text-red-800" : "text-yellow-800"));
+
+    if (st.includes('Pendiente')) badge.classList.add("bg-yellow-200", "text-yellow-800");
+    else if (st === 'Rechazado') badge.classList.add("bg-red-200", "text-red-800");
+    else if (st === 'Aprobado') badge.classList.add("bg-green-200", "text-green-800");
+    else badge.classList.add("bg-gray-200", "text-gray-800");
 
     if (st === 'Rechazado') {
         if (rechazoEl) rechazoEl.classList.remove('hidden');
@@ -210,20 +225,46 @@ function checkStateUI() {
         if (obsEl) obsEl.textContent = currentMicrodiseno.ObservacionesRechazo || 'Sin observaciones';
     }
 
-    if (st === 'Pendiente' || st === 'Aprobado') {
-        let msg = st === 'Pendiente' ? 'Enviado a revisión.' : 'Publicado oficialmente.';
-        let printBtn = st === 'Aprobado' ? `<button onclick="window.print()" class="bg-blue-600 text-white px-3 py-1 text-sm font-bold rounded ml-4 shadow">Imprimir PDF</button>` : '';
-        btns.innerHTML = `<span class="italic text-xs text-gray-400">${msg}</span>${printBtn}`;
+    const isCreador = currentMicrodiseno.CreadorId === currentUserId;
+    const isAval = currentMicrodiseno.AvalId === currentUserId;
+    const isJefe = userRole === 1;
+
+    let canEdit = isCreador && (st === 'Borrador' || st === 'Rechazado');
+    let readonlyMsg = '';
+
+    if (!isCreador && st !== 'Aprobado' && !isAval && !isJefe) {
+        document.getElementById('doc-container').innerHTML = `<div class="text-center py-20 text-red-600 font-bold text-xl">Acceso Denegado: <br><span class="text-sm font-normal text-gray-500">Este microcurrículo se encuentra en fase de desarrollo o revisión. Usted no cuenta con el rol de Creador o Aval para esta asignatura.</span></div>`;
+        btns.innerHTML = `<button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>`;
+        return;
+    }
+
+    if (canEdit) {
+        htmlBtns += `<button onclick="saveDraft()" class="bg-gray-700 text-white px-3 py-1 text-sm font-bold rounded hover:bg-gray-800 transition shadow">Guardar Borrador</button>`;
+        htmlBtns += `<button onclick="sendReview()" class="bg-blue-600 text-white px-3 py-1 text-sm font-bold rounded ml-2 hover:bg-blue-700 transition shadow">Enviar a Aval</button>`;
+        inputs.forEach(el => el.disabled = false);
+        blocks.forEach(el => el.style.display = '');
+    } else if (isAval && st === 'PendienteAval') {
+        htmlBtns += `<button onclick="actionAval('rechazar')" class="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded hover:bg-red-700 transition shadow">Rechazar (Aval)</button>`;
+        htmlBtns += `<button onclick="actionAval('aprobar')" class="bg-green-600 text-white px-3 py-1 text-sm font-bold rounded ml-2 hover:bg-green-700 transition shadow">Dar Visto Bueno</button>`;
+        readonlyMsg = 'En revisión por Aval.';
         inputs.forEach(el => el.disabled = true);
         blocks.forEach(el => el.style.display = 'none');
     } else {
-        htmlBtns += `<button onclick="saveDraft()" class="bg-gray-700 text-white px-3 py-1 text-sm font-bold rounded hover:bg-gray-800 transition shadow">Guardar Borrador</button>`;
-        htmlBtns += `<button onclick="sendReview()" class="bg-blue-600 text-white px-3 py-1 text-sm font-bold rounded ml-2 hover:bg-blue-700 transition shadow">Enviar Revisión</button>`;
-        inputs.forEach(el => el.disabled = false);
-        blocks.forEach(el => el.style.display = '');
+        if (st === 'Aprobado') {
+            readonlyMsg = 'Publicado oficialmente.';
+            htmlBtns += `<button onclick="window.print()" class="bg-blue-600 text-white px-3 py-1 text-sm font-bold rounded ml-4 shadow">Imprimir PDF</button>`;
+        } else {
+            readonlyMsg = 'En proceso. Solo lectura.';
+        }
+        inputs.forEach(el => el.disabled = true);
+        blocks.forEach(el => el.style.display = 'none');
     }
 
-    if(htmlBtns) btns.innerHTML = htmlBtns;
+    if (htmlBtns) {
+        btns.innerHTML = htmlBtns;
+    } else if (readonlyMsg) {
+        btns.innerHTML = `<span class="italic text-xs text-gray-400">${readonlyMsg}</span>`;
+    }
 }
 
 async function saveDraft() {
@@ -235,22 +276,73 @@ async function saveDraft() {
             body: JSON.stringify(currentMicrodiseno)
         });
         const ans = await res.json();
-        if(res.ok) {
+        if (res.ok) {
             alert('Guardado con éxito.');
             currentMicrodiseno.Id = ans.Id;
             checkStateUI();
         } else alert("Error: " + ans.Message);
-    } catch(err) { alert(err); }
+    } catch (err) { alert(err); }
 }
 
 async function sendReview() {
     await saveDraft();
-    if(currentMicrodiseno.Id === 0) return;
-    if(confirm('¿Enviar a revisión?')) {
+    if (currentMicrodiseno.Id === 0) return;
+    if (confirm('¿Enviar a revisión al Aval?')) {
         try {
             const res = await fetch(`${API_BASE_URL}/api/microdisenos/${currentMicrodiseno.Id}/enviar`, { method: 'POST' });
-            if(res.ok) { location.reload(); }
-        } catch(err) { alert(err); }
+            if (res.ok) { location.reload(); }
+        } catch (err) { alert(err); }
     }
 }
 
+function openRechazoModal() {
+    const m = document.getElementById('modal-rechazo');
+    if (m) {
+        document.getElementById('txt-motivo-rechazo').value = '';
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+}
+
+function closeModalRechazo() {
+    const m = document.getElementById('modal-rechazo');
+    if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+}
+
+async function submitRechazo() {
+    const obs = document.getElementById('txt-motivo-rechazo').value.trim();
+    if (!obs) return alert('Debe indicar un motivo de rechazo.');
+
+    try {
+        const dto = { RevisorNombre: localStorage.getItem('userName') || 'Aval', Observaciones: obs };
+        const res = await fetch(`${API_BASE_URL}/api/microdisenos/${currentMicrodiseno.Id}/rechazar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dto)
+        });
+        if (res.ok) location.reload();
+        else alert('Error al rechazar el microdiseño.');
+    } catch (e) { console.error(e); }
+}
+
+async function actionAval(action) {
+    if (action === 'aprobar') {
+        if (confirm('¿Dar visto bueno y enviar al Jefe de Programa?')) {
+            try {
+                const dto = { RevisorNombre: localStorage.getItem('userName') || 'Aval' };
+                const res = await fetch(`${API_BASE_URL}/api/microdisenos/${currentMicrodiseno.Id}/aprobar-aval`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
+                });
+                if (res.ok) { location.reload(); }
+                else alert('Error al aprobar.');
+            } catch (e) { console.error(e); }
+        }
+    } else if (action === 'rechazar') {
+        openRechazoModal();
+    }
+}

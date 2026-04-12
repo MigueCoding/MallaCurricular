@@ -19,7 +19,8 @@
         <div class="flex space-x-6">
             <button onclick="switchJefeTab('malla')" class="hover:underline text-white font-bold" id="tab-malla">Malla Curricular</button>
             <button onclick="switchJefeTab('grupos')" class="hover:underline text-gray-300 font-bold" id="tab-grupos">Gestión de Grupos</button>
-            <button onclick="switchJefeTab('microdisenos')" class="hover:underline text-white font-bold" id="tab-microdisenos">Microdiseños</button>
+            <button onclick="switchJefeTab('microdisenos')" class="hover:underline text-gray-300 font-bold" id="tab-microdisenos">Microdiseños</button>
+            <button onclick="switchJefeTab('roles')" class="hover:underline text-gray-300 font-bold" id="tab-roles">Roles Microcurrículos</button>
             <button onclick="logout()" class="ml-8 text-red-300 hover:text-red-500 font-bold">Cerrar Sesión</button>
         </div>
     </div>
@@ -208,8 +209,36 @@
                     <tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Cargando microdiseños...</td></tr>
                 </tbody>
             </table>
+            </table>
         </div>
     </div>
+    
+    <!-- SECCIÓN ROLES -->
+    <div id="roles-section" class="container hidden p-6 bg-white shadow-xl rounded-xl mx-auto my-8 max-w-5xl border-t-4 border-green-600">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Asignar Roles a Docentes (Creador y Aval)</h2>
+        <div class="grid grid-cols-2 gap-8">
+            <div class="border-r pr-8">
+                <div class="form-group mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Asignatura</label>
+                    <select id="roles-asignatura" class="w-full border p-3 rounded bg-white" onchange="actualizarDocentesRoles()">
+                        <option value="">Seleccione...</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <div class="form-group mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Docente Creador</label>
+                    <select id="roles-creador" class="w-full border p-3 rounded bg-white"><option value="">Seleccione...</option></select>
+                </div>
+                <div class="form-group mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Docente Aval</label>
+                    <select id="roles-aval" class="w-full border p-3 rounded bg-white"><option value="">Seleccione...</option></select>
+                </div>
+                <button onclick="guardarRolesAsignatura()" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg shadow font-bold hover:bg-green-700 transition">Guardar Roles</button>
+            </div>
+        </div>
+    </div>
+
 <script src="Scripts/script.js"></script>
     <script>
     </script>
@@ -280,8 +309,8 @@
             </form>
         </div>
     </div>
-<script src="Scripts/jefe_grupos.js"></script>
-<script src="Scripts/jefe_microdisenos.js"></script>
+<script src="Scripts/jefe_grupos.js?v=2"></script>
+<script src="Scripts/jefe_microdisenos.js?v=2"></script>
 </body>
 </html>
 

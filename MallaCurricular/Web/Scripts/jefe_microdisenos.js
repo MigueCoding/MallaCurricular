@@ -46,17 +46,17 @@ function revisarMicrodiseno(codigo, semestre) {
     window.location.href = `Microdiseno_Review.html?cursoCodigo=${encodeURIComponent(codigo)}&semestre=${encodeURIComponent(semestre)}`;
 }
 
-// Redefinimos switchJefeTab para incluir microdiseños
+// Redefinimos switchJefeTab para incluir microdiseños y roles
 function switchJefeTab(tab) {
     // Escondemos todas las secciones conocidas
-    const sections = ['malla-section', 'grupos-section', 'microdisenos-section'];
+    const sections = ['malla-section', 'grupos-section', 'microdisenos-section', 'roles-section'];
     sections.forEach(s => {
         const el = document.getElementById(s);
         if(el) el.classList.add('hidden');
     });
 
     // Reset estilos tabs
-    const tabs = ['tab-malla', 'tab-grupos', 'tab-microdisenos'];
+    const tabs = ['tab-malla', 'tab-grupos', 'tab-microdisenos', 'tab-roles'];
     tabs.forEach(t => {
         const el = document.getElementById(t);
         if(el) {
@@ -82,6 +82,101 @@ function switchJefeTab(tab) {
     if(tab === 'microdisenos') {
         fetchMicrodisenosPendientes();
     }
+    if(tab === 'roles') {
+        initRolesTab();
+    }
+}
+
+// ------ LÓGICA DE ROLES ------
+let docentesMaterias = [];
+
+async function initRolesTab() {
+    try {
+        const res = await fetch(`${API_MICRODISENOS}/roles/docentes-materias`);
+        docentesMaterias = await res.json();
+        
+        const asignaturasSet = new Set();
+        const asignaturasArr = [];
+        docentesMaterias.forEach(d => {
+            if (!asignaturasSet.has(d.CursoCodigo)) {
+                asignaturasSet.add(d.CursoCodigo);
+                asignaturasArr.push({codigo: d.CursoCodigo, nombre: d.Asignatura});
+            }
+        });
+        
+        const selAsig = document.getElementById('roles-asignatura');
+        selAsig.innerHTML = '<option value="">Seleccione...</option>';
+        asignaturasArr.forEach(a => {
+            selAsig.innerHTML += `<option value="${a.codigo}">${a.nombre} (${a.codigo})</option>`;
+        });
+    } catch(e) { console.error(e); }
+}
+
+async function actualizarDocentesRoles() {
+    const asigCodigo = document.getElementById('roles-asignatura').value;
+    const selC = document.getElementById('roles-creador');
+    const selA = document.getElementById('roles-aval');
+    
+    selC.innerHTML = '<option value="">Seleccione...</option>';
+    selA.innerHTML = '<option value="">Seleccione...</option>';
+    
+    if (!asigCodigo) return;
+    
+    const profes = docentesMaterias.filter(d => d.CursoCodigo === asigCodigo);
+    profes.forEach(p => {
+        const opt = `<option value="${p.ProfesorId}">${p.ProfesorNombre}</option>`;
+        selC.innerHTML += opt;
+        selA.innerHTML += opt;
+    });
+    
+    try {
+        const res = await fetch(`${API_MICRODISENOS}/roles/${asigCodigo}`);
+        const roles = await res.json();
+        if (roles.CreadorId) selC.value = roles.CreadorId;
+        if (roles.AvalId) selA.value = roles.AvalId;
+    } catch(e) {}
+    
+    syncRolesOptions(selC, selA);
+    syncRolesOptions(selA, selC);
+}
+
+function syncRolesOptions(source, target) {
+    if(!source || !target) return;
+    const val = source.value;
+    Array.from(target.options).forEach(opt => {
+        if(opt.value && val) opt.disabled = (opt.value === val);
+        else opt.disabled = false;
+    });
+}
+
+function hookRoleChanges() {
+    const selC = document.getElementById('roles-creador');
+    const selA = document.getElementById('roles-aval');
+    if(selC && selA) {
+        selC.addEventListener('change', () => syncRolesOptions(selC, selA));
+        selA.addEventListener('change', () => syncRolesOptions(selA, selC));
+    }
+}
+hookRoleChanges();
+
+async function guardarRolesAsignatura() {
+    const CursoCodigo = document.getElementById('roles-asignatura').value;
+    const CreadorId = document.getElementById('roles-creador').value;
+    const AvalId = document.getElementById('roles-aval').value;
+    
+    if (!CursoCodigo || !CreadorId || !AvalId) return alert('Llene todos los campos');
+    if (CreadorId === AvalId) return alert('El Creador y Aval no pueden ser el mismo docente.');
+    
+    try {
+        const res = await fetch(`${API_MICRODISENOS}/roles/asignar`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ CursoCodigo, CreadorId: parseInt(CreadorId), AvalId: parseInt(AvalId) })
+        });
+        
+        if(res.ok) alert('Roles guardados exitosamente!');
+        else alert('Error al guardar roles.');
+    } catch(e) { console.error(e); }
 }
 
 // Al cargar, verificar si hay un tab en el URL

@@ -118,7 +118,10 @@ function renderActionButtons(st) {
     const btns = document.getElementById('action-buttons');
     btns.innerHTML = '';
     
-    if(st === 'Pendiente') {
+    const badge = document.getElementById('badge-estado');
+    if(badge) badge.textContent = st;
+    
+    if(st === 'PendienteJefe') {
         btns.innerHTML = `
             <button onclick="showModalRechazo()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-1.5 text-sm font-bold rounded shadow-lg transition-all">Rechazar</button>
             <button onclick="approveReview()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-1.5 text-sm font-bold rounded shadow-lg transition-all ml-1">Aprobar Formato</button>

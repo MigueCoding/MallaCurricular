@@ -64,6 +64,18 @@ namespace MallaCurricular.Controllers
                         return NotFound();
                     }
                 }
+
+                if (mx.Id > 0 || !string.IsNullOrEmpty(mx.CursoCodigo))
+                {
+                    var cmdRoles = new SqlCommand("SELECT CreadorId, AvalId FROM MicrodisenoRoles WHERE CursoCodigo = @c", conn);
+                    cmdRoles.Parameters.AddWithValue("@c", mx.CursoCodigo);
+                    using (var rRoles = cmdRoles.ExecuteReader()) {
+                        if (rRoles.Read()) {
+                            mx.CreadorId = (int)rRoles["CreadorId"];
+                            mx.AvalId = (int)rRoles["AvalId"];
+                        }
+                    }
+                }
             }
             return Ok(mx);
         }
@@ -126,10 +138,30 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
-                var cmd = new SqlCommand("UPDATE Microdisenos SET Estado = 'Pendiente' WHERE Id = @id AND Estado IN ('Borrador', 'Rechazado')", conn);
+                var cmd = new SqlCommand("UPDATE Microdisenos SET Estado = 'PendienteAval' WHERE Id = @id AND Estado IN ('Borrador', 'Rechazado')", conn);
                 cmd.Parameters.AddWithValue("@id", id);
-                if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Enviado a revisión" });
+                if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Enviado a revisión de aval" });
                 return BadRequest("No se pudo enviar.");
+            }
+        }
+
+        // 3.5 Aprobar por Aval
+        [HttpPost]
+        [Route("{id}/aprobar-aval")]
+        public IHttpActionResult AprobarAval(int id, [FromBody] RevisionMicrodisenoDTO dto)
+        {
+            using (var conn = new SqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                var cmd = new SqlCommand(@"
+                    UPDATE Microdisenos 
+                    SET Estado = 'PendienteJefe', RevisadoPor = @rev, ObservacionesRechazo = NULL
+                    WHERE Id = @id AND Estado = 'PendienteAval'", conn);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Parameters.AddWithValue("@rev", dto.RevisorNombre ?? "");
+                
+                if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Aprobado por aval" });
+                return BadRequest("No se pudo aprobar.");
             }
         }
 
@@ -143,8 +175,8 @@ namespace MallaCurricular.Controllers
                 conn.Open();
                 var cmd = new SqlCommand(@"
                     UPDATE Microdisenos 
-                    SET Estado = 'Aprobado', AprobadoPor = @rev, RevisadoPor = @rev, FechaAprobacion = GETDATE(), ObservacionesRechazo = NULL
-                    WHERE Id = @id AND Estado = 'Pendiente'", conn);
+                    SET Estado = 'Aprobado', AprobadoPor = @rev, FechaAprobacion = GETDATE(), ObservacionesRechazo = NULL
+                    WHERE Id = @id AND Estado = 'PendienteJefe'", conn);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.Parameters.AddWithValue("@rev", dto.RevisorNombre ?? "");
                 
@@ -166,7 +198,7 @@ namespace MallaCurricular.Controllers
                 var cmd = new SqlCommand(@"
                     UPDATE Microdisenos 
                     SET Estado = 'Rechazado', RevisadoPor = @rev, ObservacionesRechazo = @obs
-                    WHERE Id = @id AND Estado = 'Pendiente'", conn);
+                    WHERE Id = @id AND Estado IN ('PendienteAval', 'PendienteJefe')", conn);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.Parameters.AddWithValue("@rev", dto.RevisorNombre ?? "");
                 cmd.Parameters.AddWithValue("@obs", dto.Observaciones);
@@ -227,7 +259,7 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
-                var cmd = new SqlCommand("SELECT Id, CursoCodigo, Semestre, ElaboradoPor, FechaCreacion, Estado FROM Microdisenos WHERE Estado = 'Pendiente' ORDER BY FechaCreacion DESC", conn);
+                var cmd = new SqlCommand("SELECT Id, CursoCodigo, Semestre, ElaboradoPor, FechaCreacion, Estado FROM Microdisenos WHERE Estado = 'PendienteJefe' ORDER BY FechaCreacion DESC", conn);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -245,6 +277,78 @@ namespace MallaCurricular.Controllers
                 }
             }
             return Ok(list);
+        }
+
+        // 8. Endpoints de Roles
+        [HttpGet]
+        [Route("roles/docentes-materias")]
+        public IHttpActionResult GetDocentesMaterias()
+        {
+            var list = new List<DocenteMateriaDTO>();
+            using (var conn = new SqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                var cmd = new SqlCommand(@"
+                    SELECT DISTINCT g.ProfesorId, u.nombre AS ProfesorNombre, g.CursoCodigo, c.Asignatura
+                    FROM Grupos g
+                    INNER JOIN Usuarios u ON g.ProfesorId = u.id_usuario
+                    INNER JOIN Cursos c ON g.CursoCodigo = c.Codigo
+                ", conn);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new DocenteMateriaDTO {
+                            ProfesorId = (int)reader["ProfesorId"],
+                            ProfesorNombre = reader["ProfesorNombre"].ToString(),
+                            CursoCodigo = reader["CursoCodigo"].ToString(),
+                            Asignatura = reader["Asignatura"].ToString()
+                        });
+                    }
+                }
+            }
+            return Ok(list);
+        }
+
+        [HttpPost]
+        [Route("roles/asignar")]
+        public IHttpActionResult AsignarRoles(MicrodisenoRolesDTO dto)
+        {
+            using (var conn = new SqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                var cmd = new SqlCommand(@"
+                    IF EXISTS (SELECT * FROM MicrodisenoRoles WHERE CursoCodigo = @cc)
+                        UPDATE MicrodisenoRoles SET CreadorId = @c, AvalId = @a WHERE CursoCodigo = @cc
+                    ELSE
+                        INSERT INTO MicrodisenoRoles (CursoCodigo, CreadorId, AvalId) VALUES (@cc, @c, @a)
+                ", conn);
+                cmd.Parameters.AddWithValue("@cc", dto.CursoCodigo);
+                cmd.Parameters.AddWithValue("@c", dto.CreadorId);
+                cmd.Parameters.AddWithValue("@a", dto.AvalId);
+                cmd.ExecuteNonQuery();
+                return Ok(new { success = true });
+            }
+        }
+
+        [HttpGet]
+        [Route("roles/{cursoCodigo}")]
+        public IHttpActionResult GetRoles(string cursoCodigo)
+        {
+            using (var conn = new SqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                var cmd = new SqlCommand("SELECT CreadorId, AvalId FROM MicrodisenoRoles WHERE CursoCodigo = @cc", conn);
+                cmd.Parameters.AddWithValue("@cc", cursoCodigo);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return Ok(new { CreadorId = (int)reader["CreadorId"], AvalId = (int)reader["AvalId"] });
+                    }
+                }
+            }
+            return Ok(new { CreadorId = 0, AvalId = 0 });
         }
     }
 }

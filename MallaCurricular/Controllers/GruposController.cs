@@ -91,10 +91,18 @@ namespace MallaCurricular.Controllers
         public IHttpActionResult Crear([FromBody] JObject data)
         {
             try {
+                string nombre = data["Nombre"].ToString();
+                string cursoCodigo = data["CursoCodigo"].ToString();
+                int profesorId = int.Parse(data["ProfesorId"].ToString());
+
+                if (_gruposRepo.GetAll().Any(gr => gr.Nombre.ToLower() == nombre.ToLower() && gr.CursoCodigo == cursoCodigo)) {
+                    return BadRequest("Ya existe un grupo con ese nombre para esta asignatura.");
+                }
+
                 Grupos g = new Grupos();
-                g.Nombre = data["Nombre"].ToString();
-                g.CursoCodigo = data["CursoCodigo"].ToString();
-                g.ProfesorId = int.Parse(data["ProfesorId"].ToString());
+                g.Nombre = nombre;
+                g.CursoCodigo = cursoCodigo;
+                g.ProfesorId = profesorId;
                 _gruposRepo.Add(g);
                 return Ok(new { success = true, id = g.Id });
             } catch(Exception ex) {
@@ -107,10 +115,17 @@ namespace MallaCurricular.Controllers
         public IHttpActionResult Inscribir([FromBody] JObject data)
         {
             try {
-                Inscripcione i = new Inscripcione();
-                i.GrupoId = int.Parse(data["GrupoId"].ToString());
-                i.EstudianteId = int.Parse(data["EstudianteId"].ToString());
-                _inscripcionesRepo.Add(i);
+                int grupoId = int.Parse(data["GrupoId"].ToString());
+                int estudianteId = int.Parse(data["EstudianteId"].ToString());
+
+                if (_inscripcionesRepo.GetAll().Any(i => i.GrupoId == grupoId && i.EstudianteId == estudianteId)) {
+                    return BadRequest("El estudiante ya se encuentra matriculado en este grupo.");
+                }
+
+                Inscripcione ins = new Inscripcione();
+                ins.GrupoId = grupoId;
+                ins.EstudianteId = estudianteId;
+                _inscripcionesRepo.Add(ins);
                 return Ok(new { success = true });
             } catch(Exception ex) {
                 return BadRequest("Error: " + ex.Message);
