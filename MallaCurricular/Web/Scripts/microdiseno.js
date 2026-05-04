@@ -116,6 +116,15 @@ function fillForm(m) {
 
     setVal('txt-bibliografia', c.bibliografia);
 
+    for (let key in c) {
+        if (key !== 'evaluaciones') {
+            const el = document.getElementById(key);
+            if (el && el.classList.contains('doc-input')) {
+                el.value = c[key] || '';
+            }
+        }
+    }
+
     currentEvaluaciones = c.evaluaciones || [];
     renderEvaluaciones();
 
@@ -192,6 +201,16 @@ function gatherData() {
     c.bibliografia = getVal('txt-bibliografia');
     c.evaluaciones = currentEvaluaciones;
 
+    // Recopilar cualquier input que tenga "doc-input", adaptandose a plantillas de Jefe dinámicas
+    const container = document.getElementById('doc-container');
+    if (container) {
+        container.querySelectorAll('.doc-input').forEach(el => {
+            if (el.id) {
+                c[el.id] = el.value || '';
+            }
+        });
+    }
+
     currentMicrodiseno.ContenidoJSON = JSON.stringify(c);
 }
 
@@ -247,6 +266,14 @@ function checkStateUI() {
         htmlBtns += `<button onclick="actionAval('rechazar')" class="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded hover:bg-red-700 transition shadow">Rechazar (Aval)</button>`;
         htmlBtns += `<button onclick="actionAval('aprobar')" class="bg-green-600 text-white px-3 py-1 text-sm font-bold rounded ml-2 hover:bg-green-700 transition shadow">Dar Visto Bueno</button>`;
         readonlyMsg = 'En revisión por Aval.';
+        inputs.forEach(el => el.disabled = true);
+        blocks.forEach(el => el.style.display = 'none');
+    } else if (isJefe && (st === 'PendienteJefe' || st === 'PendienteAval')) {
+        if (st === 'PendienteJefe') {
+            htmlBtns += `<button onclick="actionJefe('rechazar')" class="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded hover:bg-red-700 transition shadow">Rechazar (Jefe)</button>`;
+            htmlBtns += `<button onclick="actionJefe('aprobar')" class="bg-green-600 text-white px-3 py-1 text-sm font-bold rounded ml-2 hover:bg-green-700 transition shadow">Aprobar Definitivo</button>`;
+        }
+        readonlyMsg = 'En revisión por Jefe de Programa.';
         inputs.forEach(el => el.disabled = true);
         blocks.forEach(el => el.style.display = 'none');
     } else {
@@ -340,6 +367,25 @@ async function actionAval(action) {
                 });
                 if (res.ok) { location.reload(); }
                 else alert('Error al aprobar.');
+            } catch (e) { console.error(e); }
+        }
+    } else if (action === 'rechazar') {
+        openRechazoModal();
+    }
+}
+
+async function actionJefe(action) {
+    if (action === 'aprobar') {
+        if (confirm('¿Aprobar definitivamente este microdiseño?')) {
+            try {
+                const dto = { RevisorNombre: localStorage.getItem('userName') || 'Jefe' };
+                const res = await fetch(`${API_BASE_URL}/api/microdisenos/${currentMicrodiseno.Id}/aprobar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
+                });
+                if (res.ok) { location.reload(); }
+                else alert('Error al aprobar por el jefe.');
             } catch (e) { console.error(e); }
         }
     } else if (action === 'rechazar') {

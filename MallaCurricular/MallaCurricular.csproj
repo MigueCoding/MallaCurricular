@@ -320,6 +320,7 @@
     <Content Include="Web\Estudiante.html" />
     <Content Include="Web\index.html" />
     <Content Include="Areas\HelpPage\Views\Auth\Login.cshtml" />
+    <Content Include="Web\Microdiseno.html" />
     <Content Include="Web\plana.html" />
     <Content Include="Web\Profesor.html" />
     <Content Include="Web\register.html" />
@@ -330,6 +331,7 @@
     <Content Include="Web\Scripts\bootstrap.js" />
     <Content Include="Web\Scripts\bootstrap.min.js" />
     <Content Include="Web\Scripts\login.js" />
+    <Content Include="Web\Scripts\microdiseno.js" />
     <Content Include="Web\Scripts\plana.js" />
     <Content Include="Web\Scripts\estudiante.js" />
     <EntityDeploy Include="Infrastructure\Data\Model1.edmx">
@@ -416,5 +418,3 @@
   <Target Name="AfterBuild">
   </Target> -->
 </Project>
-
-

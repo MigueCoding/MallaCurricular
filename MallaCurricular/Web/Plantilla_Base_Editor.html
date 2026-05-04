@@ -1,149 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <script>if (!localStorage.getItem('userId')) { window.location.href = 'login.html'; }</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microdiseño Curricular - ITM (Docente)</title>
+    <title>Edición de Plantilla Base - Jefe de Programa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f3f4f6;
-        }
+        body { font-family: 'Roboto', sans-serif; background-color: #f3f4f6; }
 
         .a4-container {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 20px auto;
-            background: white;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 15mm;
-            color: #1a1a1a;
-            position: relative;
+            width: 210mm; min-height: 297mm; margin: 20px auto;
+            background: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 15mm; color: #1a1a1a; position: relative;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1px;
-            table-layout: fixed; /* Asegura que las columnas respeten los anchos */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1px; table-layout: fixed; }
+        
+        td, th {
+            border: 1px solid #71717a; padding: 3px 6px; font-size: 10px;
+            vertical-align: middle; position: relative; word-wrap: break-word; overflow: hidden;
         }
 
-        td,
-        th {
-            border: 1px solid #71717a;
-            padding: 3px 6px;
-            font-size: 10px;
-            vertical-align: middle;
-            overflow: hidden;
+        td[contenteditable="true"]:focus, th[contenteditable="true"]:focus {
+            outline: 2px solid #3b82f6; background-color: #eff6ff; outline-offset: -2px;
         }
 
-        .bg-label {
-            background-color: #e4e4e7;
-            font-weight: bold;
-            font-size: 10px;
-        }
+        .bg-label { background-color: #e4e4e7; font-weight: bold; font-size: 10px; }
 
         .orientacion-box {
-            border: 1px dashed #a1a1aa;
-            background: #f8fafc;
-            padding: 8px;
-            font-size: 10px;
-            margin: 8px 0;
-            line-height: 1.4;
-            color: #4b5563;
+            border: 1px dashed #a1a1aa; background: #f8fafc; padding: 8px;
+            font-size: 10px; margin: 8px 0; line-height: 1.4; color: #4b5563;
         }
-
+        
         .input-doc {
-            width: 100%;
-            border: none;
-            background: transparent;
-            outline: none;
-            font-size: 10px;
-            padding: 2px;
+            width: 100%; border: none; background: transparent; outline: none; font-size: 10px; padding: 2px;
         }
+        select.input-doc { appearance: none; -webkit-appearance: none; cursor: pointer; }
+        textarea.input-doc { resize: none; min-height: 30px; }
 
-            .input-doc:focus {
-                background-color: #fffbeb;
-            }
-
-        textarea.input-doc {
-            resize: none;
-            min-height: 30px;
-        }
-
-        .section-num {
-            font-weight: bold;
-            font-size: 11px;
-            margin-top: 12px;
-            margin-bottom: 4px;
-            display: block;
-        }
+        .section-num { font-weight: bold; font-size: 11px; margin-top: 12px; margin-bottom: 4px; display: block; outline: none; }
+        .section-num[contenteditable="true"]:focus { background-color: #eff6ff; outline: 1px dashed #3b82f6; }
 
         .nav-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid #e2e8f0;
-            z-index: 1000;
-            padding: 8px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: fixed; top: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; z-index: 1000;
+            padding: 8px 24px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-
-            body {
-                background: white;
-                margin: 0;
-                padding: 0;
-            }
-
-            .a4-container {
-                margin: 0;
-                box-shadow: none;
-                width: 100%;
-                padding: 10mm;
-            }
-
-            .orientacion-box {
-                display: none !important;
-            }
+        .toolbar {
+            position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: white; padding: 12px 20px; border-radius: 12px;
+            display: flex; flex-direction: column; gap: 8px; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
+        .toolbar-row { display: flex; gap: 8px; align-items: center; justify-content: center; }
+        .toolbar button {
+            background: #334155; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; transition: 0.2s;
+        }
+        .toolbar button:hover { background: #475569; }
+        .btn-red { background: #7f1d1d !important; } .btn-red:hover { background: #991b1b !important; }
+        .btn-indigo { background: #4338ca !important; } .btn-indigo:hover { background: #4f46e5 !important; }
+        .btn-green { background: #166534 !important; } .btn-green:hover { background: #15803d !important; }
+        .toolbar-divider { width: 1px; height: 20px; background: #475569; margin: 0 4px; }
     </style>
 </head>
-
-<body class="pt-14 pb-10">
+<body class="pt-14 pb-48">
 
     <nav class="nav-bar no-print">
         <div class="flex items-center gap-3">
-            <div class="h-8 w-1 bg-blue-600 rounded"></div>
+            <div class="h-8 w-1 bg-indigo-600 rounded"></div>
             <div>
-                <h1 class="font-bold text-gray-800 text-sm" id="header-asig-title">Editor de Microdiseño Curricular</h1>
-                <span id="badge-estado"
-                      class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Borrador</span>
+                <h1 class="font-bold text-gray-800 text-sm">Edición de Plantilla Base</h1>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">Modo Administrador</span>
+                <span class="text-xs text-gray-400 ml-2">Tip: Usa Ctrl+Z para deshacer cambios</span>
             </div>
         </div>
         <div class="flex gap-2 items-center">
-            <button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200 transition-colors flex items-center gap-1">
-                <span>←</span> Volver
-            </button>
-            <div id="action-buttons" class="flex gap-2"></div>
+            <button onclick="deshacer()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Deshacer (Ctrl+Z)</button>
+            <button onclick="window.location.href='Jefe.html'" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>
+            <button onclick="limpiarPlantillaBase()" class="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded shadow hover:bg-red-700">Restaurar Defecto</button>
+            <button onclick="guardarPlantillaBase()" class="bg-green-600 text-white px-3 py-1 text-sm font-bold rounded shadow hover:bg-green-700">Guardar Plantilla Base</button>
         </div>
     </nav>
 
-    <div class="a4-container" id="doc-container">
+    <div class="toolbar" id="toolbar" style="display: none;">
+        <div class="toolbar-row text-xs text-gray-300 font-bold mb-1">
+            Herramientas de Celda Seleccionada
+        </div>
+        <div class="toolbar-row">
+            <button onclick="alternarTitulo()" class="btn-indigo">Hacer Título / Normal</button>
+            <div class="toolbar-divider"></div>
+            <span class="text-[10px] text-gray-400">Insertar Campo:</span>
+            <button onclick="cambiarTipoCampo('texto')">Texto Corto</button>
+            <button onclick="cambiarTipoCampo('area')">Área Texto</button>
+            <button onclick="cambiarTipoCampo('select')">Desplegable</button>
+            <button onclick="cambiarTipoCampo('number')">Contador</button>
+            <button onclick="cambiarTipoCampo('normal')" class="btn-red">Quitar Campo</button>
+        </div>
+        <div class="toolbar-row mt-1">
+            <button onclick="agregarFilaArriba()">+Fila Arriba</button>
+            <button onclick="agregarFilaAbajo()">+Fila Abajo</button>
+            <button onclick="eliminarFila()" class="btn-red">Borrar Fila</button>
+            
+            <div class="toolbar-divider"></div>
+            
+            <button onclick="agregarColumnaDerUnaFila()" class="btn-green">+Col Derecha (Solo esta fila)</button>
+            <button onclick="agregarColumnaDerTodas()" class="btn-indigo">+Col Derecha (A Toda la Tabla)</button>
+            
+            <div class="toolbar-divider"></div>
+            <button onclick="eliminarCelda()" class="btn-red">Borrar Campo / Ajustar</button>
+            <button onclick="eliminarColumnaTodas()" class="btn-red">Borrar Col Total</button>
+        </div>
+    </div>
+
+    <!-- The container that will be editable and saved -->
+    <div id="editable-wrapper">
+        <div class="a4-container" id="doc-container">
+            <!-- Loading template dynamically -->
+        </div>
+    </div>
+
+    <script>
+        let selectedCell = null;
+        let undoStack = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('doc-container');
+            const savedTemplate = localStorage.getItem('plantilla_base');
+
+            const templateDefault = `
         <!-- FORMATO FDE 058 HEADER -->
         <table class="mb-5">
             <tr>
@@ -163,12 +150,6 @@
                 <td>30-07-2024</td>
             </tr>
         </table>
-
-        <!-- ALERTAS -->
-        <div id="rechazo-box" class="hidden mb-4 border border-red-300 p-2 bg-red-50 text-red-700 text-[10px] rounded">
-            <span class="font-bold uppercase">Correcciones requeridas:</span>
-            <p id="rechazo-obs" class="mt-1"></p>
-        </div>
 
         <span class="section-num">1. IDENTIFICACIÓN DE LA ASIGNATURA</span>
 
@@ -390,22 +371,15 @@
             </tr>
         </table>
 
-        <span class="section-num uppercase">6. EVALUACIÓN</span>
+        <span class="section-num uppercase">6. EVALUACIÓN (Se autogenerará durante edición)</span>
         <table>
             <tr class="bg-label text-center uppercase">
                 <td class="w-[40%]">Evaluación</td>
                 <td class="w-[10%]">%</td>
                 <td>Estrategias e instrumentos para evaluar</td>
-                <td class="w-8 doc-block no-print">X</td>
             </tr>
-            <tbody id="eval-body"></tbody>
         </table>
-        <button onclick="addEvalLine()"
-                class="no-print mt-2 bg-slate-700 text-white text-[9px] px-2 py-1 rounded doc-block hover:bg-slate-800 transition-colors">
-            +
-            Agregar Evento Evaluativo
-        </button>
-
+        
         <span class="section-num uppercase">
             Bibliografía <span class="text-[9px] font-normal italic">
                 (Básica,
@@ -440,44 +414,223 @@
                 <td colspan="2" id="txt-aprobado"></td>
             </tr>
         </table>
+            `;
+            container.innerHTML = savedTemplate || templateDefault;
+            saveState(true); // Initial state
+            activarEdicion();
+        });
 
-        <div class="text-right text-[8px] mt-4 text-gray-400 italic">Página 1 de 5</div>
-    </div>
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                deshacer();
+            }
+        });
 
-    <!-- Modals -->
-    <div id="modal-rechazo"
-         class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[2000] no-print px-4">
-        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md border border-slate-200">
-            <h2 class="text-lg font-bold text-slate-800 mb-2">Rechazar Microdiseño</h2>
-            <p class="text-xs text-slate-500 mb-4">Indique explícitamente la razón para que el docente la corrija.</p>
-            <textarea id="txt-motivo-rechazo"
-                      class="w-full border border-slate-300 rounded-lg p-3 text-sm h-32 mb-4 focus:ring-2 focus:ring-red-500 outline-none transition-all"
-                      placeholder="Escriba aquí..."></textarea>
-            <div class="flex justify-end gap-3">
-                <button onclick="closeModalRechazo()"
-                        class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                    Cancelar
-                </button>
-                <button onclick="submitRechazo()"
-                        class="px-5 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-lg shadow-red-200 transition-all">
-                    Enviar
-                    Rechazo
-                </button>
-            </div>
-        </div>
-    </div>
+        function saveState(isInitial = false) {
+            const currentHTML = document.getElementById('doc-container').innerHTML;
+            if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentHTML) {
+                undoStack.push(currentHTML);
+                if (undoStack.length > 20) undoStack.shift(); // Keep max 20 states
+            }
+        }
 
-    <script>
-        const savedTemplate = localStorage.getItem('plantilla_base');
-        if (savedTemplate) {
+        function deshacer() {
+            if (undoStack.length > 1) {
+                undoStack.pop(); // Remove current
+                const previousHTML = undoStack[undoStack.length - 1];
+                document.getElementById('doc-container').innerHTML = previousHTML;
+                activarEdicion();
+                esconderToolbar();
+            }
+        }
+
+        function activarEdicion() {
+            // Re-bind listeners for editing
             const container = document.getElementById('doc-container');
-            const rechazoBox = document.getElementById('rechazo-box');
-            let rechazoHtml = '';
-            if (rechazoBox) rechazoHtml = rechazoBox.outerHTML;
-            container.innerHTML = rechazoHtml + savedTemplate;
+            const cells = container.querySelectorAll('td, th, .section-num');
+            
+            cells.forEach(cell => {
+                cell.setAttribute('contenteditable', 'true');
+                cell.onclick = (e) => {
+                    // prevent input clicks from triggering cell logic sometimes
+                    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+                };
+                cell.onfocus = (e) => {
+                    if(e.target.tagName === 'TD' || e.target.tagName === 'TH') {
+                        selectedCell = e.target;
+                        document.getElementById('toolbar').style.display = 'flex';
+                    }
+                };
+            });
+            // Re-bind inputs to not be blocked
+            container.querySelectorAll('input, select, textarea').forEach(el => {
+                el.onfocus = () => {
+                    selectedCell = el.closest('td, th');
+                    document.getElementById('toolbar').style.display = 'flex';
+                };
+            });
+        }
+
+        function esconderToolbar() {
+            document.getElementById('toolbar').style.display = 'none';
+            selectedCell = null;
+        }
+
+        // --- CALCULO PROPORCIONAL ---
+        function recalcularProporcionesFila(tr) {
+            const table = tr.closest('table');
+            table.style.tableLayout = 'auto';
+
+            const tds = Array.from(tr.querySelectorAll(':scope > td, :scope > th'));
+            if(tds.length === 0) return;
+            // Clean colspans and define pure percentages
+            const percentage = (100 / tds.length).toFixed(2);
+            tds.forEach(td => {
+                td.removeAttribute('colspan');
+                td.style.width = percentage + '%';
+            });
+        }
+
+        // --- ACCIONES CELDA INDIVIDUAL ---
+        function alternarTitulo() {
+            saveState();
+            if (!selectedCell) return;
+            selectedCell.classList.toggle('bg-label');
+            if(selectedCell.classList.contains('bg-label')) {
+                selectedCell.style.textAlign = 'center';
+            } else {
+                selectedCell.style.textAlign = 'left';
+            }
+        }
+
+        function cambiarTipoCampo(tipo) {
+            saveState();
+            if (!selectedCell) return;
+            selectedCell.innerHTML = '';
+            
+            if (tipo === 'select') {
+                selectedCell.innerHTML = `<select class="input-doc doc-input"><option value="">Desplegable...</option><option value="1">Opción 1</option><option value="2">Opción 2</option></select>`;
+            } else if (tipo === 'number') {
+                selectedCell.innerHTML = `<input type="number" class="input-doc text-center doc-input" placeholder="0">`;
+            } else if (tipo === 'texto') {
+                selectedCell.innerHTML = `<input type="text" class="input-doc doc-input" placeholder="Texto corto...">`;
+            } else if (tipo === 'area') {
+                selectedCell.innerHTML = `<textarea class="input-doc doc-input" placeholder="Comentarios..."></textarea>`;
+            } else if (tipo === 'normal') {
+                selectedCell.innerHTML = `Escriba título normal...`;
+            }
+            activarEdicion();
+        }
+
+        function eliminarCelda() {
+            saveState();
+            if (!selectedCell) return;
+            const tr = selectedCell.closest('tr');
+            selectedCell.remove();
+            recalcularProporcionesFila(tr);
+            esconderToolbar();
+        }
+
+        // --- ACCIONES FILA ---
+        function agregarFilaAbajo() {
+            saveState();
+            if (!selectedCell) return;
+            const tr = selectedCell.closest('tr');
+            const newTr = tr.cloneNode(true);
+            newTr.querySelectorAll('td, th').forEach(td => {
+                td.innerHTML = '&nbsp;'; 
+                td.removeAttribute('class'); 
+            });
+            tr.parentNode.insertBefore(newTr, tr.nextSibling);
+            activarEdicion();
+        }
+
+        function agregarFilaArriba() {
+            saveState();
+            if (!selectedCell) return;
+            const tr = selectedCell.closest('tr');
+            const newTr = tr.cloneNode(true);
+            newTr.querySelectorAll('td, th').forEach(td => {
+                td.innerHTML = '&nbsp;';
+                td.removeAttribute('class'); 
+            });
+            tr.parentNode.insertBefore(newTr, tr);
+            activarEdicion();
+        }
+
+        function eliminarFila() {
+            saveState();
+            if (!selectedCell) return;
+            const tr = selectedCell.closest('tr');
+            tr.remove();
+            esconderToolbar();
+        }
+
+        // --- ACCIONES COLUMNA (SOLO ESTA FILA O TODAS) ---
+        function agregarColumnaDerUnaFila() {
+            saveState();
+            if (!selectedCell) return;
+            const tr = selectedCell.closest('tr');
+            const newTd = document.createElement('td');
+            newTd.innerHTML = '&nbsp;';
+            tr.insertBefore(newTd, selectedCell.nextSibling);
+            recalcularProporcionesFila(tr); // Se comparte proporcionalmente (eje: 50/50 o 33/33/33)
+            activarEdicion();
+        }
+
+        function agregarColumnaDerTodas() {
+            saveState();
+            if (!selectedCell) return;
+            const table = selectedCell.closest('table');
+            const cellIdx = selectedCell.cellIndex;
+            Array.from(table.rows).forEach(tr => {
+                // If row has enough cells
+                if(cellIdx < tr.cells.length) {
+                    const newTd = document.createElement('td');
+                    newTd.innerHTML = '&nbsp;';
+                    tr.insertBefore(newTd, tr.cells[cellIdx].nextSibling);
+                    recalcularProporcionesFila(tr);
+                }
+            });
+            activarEdicion();
+        }
+
+        function eliminarColumnaTodas() {
+            saveState();
+            if (!selectedCell) return;
+            const table = selectedCell.closest('table');
+            const cellIdx = selectedCell.cellIndex;
+            Array.from(table.rows).forEach(tr => {
+                if(tr.cells[cellIdx]) {
+                    tr.deleteCell(cellIdx);
+                    recalcularProporcionesFila(tr);
+                }
+            });
+            esconderToolbar();
+        }
+
+        function guardarPlantillaBase() {
+            const cleanContainer = document.getElementById('doc-container').cloneNode(true);
+            cleanContainer.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+            
+            // Generate IDs for new dynamic inputs
+            const inputs = cleanContainer.querySelectorAll('input.doc-input, select.doc-input, textarea.doc-input');
+            inputs.forEach(i => {
+                if(!i.id) i.id = 'dinamico-' + Math.random().toString(36).substr(2, 9);
+            });
+
+            localStorage.setItem('plantilla_base', cleanContainer.innerHTML);
+            alert("Plantilla Base guardada exitosamente y estará disponible para los docentes.");
+            window.location.href = 'Jefe.html';
+        }
+
+        function limpiarPlantillaBase() {
+            if(confirm("¿Restaurar diseño original? Se borrará la plantilla personalizada.")) {
+                localStorage.removeItem('plantilla_base');
+                location.reload();
+            }
         }
     </script>
-    <script src="Scripts/microdiseno.js?v=5"></script>
 </body>
-
 </html>
