@@ -465,7 +465,7 @@ function renderSemesters() {
                         <div class="flex items-center justify-center text-lg font-semibold creditos">${creditos}</div>
                     </div>
                 </div>
-                    <a href="Microdiseno_View.html?cursoCode=${encodeURIComponent(course.code || course.Codigo || "")}&cursoCodigo=${encodeURIComponent(course.code || course.Codigo || "")}" 
+                    <a href="Microdiseno.html?cursoCode=${encodeURIComponent(course.code || course.Codigo || "")}&cursoCodigo=${encodeURIComponent(course.code || course.Codigo || "")}" 
                        target="_blank"
                        class="text-[9px] bg-white/40 hover:bg-white/60 px-2 py-0.5 rounded font-bold uppercase tracking-tighter transition-colors block text-center">
                        📄 Ver Microdiseño
@@ -837,11 +837,8 @@ function renderMisAsignaturas(inscripciones) {
                     <div class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase my-auto">
                         Prof: ${ins.ProfesorNombre || 'Sin Profesor'}
                     </div>
-                    <button onclick="window.open('Microdiseno_View.html?cursoCode=${encodeURIComponent(ins.CursoCodigo || '')}&cursoCodigo=${encodeURIComponent(ins.CursoCodigo || '')}', '_blank')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded shadow transition">
+                    <button onclick="window.open('Microdiseno.html?cursoCode=${encodeURIComponent(ins.CursoCodigo || '')}&cursoCodigo=${encodeURIComponent(ins.CursoCodigo || '')}', '_blank')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded shadow transition">
                         📄 Ver Microdiseño
-                    </button>
-                    <button onclick="window.open('Compromiso_Academico.html?grupoId=${ins.GrupoId}&cursoCodigo=${encodeURIComponent(ins.CursoCodigo || '')}&asigNombre=${encodeURIComponent(ins.CursoNombre || '')}&role=estudiante', '_blank')" class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold px-4 py-2 rounded shadow transition">
-                        🤝 Ver Compromiso
                     </button>
                 </div>
             </div>

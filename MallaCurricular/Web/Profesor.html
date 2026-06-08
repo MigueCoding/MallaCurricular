@@ -47,82 +47,8 @@
                     class="bg-indigo-600 text-white px-6 py-2 rounded font-bold shadow hover:bg-indigo-700 transition">
                     Ver Microdiseño
                 </button>
-                <button onclick="openCompromiso()"
-                    class="bg-yellow-500 text-white px-6 py-2 rounded font-bold shadow hover:bg-yellow-600 transition">
-                    Ver Compromiso Académico
-                </button>
-                <button onclick="saveAllChanges()"
-                    class="bg-blue-600 text-white px-6 py-2 rounded font-bold shadow hover:bg-blue-700 transition">
-                    Guardar Cambios
-                </button>
             </div>
         </header>
-
-        <div class="flex-1 overflow-y-auto p-8 space-y-8">
-
-            <!-- COMPROMISO ACADEMICO -->
-            <section class="bg-white rounded-lg shadow border overflow-hidden">
-                <div class="bg-[#3b82f6] text-white p-3 text-center font-bold">
-                    Detalles de concertación de evaluaciones (Compromiso Académico)
-                </div>
-
-                <div class="p-4">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-gray-100 text-gray-700 font-bold border-b">
-                            <tr>
-                                <th class="p-3">N°</th>
-                                <th class="p-3">AEAE</th>
-                                <th class="p-3">TIA</th>
-                                <th class="p-3">Valor %</th>
-                                <th class="p-3">Fecha</th>
-                                <th class="p-3 text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="evaluations-body">
-                            <!-- Rows dynamicas -->
-                        </tbody>
-                        <tfoot class="bg-gray-200 font-bold text-gray-800">
-                            <tr>
-                                <td colspan="3" class="p-3 text-right">TOTAL</td>
-                                <td class="p-3" id="total-percent">0%</td>
-                                <td colspan="2"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-
-                    <div class="mt-4">
-                        <button onclick="addEvaluationRow()"
-                            class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded text-sm transition">
-                            + Añadir Momento Evaluativo
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- RESPUESTAS DE ESTUDIANTES -->
-            <section class="bg-white rounded-lg shadow border overflow-hidden">
-                <div class="bg-[#3b82f6] text-white p-3 text-center font-bold">
-                    Respuestas de Estudiantes
-                </div>
-
-                <div class="p-4 overflow-x-auto">
-                    <table class="w-full text-sm text-left border-collapse">
-                        <thead class="bg-gray-50 text-gray-600 font-bold border-b">
-                            <tr>
-                                <th class="p-3 border-b">Estudiante</th>
-                                <th class="p-3 border-b">Estado</th>
-                                <th class="p-3 border-b">Fecha de Respuesta</th>
-                                <th class="p-3 border-b w-1/3">Observaciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="students-responses-body" class="text-gray-700">
-                            <!-- Rows dynamicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-        </div>
     </main>
 
     <script src="Scripts/profesor.js?v=3"></script>

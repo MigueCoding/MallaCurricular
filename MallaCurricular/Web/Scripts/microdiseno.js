@@ -74,7 +74,14 @@ async function fetchCourseInfo(codigo) {
 async function loadMicrodiseno(codigo, semestre) {
     console.log('Loading microdiseno for:', codigo, semestre);
     try {
-        const res = await fetch(`${API_BASE_URL}/api/microdisenos/${encodeURIComponent(codigo)}/${encodeURIComponent(semestre)}`);
+        let fetchUrl = `${API_BASE_URL}/api/microdisenos/${encodeURIComponent(codigo)}/${encodeURIComponent(semestre)}`;
+        
+        // Si es Estudiante (Rol 3), obtener directamente el microdiseño aprobado sin importar el semestre
+        if (userRole === 3) {
+            fetchUrl = `${API_BASE_URL}/api/microdisenos/aprobados/curso/${encodeURIComponent(codigo)}`;
+        }
+
+        const res = await fetch(fetchUrl);
         console.log('Load microdiseno status:', res.status);
         if (res.ok) {
             const data = await res.json();
@@ -283,7 +290,7 @@ function checkStateUI() {
     if (!currentMicrodiseno) return;
     console.log("Checking UI state:", currentMicrodiseno.Estado, "Roles:", { Creador: currentMicrodiseno.CreadorId, Aval: currentMicrodiseno.AvalId }, "CurrentUser:", { Id: currentUserId, Role: userRole });
     
-    const st = currentMicrodiseno.Estado || 'Borrador';
+    const st = (currentMicrodiseno.Estado || 'Borrador').trim();
     const badge = document.getElementById('badge-estado');
     const btns = document.getElementById('action-buttons');
     const inputs = document.querySelectorAll('.doc-input');
@@ -319,6 +326,17 @@ function checkStateUI() {
     const avalCanAccess = isAval && (st === 'PendienteAval' || st === 'PendienteJefe' || st === 'Aprobado');
     
     if (!isCreador && st !== 'Aprobado' && !avalCanAccess && !isJefe) {
+        if (userRole === 3) {
+            document.getElementById('doc-container').innerHTML = `
+                <div class="p-20 text-center">
+                    <div class="text-6xl mb-4">📄</div>
+                    <h2 class="text-xl font-bold text-gray-800">Microdiseño No Publicado</h2>
+                    <p class="text-gray-500 mt-2">Este microdiseño aún no ha sido aprobado oficialmente por la coordinación para su consulta pública.</p>
+                </div>`;
+            btns.innerHTML = `<button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>`;
+            return;
+        }
+
         let msg = 'Este microcurrículo se encuentra en fase de desarrollo o revisión. Usted no cuenta con el rol de Creador o Aval para esta asignatura.';
         // Mensaje específico para el Aval que intenta acceder antes de tiempo
         if (isAval && (st === 'Borrador' || st === 'Rechazado')) {
@@ -369,6 +387,11 @@ function checkStateUI() {
         }
         inputs.forEach(el => el.disabled = true);
         blocks.forEach(el => el.style.display = 'none');
+        
+        // Ocultar orientaciones para los estudiantes
+        if (userRole === 3) {
+            document.querySelectorAll('.orientacion-box').forEach(el => el.style.display = 'none');
+        }
     }
 
     if (htmlBtns) {

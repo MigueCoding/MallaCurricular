@@ -243,7 +243,7 @@ function renderSemesters() {
                 if(userRole === 1 || userRole === 2) {
                     targetPage = 'Microdiseno.html';
                 } else if(userRole === 3) {
-                    targetPage = 'Microdiseno_View.html';
+                    targetPage = 'Microdiseno.html';
                     urlParams = `?cursoCode=${encodeURIComponent(finalCode)}&cursoCodigo=${encodeURIComponent(finalCode)}`;
                 }
 

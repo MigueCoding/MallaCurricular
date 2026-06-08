@@ -321,7 +321,9 @@
     <Content Include="Web\Content\plana.css" />
     <Content Include="Web\Content\estudiante.css" />
     <Content Include="Web\Content\Profesor.css" />
+    <Content Include="Web\Jefe.html" />
     <Content Include="Web\login.html" />
+    <Content Include="Web\LOGO ITM 2020-02.png" />
     <Content Include="Web\logo2020.png" />
     <Content Include="Web\Content\Site.css" />
     <Content Include="Web\Content\style.css" />
@@ -329,7 +331,10 @@
     <Content Include="Web\index.html" />
     <Content Include="Areas\HelpPage\Views\Auth\Login.cshtml" />
     <Content Include="Web\Microdiseno.html" />
+    <Content Include="Web\Microdiseno_Review.html" />
+    <Content Include="Web\Microdiseno_View.html" />
     <Content Include="Web\plana.html" />
+    <Content Include="Web\Plantilla_Base_Editor.html" />
     <Content Include="Web\Profesor.html" />
     <Content Include="Web\register.html" />
     <Content Include="Web\Scripts\bootstrap.bundle.js" />
