@@ -28,8 +28,13 @@ namespace MallaCurricular.Controllers
 
         private string GetNovedadesJson(int grupoId, string textAvisos)
         {
-            JObject json = new JObject();
-            json["avisos"] = textAvisos ?? "";
+            JObject json;
+            try {
+                json = JObject.Parse(textAvisos ?? "{}");
+            } catch {
+                json = new JObject();
+                json["avisos"] = textAvisos ?? "";
+            }
             JArray evs = new JArray();
             JArray resp = new JArray();
 
@@ -172,9 +177,8 @@ namespace MallaCurricular.Controllers
                 if (g == null) return BadRequest("Grupo no encontrado");
                 
                 string payload = data["Novedades"]?.ToString();
+                g.Novedades = payload;
                 var json = JObject.Parse(payload ?? "{}");
-                
-                g.Novedades = json["avisos"]?.ToString();
                 _gruposRepo.Update(g);
 
                 using(var conn = new SqlConnection(GetConnectionString()))

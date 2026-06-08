@@ -240,8 +240,8 @@ function renderSemesters() {
                 const finalCode = course.code || course.Codigo || courseCode || "";
                 let urlParams = `?cursoCode=${encodeURIComponent(finalCode)}&cursoCodigo=${encodeURIComponent(finalCode)}&semestre=2026-I`;
                 
-                if(userRole === 1) {
-                    targetPage = 'Microdiseno_Review.html';
+                if(userRole === 1 || userRole === 2) {
+                    targetPage = 'Microdiseno.html';
                 } else if(userRole === 3) {
                     targetPage = 'Microdiseno_View.html';
                     urlParams = `?cursoCode=${encodeURIComponent(finalCode)}&cursoCodigo=${encodeURIComponent(finalCode)}`;
@@ -643,16 +643,28 @@ function fillUpdateForm(courseCode) {
     const course = courses[courseCode];
 
     // Rellenar los campos
-    document.getElementById('update-name').value = course.name;
-    document.getElementById('update-color').value = course.color;
-    document.getElementById('update-tps').value = course.tps;
-    document.getElementById('update-tis').value = course.tis;
-    document.getElementById('update-type').value = course.type || 'Teorica';
-    document.getElementById('update-credits').value = course.credits;
+    const nameEl = document.getElementById('update-name');
+    if (nameEl) nameEl.value = course.name;
+    
+    const colorEl = document.getElementById('update-color');
+    if (colorEl) colorEl.value = course.color;
+    
+    const tpsEl = document.getElementById('update-tps');
+    if (tpsEl) tpsEl.value = course.tps;
+    
+    const tisEl = document.getElementById('update-tis');
+    if (tisEl) tisEl.value = course.tis;
+    
+    const typeEl = document.getElementById('update-type');
+    if (typeEl) typeEl.value = course.type || 'Teorica';
+    
+    const creditsEl = document.getElementById('update-credits');
+    if (creditsEl) creditsEl.value = course.credits;
 
     // Rellenar prerrequisito
     const prereqCode = (course.prerequisiteCodes && course.prerequisiteCodes.length > 0) ? course.prerequisiteCodes[0] : '';
-    document.getElementById('update-prerequisite').value = prereqCode;
+    const prereqEl = document.getElementById('update-prerequisite');
+    if (prereqEl) prereqEl.value = prereqCode;
 }
 
 /**

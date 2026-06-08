@@ -4,6 +4,8 @@ using System.Configuration;
 using System.Data.Entity.Core.EntityClient;
 using System.Data.SqlClient;
 using System.Web.Http;
+using System.IO;
+using System.Text;
 using MallaCurricular.Models;
 
 namespace MallaCurricular.Controllers
@@ -34,7 +36,12 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
-                var cmd = new SqlCommand("SELECT TOP 1 * FROM Microdisenos WHERE CursoCodigo = @c AND Semestre = @s ORDER BY Id DESC", conn);
+                var cmd = new SqlCommand(@"
+                    SELECT m.*, c.Asignatura 
+                    FROM Microdisenos m
+                    LEFT JOIN Cursos c ON LTRIM(RTRIM(m.CursoCodigo)) = LTRIM(RTRIM(c.Codigo))
+                    WHERE LTRIM(RTRIM(m.CursoCodigo)) = @c AND LTRIM(RTRIM(m.Semestre)) = @s 
+                    ORDER BY m.Id DESC", conn);
                 cmd.Parameters.AddWithValue("@c", cursoCodigo);
                 cmd.Parameters.AddWithValue("@s", semestre);
 
@@ -44,6 +51,7 @@ namespace MallaCurricular.Controllers
                     {
                         mx.Id = (int)reader["Id"];
                         mx.CursoCodigo = reader["CursoCodigo"].ToString();
+                        mx.Asignatura = reader["Asignatura"].ToString();
                         mx.Semestre = reader["Semestre"].ToString();
                         mx.Facultad = reader["Facultad"]?.ToString();
                         mx.Modalidad = reader["Modalidad"]?.ToString();
@@ -68,11 +76,11 @@ namespace MallaCurricular.Controllers
                 if (mx.Id > 0 || !string.IsNullOrEmpty(mx.CursoCodigo))
                 {
                     var cmdRoles = new SqlCommand("SELECT CreadorId, AvalId FROM MicrodisenoRoles WHERE CursoCodigo = @c", conn);
-                    cmdRoles.Parameters.AddWithValue("@c", mx.CursoCodigo);
+                    cmdRoles.Parameters.AddWithValue("@c", (mx.CursoCodigo ?? "").Trim());
                     using (var rRoles = cmdRoles.ExecuteReader()) {
                         if (rRoles.Read()) {
-                            mx.CreadorId = (int)rRoles["CreadorId"];
-                            mx.AvalId = (int)rRoles["AvalId"];
+                            mx.CreadorId = rRoles["CreadorId"] != DBNull.Value ? (int)rRoles["CreadorId"] : 0;
+                            mx.AvalId = rRoles["AvalId"] != DBNull.Value ? (int)rRoles["AvalId"] : 0;
                         }
                     }
                 }
@@ -259,7 +267,16 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
-                var cmd = new SqlCommand("SELECT Id, CursoCodigo, Semestre, ElaboradoPor, FechaCreacion, Estado FROM Microdisenos WHERE Estado = 'PendienteJefe' ORDER BY FechaCreacion DESC", conn);
+                var cmd = new SqlCommand(@"
+                    SELECT m.Id, m.CursoCodigo, m.Semestre, m.ElaboradoPor, m.FechaCreacion, m.Estado, c.Asignatura,
+                           u1.nombre as CreadorNombre, u2.nombre as AvalNombre
+                    FROM Microdisenos m
+                    LEFT JOIN Cursos c ON LTRIM(RTRIM(m.CursoCodigo)) = LTRIM(RTRIM(c.Codigo))
+                    LEFT JOIN MicrodisenoRoles r ON LTRIM(RTRIM(m.CursoCodigo)) = LTRIM(RTRIM(r.CursoCodigo))
+                    LEFT JOIN Usuarios u1 ON r.CreadorId = u1.id_usuario
+                    LEFT JOIN Usuarios u2 ON r.AvalId = u2.id_usuario
+                    WHERE m.Estado = 'PendienteJefe' 
+                    ORDER BY m.FechaCreacion DESC", conn);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -268,8 +285,11 @@ namespace MallaCurricular.Controllers
                         {
                             Id = (int)reader["Id"],
                             CursoCodigo = reader["CursoCodigo"].ToString(),
+                            Asignatura = reader["Asignatura"]?.ToString(),
                             Semestre = reader["Semestre"].ToString(),
                             ElaboradoPor = reader["ElaboradoPor"]?.ToString(),
+                            CreadorNombre = reader["CreadorNombre"]?.ToString(),
+                            AvalNombre = reader["AvalNombre"]?.ToString(),
                             FechaCreacion = reader["FechaCreacion"] != DBNull.Value ? (DateTime)reader["FechaCreacion"] : DateTime.MinValue,
                             Estado = reader["Estado"].ToString()
                         });
@@ -349,6 +369,113 @@ namespace MallaCurricular.Controllers
                 }
             }
             return Ok(new { CreadorId = 0, AvalId = 0 });
+        }
+
+        // 9. Obtener Plantilla Base HTML
+        [HttpGet]
+        [Route("plantilla-base")]
+        public IHttpActionResult GetPlantillaBase()
+        {
+            string path = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_base.html");
+            if (!File.Exists(path))
+            {
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                File.WriteAllText(path, WordTemplateHelper.DefaultTemplateHtml, Encoding.UTF8);
+            }
+            string html = File.ReadAllText(path, Encoding.UTF8);
+            return Ok(new { html });
+        }
+
+        // 10. Exportar Plantilla Base a DOCX
+        [HttpGet]
+        [Route("plantilla-base/export")]
+        public System.Net.Http.HttpResponseMessage ExportPlantillaBase()
+        {
+            string path = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_base.html");
+            if (!File.Exists(path))
+            {
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                File.WriteAllText(path, WordTemplateHelper.DefaultTemplateHtml, Encoding.UTF8);
+            }
+            string html = File.ReadAllText(path, Encoding.UTF8);
+
+            var ms = new MemoryStream();
+            WordTemplateHelper.ExportHtmlToDocx(html, ms);
+            ms.Position = 0;
+
+            var response = new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            response.Content = new System.Net.Http.StreamContent(ms);
+            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            response.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment")
+            {
+                FileName = "plantilla_base.docx"
+            };
+            return response;
+        }
+
+        // 11. Importar Plantilla Base desde DOCX
+        [HttpPost]
+        [Route("plantilla-base/import")]
+        public IHttpActionResult ImportPlantillaBase()
+        {
+            var request = System.Web.HttpContext.Current.Request;
+            if (request.Files.Count == 0)
+            {
+                return BadRequest("No se subió ningún archivo.");
+            }
+
+            var file = request.Files[0];
+            if (file.ContentLength == 0)
+            {
+                return BadRequest("El archivo está vacío.");
+            }
+
+            try
+            {
+                using (var stream = file.InputStream)
+                {
+                    string html = WordTemplateHelper.ImportDocxToHtml(stream);
+                    
+                    if (string.IsNullOrWhiteSpace(html))
+                    {
+                        return BadRequest("No se pudo extraer el contenido del documento Word.");
+                    }
+
+                    string path = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_base.html");
+                    string dir = Path.GetDirectoryName(path);
+                    if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                    
+                    File.WriteAllText(path, html, Encoding.UTF8);
+                    
+                    return Ok(new { Message = "Plantilla cargada y actualizada con éxito", html });
+                }
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // 12. Restaurar Plantilla Base por Defecto
+        [HttpPost]
+        [Route("plantilla-base/reset")]
+        public IHttpActionResult ResetPlantillaBase()
+        {
+            try
+            {
+                string path = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_base.html");
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+                return Ok(new { Message = "Plantilla restaurada con éxito" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
     }
 }

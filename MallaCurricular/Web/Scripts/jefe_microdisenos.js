@@ -1,62 +1,107 @@
 const API_MICRODISENOS = 'http://localhost:49513/api/microdisenos';
+const API_CURSOS_BASE = 'http://localhost:49513/api/cursos';
 
 async function fetchMicrodisenosPendientes() {
+    const tbody = document.getElementById('microdisenos-list-body');
+    if(!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Cargando microdiseños...</td></tr>';
+
     try {
+        // 1. Obtener lista base de pendientes
         const res = await fetch(`${API_MICRODISENOS}/pendientes`);
         if(!res.ok) throw new Error('Error al obtener microdiseños');
-        
         const data = await res.json();
-        const tbody = document.getElementById('microdisenos-list-body');
-        if(!tbody) return;
-        
+
         tbody.innerHTML = '';
-        
+
         if(data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500 italic">No hay microdiseños pendientes de revisión.</td></tr>';
             return;
         }
 
-        data.forEach(m => {
+        // 2. Para cada microdiseño, enriquecer con datos de APIs que ya funcionan
+        for (const m of data) {
+            const codigo = (m.CursoCodigo || '').trim();
+
+            // Obtener nombre de la asignatura desde /api/cursos/{codigo}
+            let asigNombre = m.Asignatura || '';
+            if (!asigNombre) {
+                try {
+                    const cRes = await fetch(`${API_CURSOS_BASE}/${encodeURIComponent(codigo)}`);
+                    if (cRes.ok) {
+                        const curso = await cRes.json();
+                        asigNombre = curso.Asignatura || '';
+                    }
+                } catch(e) {}
+            }
+
+            // Obtener nombres de Creador y Aval desde /api/microdisenos/roles/{codigo}
+            // + /api/microdisenos/roles/docentes-materias
+            let creadorNombre = m.CreadorNombre || '';
+            let avalNombre = m.AvalNombre || '';
+
+            if (!creadorNombre || !avalNombre) {
+                try {
+                    const rRes = await fetch(`${API_MICRODISENOS}/roles/${encodeURIComponent(codigo)}`);
+                    if (rRes.ok) {
+                        const roles = await rRes.json();
+                        // Buscar nombres en el listado de docentes-materias ya cargado
+                        if (roles.CreadorId && window._docentesMaterias) {
+                            const c = window._docentesMaterias.find(d => d.ProfesorId === roles.CreadorId);
+                            if (c) creadorNombre = c.ProfesorNombre;
+                        }
+                        if (roles.AvalId && window._docentesMaterias) {
+                            const a = window._docentesMaterias.find(d => d.ProfesorId === roles.AvalId);
+                            if (a) avalNombre = a.ProfesorNombre;
+                        }
+                        // Si no tenemos el listado precargado, fallback a ElaboradoPor
+                        if (!creadorNombre) creadorNombre = m.ElaboradoPor || 'No asignado';
+                    }
+                } catch(e) {}
+            }
+
             const tr = document.createElement('tr');
             tr.className = "border-b hover:bg-gray-50 transition";
             tr.innerHTML = `
-                <td class="p-4 font-bold text-indigo-700">${m.CursoCodigo}</td>
-                <td class="p-4 text-gray-600">${m.Semestre}</td>
-                <td class="p-4">${m.ElaboradoPor || 'Docente'}</td>
-                <td class="p-4 text-xs text-gray-400">${new Date(m.FechaCreacion).toLocaleString()}</td>
+                <td class="p-4 font-bold text-indigo-700">${asigNombre || codigo} <span class="text-[10px] text-gray-400 font-normal">(${codigo})</span></td>
+                <td class="p-4 text-gray-600">${m.Semestre || ''}</td>
+                <td class="p-4">
+                    <div class="text-[11px]"><span class="font-bold text-gray-500">Creado por:</span><br>${creadorNombre || m.ElaboradoPor || 'No asignado'}</div>
+                    <div class="text-[11px] mt-1"><span class="font-bold text-indigo-500">Avalado por:</span><br>${avalNombre || 'No asignado'}</div>
+                </td>
+                <td class="p-4 text-[10px] text-gray-400">${new Date(m.FechaCreacion).toLocaleString()}</td>
                 <td class="p-4 text-center">
                     <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200">${m.Estado}</span>
                 </td>
                 <td class="p-4 text-center">
-                    <button onclick="revisarMicrodiseno('${m.CursoCodigo}', '${m.Semestre}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold shadow transition-all transform hover:scale-105">
+                    <button onclick="revisarMicrodiseno('${codigo}', '${m.Semestre}', '${asigNombre}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold shadow transition-all transform hover:scale-105">
                         Revisar y Decidir
                     </button>
                 </td>
             `;
             tbody.appendChild(tr);
-        });
+        }
     } catch(e) { 
         console.error(e);
-        const tbody = document.getElementById('microdisenos-list-body');
         if(tbody) tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-500 font-bold">Error al cargar datos del servidor.</td></tr>';
     }
 }
 
-function revisarMicrodiseno(codigo, semestre) {
-    window.location.href = `Microdiseno_Review.html?cursoCodigo=${encodeURIComponent(codigo)}&semestre=${encodeURIComponent(semestre)}`;
+function revisarMicrodiseno(codigo, semestre, asigNombre) {
+    window.location.href = `Microdiseno.html?cursoCodigo=${encodeURIComponent(codigo)}&semestre=${encodeURIComponent(semestre)}&asigNombre=${encodeURIComponent(asigNombre || '')}`;
 }
 
 // Redefinimos switchJefeTab para incluir microdiseños y roles
 function switchJefeTab(tab) {
     // Escondemos todas las secciones conocidas
-    const sections = ['malla-section', 'grupos-section', 'microdisenos-section', 'roles-section'];
+    const sections = ['malla-section', 'grupos-section', 'microdisenos-section', 'roles-section', 'compromiso-section'];
     sections.forEach(s => {
         const el = document.getElementById(s);
         if(el) el.classList.add('hidden');
     });
 
     // Reset estilos tabs
-    const tabs = ['tab-malla', 'tab-grupos', 'tab-microdisenos', 'tab-roles'];
+    const tabs = ['tab-malla', 'tab-grupos', 'tab-microdisenos', 'tab-roles', 'tab-compromiso'];
     tabs.forEach(t => {
         const el = document.getElementById(t);
         if(el) {
@@ -80,7 +125,7 @@ function switchJefeTab(tab) {
         if(typeof initJefeGrupos === 'function') initJefeGrupos();
     }
     if(tab === 'microdisenos') {
-        fetchMicrodisenosPendientes();
+        cargarDocentesMaterias().then(() => fetchMicrodisenosPendientes());
     }
     if(tab === 'roles') {
         initRolesTab();
@@ -90,10 +135,18 @@ function switchJefeTab(tab) {
 // ------ LÓGICA DE ROLES ------
 let docentesMaterias = [];
 
-async function initRolesTab() {
+async function cargarDocentesMaterias() {
+    if (window._docentesMaterias && window._docentesMaterias.length > 0) return; // ya cargados
     try {
         const res = await fetch(`${API_MICRODISENOS}/roles/docentes-materias`);
         docentesMaterias = await res.json();
+        window._docentesMaterias = docentesMaterias;
+    } catch(e) { console.error('Error cargando docentes-materias:', e); }
+}
+
+async function initRolesTab() {
+    try {
+        await cargarDocentesMaterias();
         
         const asignaturasSet = new Set();
         const asignaturasArr = [];

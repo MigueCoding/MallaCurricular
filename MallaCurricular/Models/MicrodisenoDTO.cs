@@ -7,6 +7,7 @@ namespace MallaCurricular.Models
     {
         public int Id { get; set; }
         public string CursoCodigo { get; set; }
+        public string Asignatura { get; set; }
         public string Semestre { get; set; }
         public string Facultad { get; set; }
         public string Modalidad { get; set; }
@@ -23,7 +24,9 @@ namespace MallaCurricular.Models
         public string ContenidoJSON { get; set; }
         
         public int? CreadorId { get; set; }
+        public string CreadorNombre { get; set; }
         public int? AvalId { get; set; }
+        public string AvalNombre { get; set; }
     }
 
     public class RevisionMicrodisenoDTO

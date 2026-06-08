@@ -771,7 +771,8 @@ function parseNovedades(novedadesStr) {
             return {
                 avisos: parsed.avisos || "",
                 evaluaciones: parsed.evaluaciones || [],
-                respuestas: parsed.respuestas || []
+                respuestas: parsed.respuestas || [],
+                compromiso: parsed.compromiso || null
             };
         }
     } catch(e) {}
@@ -839,10 +840,13 @@ function renderMisAsignaturas(inscripciones) {
                     <button onclick="window.open('Microdiseno_View.html?cursoCode=${encodeURIComponent(ins.CursoCodigo || '')}&cursoCodigo=${encodeURIComponent(ins.CursoCodigo || '')}', '_blank')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded shadow transition">
                         📄 Ver Microdiseño
                     </button>
+                    <button onclick="window.open('Compromiso_Academico.html?grupoId=${ins.GrupoId}&cursoCodigo=${encodeURIComponent(ins.CursoCodigo || '')}&asigNombre=${encodeURIComponent(ins.CursoNombre || '')}&role=estudiante', '_blank')" class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold px-4 py-2 rounded shadow transition">
+                        🤝 Ver Compromiso
+                    </button>
                 </div>
             </div>
 
-            ${data.evaluaciones.length > 0 ? `
+            ${(data.evaluaciones.length > 0 || data.compromiso?.publicado) ? `
             <div class="mb-4 overflow-x-auto text-gray-700">
                 <h4 class="font-bold text-blue-900 mb-2 mt-6">📋 Compromiso Académico:</h4>
                 <table class="w-full text-left border rounded shadow-sm">

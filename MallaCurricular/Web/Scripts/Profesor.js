@@ -206,3 +206,9 @@ function openMicrodiseno() {
     const url = `Microdiseno.html?cursoCodigo=${encodeURIComponent(currentSubject.CursoCodigo)}&asigNombre=${encodeURIComponent(currentSubject.Asignatura)}&semestre=2026-I`;
     window.open(url, '_blank');
 }
+
+function openCompromiso() {
+    if (!currentSubject) return;
+    const url = `Compromiso_Academico.html?grupoId=${currentSubject.Id}&cursoCodigo=${encodeURIComponent(currentSubject.CursoCodigo)}&asigNombre=${encodeURIComponent(currentSubject.Asignatura)}&role=profesor`;
+    window.open(url, '_blank');
+}

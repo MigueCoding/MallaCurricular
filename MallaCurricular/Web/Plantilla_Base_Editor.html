@@ -4,631 +4,378 @@
     <script>if (!localStorage.getItem('userId')) { window.location.href = 'login.html'; }</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edición de Plantilla Base - Jefe de Programa</title>
+    <title>Parametrización de Plantilla Base - Jefe de Programa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-        body { font-family: 'Roboto', sans-serif; background-color: #f3f4f6; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
 
         .a4-container {
-            width: 210mm; min-height: 297mm; margin: 20px auto;
-            background: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 15mm; color: #1a1a1a; position: relative;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            padding: 15mm;
+            color: #1a1a1a;
+            position: relative;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 1px; table-layout: fixed; }
-        
-        td, th {
-            border: 1px solid #71717a; padding: 3px 6px; font-size: 10px;
-            vertical-align: middle; position: relative; word-wrap: break-word; overflow: hidden;
-        }
-
-        td[contenteditable="true"]:focus, th[contenteditable="true"]:focus {
-            outline: 2px solid #3b82f6; background-color: #eff6ff; outline-offset: -2px;
-        }
-
-        .bg-label { background-color: #e4e4e7; font-weight: bold; font-size: 10px; }
-
-        .orientacion-box {
-            border: 1px dashed #a1a1aa; background: #f8fafc; padding: 8px;
-            font-size: 10px; margin: 8px 0; line-height: 1.4; color: #4b5563;
+        /* Microdiseno Table preview styling */
+        .a4-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            table-layout: fixed;
         }
         
-        .input-doc {
-            width: 100%; border: none; background: transparent; outline: none; font-size: 10px; padding: 2px;
-        }
-        select.input-doc { appearance: none; -webkit-appearance: none; cursor: pointer; }
-        textarea.input-doc { resize: none; min-height: 30px; }
-
-        .section-num { font-weight: bold; font-size: 11px; margin-top: 12px; margin-bottom: 4px; display: block; outline: none; }
-        .section-num[contenteditable="true"]:focus { background-color: #eff6ff; outline: 1px dashed #3b82f6; }
-
-        .nav-bar {
-            position: fixed; top: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; z-index: 1000;
-            padding: 8px 24px; display: flex; justify-content: space-between; align-items: center;
+        .a4-container td, .a4-container th {
+            border: 1px solid #a1a1aa;
+            padding: 5px 8px;
+            font-size: 11px;
+            vertical-align: middle;
+            word-wrap: break-word;
         }
 
-        .toolbar {
-            position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-            background: #1e293b; color: white; padding: 12px 20px; border-radius: 12px;
-            display: flex; flex-direction: column; gap: 8px; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        .a4-container .bg-label {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            color: #334155;
         }
-        .toolbar-row { display: flex; gap: 8px; align-items: center; justify-content: center; }
-        .toolbar button {
-            background: #334155; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; transition: 0.2s;
+
+        .a4-container .orientacion-box {
+            border: 1px dashed #cbd5e1;
+            background: #f8fafc;
+            padding: 10px;
+            font-size: 11px;
+            margin: 10px 0;
+            line-height: 1.4;
+            color: #64748b;
+            border-radius: 6px;
         }
-        .toolbar button:hover { background: #475569; }
-        .btn-red { background: #7f1d1d !important; } .btn-red:hover { background: #991b1b !important; }
-        .btn-indigo { background: #4338ca !important; } .btn-indigo:hover { background: #4f46e5 !important; }
-        .btn-green { background: #166534 !important; } .btn-green:hover { background: #15803d !important; }
-        .toolbar-divider { width: 1px; height: 20px; background: #475569; margin: 0 4px; }
+        
+        .a4-container .input-doc {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            outline: none;
+            font-size: 11px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            color: #334155;
+        }
+
+        .a4-container select.input-doc {
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .a4-container textarea.input-doc {
+            min-height: 50px;
+            pointer-events: none;
+        }
+        .a4-container input.input-doc {
+            pointer-events: none;
+        }
+
+        .a4-container .section-num {
+            font-weight: 700;
+            font-size: 12px;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            display: block;
+            color: #1e293b;
+            text-transform: uppercase;
+        }
+
+        /* Drag & Drop Area styling */
+        .dropzone {
+            border: 2px dashed #6366f1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dropzone.dragover {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+            transform: scale(1.02);
+        }
+
+        /* Micro-animations */
+        .btn-hover-effect {
+            transition: all 0.2s ease;
+        }
+        .btn-hover-effect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
     </style>
 </head>
-<body class="pt-14 pb-48">
+<body class="pb-12">
 
-    <nav class="nav-bar no-print">
+    <!-- Top Navigation Bar -->
+    <nav class="sticky top-0 bg-white/95 backdrop-blur-md border-bottom border-gray-100 z-50 shadow-sm py-4 px-6 md:px-12 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="h-8 w-1 bg-indigo-600 rounded"></div>
+            <div class="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                <i class="fa-solid fa-file-word text-lg"></i>
+            </div>
             <div>
-                <h1 class="font-bold text-gray-800 text-sm">Edición de Plantilla Base</h1>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">Modo Administrador</span>
-                <span class="text-xs text-gray-400 ml-2">Tip: Usa Ctrl+Z para deshacer cambios</span>
+                <h1 class="font-bold text-gray-900 text-lg">Parametrización con Plantilla Word</h1>
+                <p class="text-xs text-gray-500">Administración de Microdiseño Curricular</p>
             </div>
         </div>
-        <div class="flex gap-2 items-center">
-            <button onclick="deshacer()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Deshacer (Ctrl+Z)</button>
-            <button onclick="window.location.href='Jefe.html'" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>
-            <button onclick="limpiarPlantillaBase()" class="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded shadow hover:bg-red-700">Restaurar Defecto</button>
-            <button onclick="guardarPlantillaBase()" class="bg-green-600 text-white px-3 py-1 text-sm font-bold rounded shadow hover:bg-green-700">Guardar Plantilla Base</button>
+        <div class="flex gap-3">
+            <button onclick="window.location.href='Jefe.html'" class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Panel Jefe
+            </button>
+            <button onclick="restaurarPorDefecto()" class="px-4 py-2 border border-red-200 text-red-600 text-sm font-semibold rounded-xl bg-red-50 hover:bg-red-100 transition">
+                <i class="fa-solid fa-rotate-left mr-2"></i> Restaurar Defecto
+            </button>
         </div>
     </nav>
 
-    <div class="toolbar" id="toolbar" style="display: none;">
-        <div class="toolbar-row text-xs text-gray-300 font-bold mb-1">
-            Herramientas de Celda Seleccionada
-        </div>
-        <div class="toolbar-row">
-            <button onclick="alternarTitulo()" class="btn-indigo">Hacer Título / Normal</button>
-            <div class="toolbar-divider"></div>
-            <span class="text-[10px] text-gray-400">Insertar Campo:</span>
-            <button onclick="cambiarTipoCampo('texto')">Texto Corto</button>
-            <button onclick="cambiarTipoCampo('area')">Área Texto</button>
-            <button onclick="cambiarTipoCampo('select')">Desplegable</button>
-            <button onclick="cambiarTipoCampo('number')">Contador</button>
-            <button onclick="cambiarTipoCampo('normal')" class="btn-red">Quitar Campo</button>
-        </div>
-        <div class="toolbar-row mt-1">
-            <button onclick="agregarFilaArriba()">+Fila Arriba</button>
-            <button onclick="agregarFilaAbajo()">+Fila Abajo</button>
-            <button onclick="eliminarFila()" class="btn-red">Borrar Fila</button>
-            
-            <div class="toolbar-divider"></div>
-            
-            <button onclick="agregarColumnaDerUnaFila()" class="btn-green">+Col Derecha (Solo esta fila)</button>
-            <button onclick="agregarColumnaDerTodas()" class="btn-indigo">+Col Derecha (A Toda la Tabla)</button>
-            
-            <div class="toolbar-divider"></div>
-            <button onclick="eliminarCelda()" class="btn-red">Borrar Campo / Ajustar</button>
-            <button onclick="eliminarColumnaTodas()" class="btn-red">Borrar Col Total</button>
-        </div>
-    </div>
+    <!-- Main Content Grid -->
+    <div class="max-w-[1280px] mx-auto px-4 md:px-12 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Side: Wizard Workflow Controls -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                <h2 class="font-bold text-gray-900 text-base mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-indigo-600"></i> Proceso de Configuración
+                </h2>
 
-    <!-- The container that will be editable and saved -->
-    <div id="editable-wrapper">
-        <div class="a4-container" id="doc-container">
-            <!-- Loading template dynamically -->
+                <!-- Step-by-Step Flow -->
+                <div class="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-[2px] before:bg-indigo-100">
+                    
+                    <!-- Step 1: Export -->
+                    <div class="flex gap-4 relative">
+                        <div class="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-md">1</div>
+                        <div class="space-y-2">
+                            <h3 class="font-bold text-gray-800 text-sm">Exportar Plantilla Base</h3>
+                            <p class="text-xs text-gray-500">Descarga la plantilla actual como un archivo editable de Word (.docx) con todas las tablas e identificadores.</p>
+                            <button onclick="exportarPlantilla()" class="btn-hover-effect w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-download"></i> Descargar Plantilla Word
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Edit Locally -->
+                    <div class="flex gap-4 relative">
+                        <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">2</div>
+                        <div class="space-y-1">
+                            <h3 class="font-bold text-gray-800 text-sm">Edición en Word</h3>
+                            <p class="text-xs text-gray-500">Abre el archivo Word en tu computador local. Modifica textos, reordena tablas o parametriza nuevos campos utilizando el formato:</p>
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 font-mono text-[9px] text-gray-600 mt-2 space-y-1">
+                                <div>• <b>[Campo: id_campo]</b>: Input de texto</div>
+                                <div>• <b>[Texto: id_campo]</b>: Área de texto</div>
+                                <div>• <b>[Numero: id_campo]</b>: Input numérico</div>
+                                <div>• <b>[Lista: id | Op1; Op2; ...]</b>: Desplegable</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Drag & Drop Upload -->
+                    <div class="flex gap-4 relative">
+                        <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">3</div>
+                        <div class="space-y-2 w-full">
+                            <h3 class="font-bold text-gray-800 text-sm">Subir Nueva Plantilla</h3>
+                            <p class="text-xs text-gray-500">Arrastra el archivo Word editado para sincronizar los cambios de estructura en el sistema de inmediato.</p>
+                            
+                            <!-- Drag & Drop Field -->
+                            <div id="dropzone" class="dropzone rounded-2xl p-6 bg-indigo-50/50 cursor-pointer text-center flex flex-col items-center justify-center hover:bg-indigo-50/80">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-500 mb-2"></i>
+                                <span class="text-xs font-semibold text-gray-700 block">Arrastra tu archivo aquí</span>
+                                <span class="text-[10px] text-gray-400 block mt-1">o haz clic para explorar (.docx)</span>
+                                <input type="file" id="fileInput" accept=".docx" class="hidden">
+                            </div>
+                            
+                            <!-- Loading / Message Indicator -->
+                            <div id="uploadStatus" class="hidden text-xs font-semibold p-3 rounded-lg text-center mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Sincronizacion -->
+                    <div class="flex gap-4 relative">
+                        <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">4</div>
+                        <div class="space-y-1">
+                            <h3 class="font-bold text-gray-800 text-sm">Actualización Automática</h3>
+                            <p class="text-xs text-gray-500">El backend procesará el documento y la nueva plantilla se propagará instantáneamente a las vistas de estudiantes y profesores.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
+
+        <!-- Right Side: Live Template Preview -->
+        <div class="lg:col-span-8 space-y-4">
+            <div class="flex justify-between items-center bg-slate-800 text-white rounded-xl px-5 py-3 shadow-md">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <h2 class="font-bold text-xs uppercase tracking-wider">Vista Previa de la Plantilla Activa</h2>
+                </div>
+                <div class="text-[11px] text-slate-400">Sólo Lectura</div>
+            </div>
+
+            <!-- Main A4 preview frame -->
+            <div class="overflow-x-auto w-full">
+                <div class="a4-container" id="doc-container">
+                    <div class="flex flex-col items-center justify-center min-h-[300px] text-gray-400">
+                        <i class="fa-solid fa-spinner animate-spin text-3xl mb-3 text-indigo-500"></i>
+                        <p class="text-sm font-semibold">Cargando plantilla desde el servidor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        let selectedCell = null;
-        let undoStack = [];
+        const baseUrl = '/api/microdisenos';
+        const docContainer = document.getElementById('doc-container');
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadStatus = document.getElementById('uploadStatus');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('doc-container');
-            const savedTemplate = localStorage.getItem('plantilla_base');
+        // Load the active template on mount
+        document.addEventListener('DOMContentLoaded', loadActiveTemplate);
 
-            const templateDefault = `
-        <!-- FORMATO FDE 058 HEADER -->
-        <table class="mb-5">
-            <tr>
-                <td rowspan="3" class="w-[20%] text-center">
-                    <img src="LOGO ITM 2020-02.png" alt="ITM" class="h-14 mx-auto opacity-100">
-                </td>
-                <td rowspan="3" class="text-center font-bold text-sm">MICRODISEÑO CURRICULAR</td>
-                <td class="bg-gray-50 font-bold w-16">Código</td>
-                <td class="w-20">FDE 058</td>
-            </tr>
-            <tr>
-                <td class="bg-gray-50 font-bold">Versión</td>
-                <td>05</td>
-            </tr>
-            <tr>
-                <td class="bg-gray-50 font-bold">Fecha</td>
-                <td>30-07-2024</td>
-            </tr>
-        </table>
+        async function loadActiveTemplate() {
+            try {
+                const response = await fetch(`${baseUrl}/plantilla-base`);
+                if (!response.ok) throw new Error('Error al conectar con la API.');
+                const data = await response.json();
+                
+                if (data.html) {
+                    docContainer.innerHTML = data.html;
+                    // Disable inputs and select fields in preview
+                    docContainer.querySelectorAll('input, select, textarea').forEach(el => {
+                        el.disabled = true;
+                        el.style.cursor = 'default';
+                        if (el.tagName === 'INPUT') {
+                            el.value = el.value || '[Campo base]';
+                        } else if (el.tagName === 'TEXTAREA') {
+                            el.value = el.value || '[Área de texto base]';
+                        }
+                    });
+                } else {
+                    docContainer.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">No se encontró contenido para la plantilla.</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                docContainer.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">Error al cargar la plantilla activa.</div>`;
+            }
+        }
 
-        <span class="section-num">1. IDENTIFICACIÓN DE LA ASIGNATURA</span>
+        function exportarPlantilla() {
+            window.location.href = `${baseUrl}/plantilla-base/export`;
+        }
 
-        <table class="identification-table">
-            <!-- Fila de Nombre y Programa -->
-            <tr>
-                <td class="bg-label" colspan="1">Nombre de la Asignatura:</td>
-                <td colspan="3"><input type="text" id="asig-nombre" class="input-doc font-bold" readonly></td>
-                <td class="bg-label" colspan="1">Programa (s):</td>
-                <td colspan="3"><input type="text" id="txt-programas" class="input-doc doc-input"></td>
-            </tr>
-            <!-- Fila de Facultad -->
-            <tr>
-                <td class="bg-label" colspan="1">Facultad:</td>
-                <td colspan="7">
-                    <select id="sel-facultad" class="input-doc doc-input">
-                        <option value="">Seleccione Facultad.</option>
-                        <option value="Artes y Humanidades">Artes y Humanidades</option>
-                        <option value="Ciencias Económicas y Administrativas">Ciencias Económicas y Administrativas</option>
-                        <option value="Ciencias Exactas y Aplicadas">Ciencias Exactas y Aplicadas</option>
-                        <option value="Ingenierías">Ingenierías</option>
-                    </select>
-                </td>
-            </tr>
-            <!-- Fila de Modalidad -->
-            <tr>
-                <td class="bg-label" colspan="1">Modalidad del programa:</td>
-                <td colspan="7">
-                    <select id="sel-modalidad" class="input-doc doc-input">
-                        <option value="">Seleccione Modalidad.</option>
-                        <option value="Presencial">Presencial</option>
-                        <option value="Virtual">Virtual</option>
-                        <option value="A distancia">A distancia</option>
-                        <option value="Híbrida">Híbrida</option>
-                        <option value="Dual">Dual</option>
-                    </select>
-                </td>
-            </tr>
-            <!-- Fila de Área -->
-            <tr>
-                <td class="bg-label" colspan="1">Área de formación:</td>
-                <td colspan="7"><input type="text" id="txt-area" class="input-doc doc-input"></td>
-            </tr>
-            <!-- Fila de Código y Plan -->
-            <tr>
-                <td class="bg-label" colspan="1">Código de asignatura:</td>
-                <td colspan="3"><input type="text" id="asig-codigo" class="input-doc bg-gray-50" readonly></td>
-                <td class="bg-label" colspan="1">Plan de estudios <span class="text-[8px] font-normal">(solo específicas)</span>:</td>
-                <td colspan="3"><input type="text" id="txt-plandeestudios" class="input-doc doc-input"></td>
-            </tr>
-            <!-- Fila de Correquisitos y Prerrequisitos -->
-            <tr>
-                <td class="bg-label" colspan="1">Correquisitos:</td>
-                <td colspan="3"><input type="text" id="txt-correq" class="input-doc doc-input"></td>
-                <td class="bg-label" colspan="1">Prerrequisitos:</td>
-                <td colspan="3"><input type="text" id="txt-prereq" class="input-doc doc-input"></td>
-            </tr>
-            <!-- Fila de Créditos y Tipo de Crédito -->
-            <tr>
-                <td class="bg-label" colspan="1">Créditos de la asignatura</td>
-                <td colspan="1"><input type="number" id="num-creditos" class="input-doc text-center doc-input"></td>
-                <td class="bg-label" colspan="2" class="text-center">Tipo de crédito:</td>
-                <td colspan="4">
-                    <select id="sel-tipocredito" class="input-doc doc-input">
-                        <option value="Obligatorio">Obligatorio</option>
-                        <option value="electivo">electivo</option>
-                        <option value="optativo">optativo</option>
-                        <option value="libre elección">libre elección</option>
-                        <option value="Propedeutico">Propedeutico</option>
-                    </select>
-                </td>
-            </tr>
-            <!-- Fila de Tipo de Asignatura -->
-            <tr>
-                <td class="bg-label" colspan="1">Tipo de asignatura:</td>
-                <td colspan="7">
-                    <select id="sel-tipoasignatura" class="input-doc doc-input">
-                        <option value="">Elija un elemento.</option>
-                        <option value="Teórica">Teórica</option>
-                        <option value="Práctica">Práctica</option>
-                        <option value="Teórico-práctica">Teórico-práctica</option>
-                    </select>
-                </td>
-            </tr>
-            <!-- Fila de Distribución de Horas (8 columnas) -->
-            <tr>
-                <td class="bg-label text-center">Horas teóricas:</td>
-                <td class="text-center font-bold"><input type="number" id="num-hteoricas" class="input-doc text-center doc-input"></td>
-                <td class="bg-label text-center">Horas teórico – prácticas:</td>
-                <td class="text-center font-bold"><input type="number" id="num-hteoprac" class="input-doc text-center doc-input"></td>
-                <td class="bg-label text-center">Horas prácticas:</td>
-                <td class="text-center font-bold"><input type="number" id="num-hprac" class="input-doc text-center doc-input"></td>
-                <td class="bg-label text-center">Horas trabajo independiente:</td>
-                <td class="text-center font-bold"><input type="number" id="num-hindep" class="input-doc text-center doc-input"></td>
-            </tr>
-            <!-- Fila de Modalidad de Horas -->
-            <tr>
-                <td class="bg-label text-center">Horas presenciales</td>
-                <td class="text-center font-bold"><input type="number" id="num-hpres" class="input-doc text-center doc-input"></td>
-                <td class="bg-label text-center">Horas encuentros físicos</td>
-                <td class="text-center font-bold"><input type="number" id="num-hfisicos" class="input-doc text-center doc-input"></td>
-                <td class="bg-label text-center">Horas sesiones sincrónicas</td>
-                <td colspan="3" class="text-center font-bold"><input type="number" id="num-hsinc" class="input-doc text-center doc-input"></td>
-            </tr>
-        </table>
+        // Dropzone interactions
+        dropzone.addEventListener('click', () => fileInput.click());
 
-        <div class="orientacion-box">
-            <strong>1. Orientaciones sobre cómo desarrollar la identificación de la asignatura:</strong><br>
-            La identificación permite comprender su contexto. Una modalidad como la virtual implica diferencias en
-            planificación...
-            Asignaturas transversales se dejan en blanco los datos del programa. Los créditos deben corresponder al
-            total de horas.
-        </div>
-
-        <span class="section-num uppercase">2. Justificación</span>
-        <div class="border border-black p-1">
-            <textarea id="txt-justificacion" class="input-doc doc-input min-h-[60px]"
-                      placeholder="Escriba aquí..."></textarea>
-        </div>
-
-        <div class="orientacion-box">
-            <strong>2) Orientaciones sobre cómo escribir la justificación:</strong> Debe desarrollar la pertinencia...
-            ¿Qué problema o situación del contexto intenta abordar o resolver?
-        </div>
-
-        <span class="section-num uppercase">3. COMPETENCIA(S) Y RESULTADOS DE APRENDIZAJE</span>
-        <table>
-            <tr class="bg-label text-center uppercase">
-                <td class="w-1/2">Competencia del programa a la que aporta la asignatura</td>
-                <td>Resultado (s) de aprendizaje del programa asociados a la competencia</td>
-            </tr>
-            <tr>
-                <td class="p-0">
-                    <textarea id="txt-competencias" class="input-doc doc-input min-h-[70px]"
-                              placeholder="Escriba la competencia..."></textarea>
-                </td>
-                <td class="p-0">
-                    <textarea id="txt-resultados-aprendizaje" class="input-doc doc-input min-h-[70px]"
-                              placeholder="- Escriba el resultado..."></textarea>
-                </td>
-            </tr>
-        </table>
-
-        <div class="orientacion-box">
-            <strong>4) Orientaciones sobre las competencias:</strong> Deben ser las definidas en el programa de
-            formación, NO definiremos aquí competencias de asignatura.
-        </div>
-
-        <span class="section-num uppercase">4. SABERES</span>
-        <table>
-            <tr class="bg-label text-center uppercase">
-                <td class="w-[30%]">Saberes</td>
-                <td>Criterios de desempeño / Resultados esperados</td>
-                <td>Evidencias</td>
-            </tr>
-            <tr>
-                <td class="bg-gray-50 font-bold p-1">
-                    DECLARATIVOS: <br><span class="font-normal text-[8px] italic">Escriba aquí...</span>
-                </td>
-                <td class="p-0"><textarea id="txt-saber-dec-crit" class="input-doc doc-input h-full"></textarea></td>
-                <td class="p-0"><textarea id="txt-saber-dec-evi" class="input-doc doc-input h-full"></textarea></td>
-            </tr>
-            <tr>
-                <td class="bg-gray-50 font-bold p-1">
-                    PROCEDIMENTALES: <br><span class="font-normal text-[8px] italic">Escriba aquí...</span>
-                </td>
-                <td class="p-0"><textarea id="txt-saber-pro-crit" class="input-doc doc-input h-full"></textarea></td>
-                <td class="p-0"><textarea id="txt-saber-pro-evi" class="input-doc doc-input h-full"></textarea></td>
-            </tr>
-            <tr>
-                <td class="bg-gray-50 font-bold p-1">
-                    ACTITUDINALES: <br><span class="font-normal text-[8px] italic">Escriba aquí...</span>
-                </td>
-                <td class="p-0"><textarea id="txt-saber-act-crit" class="input-doc doc-input h-full"></textarea></td>
-                <td class="p-0"><textarea id="txt-saber-act-evi" class="input-doc doc-input h-full"></textarea></td>
-            </tr>
-        </table>
-
-        <span class="section-num uppercase">5. METODOLOGÍA, MATERIALES Y RECURSOS</span>
-        <table>
-            <tr>
-                <td class="bg-label uppercase">Metodología</td>
-            </tr>
-            <tr>
-                <td class="bg-gray-100 font-bold text-[9px] uppercase">Diagnóstico aprendizajes previos</td>
-            </tr>
-            <tr>
-                <td class="p-0">
-                    <textarea id="txt-diagnostico" class="input-doc doc-input min-h-[40px]"
-                              placeholder="Escriba aquí..."></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td class="bg-gray-100 font-bold text-[9px] uppercase">Metodología</td>
-            </tr>
-            <tr>
-                <td class="p-0">
-                    <textarea id="txt-metodologia" class="input-doc doc-input min-h-[60px]"
-                              placeholder="Describa la metodología..."></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td class="bg-label uppercase">Materiales y Recursos</td>
-            </tr>
-            <tr>
-                <td class="p-0">
-                    <textarea id="txt-materiales" class="input-doc doc-input min-h-[40px]"
-                              placeholder="Describa aquí..."></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td class="bg-label uppercase text-[9px]">Trabajo Independiente</td>
-            </tr>
-            <tr>
-                <td class="p-0">
-                    <textarea id="txt-trabajoindep" class="input-doc doc-input min-h-[40px]"
-                              placeholder="Actividades de trabajo independiente..."></textarea>
-                </td>
-            </tr>
-        </table>
-
-        <span class="section-num uppercase">6. EVALUACIÓN (Se autogenerará durante edición)</span>
-        <table>
-            <tr class="bg-label text-center uppercase">
-                <td class="w-[40%]">Evaluación</td>
-                <td class="w-[10%]">%</td>
-                <td>Estrategias e instrumentos para evaluar</td>
-            </tr>
-        </table>
-        
-        <span class="section-num uppercase">
-            Bibliografía <span class="text-[9px] font-normal italic">
-                (Básica,
-                complementaria y referenciada)
-            </span>
-        </span>
-        <div class="border border-black p-1">
-            <textarea id="txt-bibliografia" class="input-doc doc-input min-h-[60px]"
-                      placeholder="Apellido, A. A. (Año). Título..."></textarea>
-        </div>
-
-        <!-- CONTROL DE DOCUMENTO -->
-        <table class="mt-8">
-            <tr>
-                <td class="bg-gray-50 font-bold w-1/2">Elaborado por:</td>
-                <td class="bg-gray-50 font-bold">Revisado por:</td>
-            </tr>
-            <tr class="h-12">
-                <td id="txt-elaborado" class="italic align-bottom text-[9px]"></td>
-                <td id="txt-revisado" class="italic align-bottom text-[9px]"></td>
-            </tr>
-            <tr>
-                <td class="bg-gray-50 font-bold">Aprobado por:</td>
-                <td class="bg-gray-100 px-2">
-                    <div class="flex justify-between items-center text-[7px] font-bold">
-                        <div>VERSIÓN: <span id="txt-version">05</span></div>
-                        <div>FECHA: <span id="txt-fecha">30-07-2024</span></div>
-                    </div>
-                </td>
-            </tr>
-            <tr class="h-10 text-[9px]">
-                <td colspan="2" id="txt-aprobado"></td>
-            </tr>
-        </table>
-            `;
-            container.innerHTML = savedTemplate || templateDefault;
-            saveState(true); // Initial state
-            activarEdicion();
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
         });
 
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'z') {
-                e.preventDefault();
-                deshacer();
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                processFile(e.dataTransfer.files[0]);
             }
         });
 
-        function saveState(isInitial = false) {
-            const currentHTML = document.getElementById('doc-container').innerHTML;
-            if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentHTML) {
-                undoStack.push(currentHTML);
-                if (undoStack.length > 20) undoStack.shift(); // Keep max 20 states
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processFile(e.target.files[0]);
+            }
+        });
+
+        async function processFile(file) {
+            if (!file.name.endsWith('.docx')) {
+                showStatus('Por favor, selecciona un archivo Word válido (.docx)', 'error');
+                return;
+            }
+
+            showStatus('<i class="fa-solid fa-spinner animate-spin mr-2"></i> Procesando archivo en el servidor...', 'info');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${baseUrl}/plantilla-base/import`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Plantilla actualizada exitosamente!', 'success');
+                    // Reload the template preview immediately
+                    loadActiveTemplate();
+                } else {
+                    showStatus(result.Message || 'Error al procesar el archivo Word.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showStatus('Error de conexión al servidor al subir archivo.', 'error');
             }
         }
 
-        function deshacer() {
-            if (undoStack.length > 1) {
-                undoStack.pop(); // Remove current
-                const previousHTML = undoStack[undoStack.length - 1];
-                document.getElementById('doc-container').innerHTML = previousHTML;
-                activarEdicion();
-                esconderToolbar();
-            }
-        }
-
-        function activarEdicion() {
-            // Re-bind listeners for editing
-            const container = document.getElementById('doc-container');
-            const cells = container.querySelectorAll('td, th, .section-num');
-            
-            cells.forEach(cell => {
-                cell.setAttribute('contenteditable', 'true');
-                cell.onclick = (e) => {
-                    // prevent input clicks from triggering cell logic sometimes
-                    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
-                };
-                cell.onfocus = (e) => {
-                    if(e.target.tagName === 'TD' || e.target.tagName === 'TH') {
-                        selectedCell = e.target;
-                        document.getElementById('toolbar').style.display = 'flex';
-                    }
-                };
-            });
-            // Re-bind inputs to not be blocked
-            container.querySelectorAll('input, select, textarea').forEach(el => {
-                el.onfocus = () => {
-                    selectedCell = el.closest('td, th');
-                    document.getElementById('toolbar').style.display = 'flex';
-                };
-            });
-        }
-
-        function esconderToolbar() {
-            document.getElementById('toolbar').style.display = 'none';
-            selectedCell = null;
-        }
-
-        // --- CALCULO PROPORCIONAL ---
-        function recalcularProporcionesFila(tr) {
-            const table = tr.closest('table');
-            table.style.tableLayout = 'auto';
-
-            const tds = Array.from(tr.querySelectorAll(':scope > td, :scope > th'));
-            if(tds.length === 0) return;
-            // Clean colspans and define pure percentages
-            const percentage = (100 / tds.length).toFixed(2);
-            tds.forEach(td => {
-                td.removeAttribute('colspan');
-                td.style.width = percentage + '%';
-            });
-        }
-
-        // --- ACCIONES CELDA INDIVIDUAL ---
-        function alternarTitulo() {
-            saveState();
-            if (!selectedCell) return;
-            selectedCell.classList.toggle('bg-label');
-            if(selectedCell.classList.contains('bg-label')) {
-                selectedCell.style.textAlign = 'center';
+        function showStatus(message, type) {
+            uploadStatus.classList.remove('hidden', 'bg-blue-100', 'text-blue-700', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700');
+            if (type === 'info') {
+                uploadStatus.classList.add('bg-blue-100', 'text-blue-700');
+            } else if (type === 'success') {
+                uploadStatus.classList.add('bg-green-100', 'text-green-700');
             } else {
-                selectedCell.style.textAlign = 'left';
+                uploadStatus.classList.add('bg-red-100', 'text-red-700');
             }
+            uploadStatus.innerHTML = message;
+            uploadStatus.classList.remove('hidden');
         }
 
-        function cambiarTipoCampo(tipo) {
-            saveState();
-            if (!selectedCell) return;
-            selectedCell.innerHTML = '';
-            
-            if (tipo === 'select') {
-                selectedCell.innerHTML = `<select class="input-doc doc-input"><option value="">Desplegable...</option><option value="1">Opción 1</option><option value="2">Opción 2</option></select>`;
-            } else if (tipo === 'number') {
-                selectedCell.innerHTML = `<input type="number" class="input-doc text-center doc-input" placeholder="0">`;
-            } else if (tipo === 'texto') {
-                selectedCell.innerHTML = `<input type="text" class="input-doc doc-input" placeholder="Texto corto...">`;
-            } else if (tipo === 'area') {
-                selectedCell.innerHTML = `<textarea class="input-doc doc-input" placeholder="Comentarios..."></textarea>`;
-            } else if (tipo === 'normal') {
-                selectedCell.innerHTML = `Escriba título normal...`;
-            }
-            activarEdicion();
-        }
-
-        function eliminarCelda() {
-            saveState();
-            if (!selectedCell) return;
-            const tr = selectedCell.closest('tr');
-            selectedCell.remove();
-            recalcularProporcionesFila(tr);
-            esconderToolbar();
-        }
-
-        // --- ACCIONES FILA ---
-        function agregarFilaAbajo() {
-            saveState();
-            if (!selectedCell) return;
-            const tr = selectedCell.closest('tr');
-            const newTr = tr.cloneNode(true);
-            newTr.querySelectorAll('td, th').forEach(td => {
-                td.innerHTML = '&nbsp;'; 
-                td.removeAttribute('class'); 
-            });
-            tr.parentNode.insertBefore(newTr, tr.nextSibling);
-            activarEdicion();
-        }
-
-        function agregarFilaArriba() {
-            saveState();
-            if (!selectedCell) return;
-            const tr = selectedCell.closest('tr');
-            const newTr = tr.cloneNode(true);
-            newTr.querySelectorAll('td, th').forEach(td => {
-                td.innerHTML = '&nbsp;';
-                td.removeAttribute('class'); 
-            });
-            tr.parentNode.insertBefore(newTr, tr);
-            activarEdicion();
-        }
-
-        function eliminarFila() {
-            saveState();
-            if (!selectedCell) return;
-            const tr = selectedCell.closest('tr');
-            tr.remove();
-            esconderToolbar();
-        }
-
-        // --- ACCIONES COLUMNA (SOLO ESTA FILA O TODAS) ---
-        function agregarColumnaDerUnaFila() {
-            saveState();
-            if (!selectedCell) return;
-            const tr = selectedCell.closest('tr');
-            const newTd = document.createElement('td');
-            newTd.innerHTML = '&nbsp;';
-            tr.insertBefore(newTd, selectedCell.nextSibling);
-            recalcularProporcionesFila(tr); // Se comparte proporcionalmente (eje: 50/50 o 33/33/33)
-            activarEdicion();
-        }
-
-        function agregarColumnaDerTodas() {
-            saveState();
-            if (!selectedCell) return;
-            const table = selectedCell.closest('table');
-            const cellIdx = selectedCell.cellIndex;
-            Array.from(table.rows).forEach(tr => {
-                // If row has enough cells
-                if(cellIdx < tr.cells.length) {
-                    const newTd = document.createElement('td');
-                    newTd.innerHTML = '&nbsp;';
-                    tr.insertBefore(newTd, tr.cells[cellIdx].nextSibling);
-                    recalcularProporcionesFila(tr);
+        async function restaurarPorDefecto() {
+            if (confirm('¿Estás seguro de que deseas restaurar la plantilla base por defecto? Se perderán las modificaciones locales.')) {
+                showStatus('<i class="fa-solid fa-spinner animate-spin mr-2"></i> Restaurando...', 'info');
+                try {
+                    // To restore, we can just upload a blank post or ask the server to clear App_Data/plantilla_base.html
+                    // Wait, we can add a delete/reset call or simply post a request to reset.
+                    // Or let's just make a POST to a reset endpoint. Let's look if we have one. We can add a simple reset logic.
+                    // Actually, if we post a DELETE to api/microdisenos/plantilla-base or a specific endpoint, the server will delete the file
+                    // and then the next load will automatically recreate the default one.
+                    const response = await fetch(`${baseUrl}/plantilla-base/reset`, { method: 'POST' });
+                    if (response.ok) {
+                        showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Plantilla base restaurada por defecto!', 'success');
+                        loadActiveTemplate();
+                    } else {
+                        showStatus('Error al restaurar plantilla.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showStatus('Error de red al intentar restaurar.', 'error');
                 }
-            });
-            activarEdicion();
-        }
-
-        function eliminarColumnaTodas() {
-            saveState();
-            if (!selectedCell) return;
-            const table = selectedCell.closest('table');
-            const cellIdx = selectedCell.cellIndex;
-            Array.from(table.rows).forEach(tr => {
-                if(tr.cells[cellIdx]) {
-                    tr.deleteCell(cellIdx);
-                    recalcularProporcionesFila(tr);
-                }
-            });
-            esconderToolbar();
-        }
-
-        function guardarPlantillaBase() {
-            const cleanContainer = document.getElementById('doc-container').cloneNode(true);
-            cleanContainer.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
-            
-            // Generate IDs for new dynamic inputs
-            const inputs = cleanContainer.querySelectorAll('input.doc-input, select.doc-input, textarea.doc-input');
-            inputs.forEach(i => {
-                if(!i.id) i.id = 'dinamico-' + Math.random().toString(36).substr(2, 9);
-            });
-
-            localStorage.setItem('plantilla_base', cleanContainer.innerHTML);
-            alert("Plantilla Base guardada exitosamente y estará disponible para los docentes.");
-            window.location.href = 'Jefe.html';
-        }
-
-        function limpiarPlantillaBase() {
-            if(confirm("¿Restaurar diseño original? Se borrará la plantilla personalizada.")) {
-                localStorage.removeItem('plantilla_base');
-                location.reload();
             }
         }
     </script>
