@@ -217,6 +217,16 @@
 
                 </div>
             </div>
+            
+            <!-- History Panel -->
+            <div class="glass-panel rounded-2xl p-6 shadow-sm mt-6">
+                <h2 class="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Versiones
+                </h2>
+                <div class="max-h-64 overflow-y-auto pr-2 space-y-3" id="history-list">
+                    <div class="text-xs text-gray-500 italic">Cargando historial...</div>
+                </div>
+            </div>
         </div>
 
         <!-- Right Side: Live Template Preview -->
@@ -253,7 +263,10 @@
         const uploadStatus = document.getElementById('uploadStatus');
 
         // Load the active template on mount
-        document.addEventListener('DOMContentLoaded', loadActiveTemplate);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadActiveTemplate();
+            loadHistory();
+        });
 
         async function loadActiveTemplate() {
             try {
@@ -334,6 +347,7 @@
                     showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Plantilla actualizada exitosamente!', 'success');
                     // Reload the template preview immediately
                     loadActiveTemplate();
+                    loadHistory();
                 } else {
                     showStatus(result.Message || 'Error al procesar el archivo Word.', 'error');
                 }
@@ -371,6 +385,61 @@
                         loadActiveTemplate();
                     } else {
                         showStatus('Error al restaurar plantilla.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showStatus('Error de red al intentar restaurar.', 'error');
+                }
+            }
+        }
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${baseUrl}/plantilla-base/history`);
+                if (!response.ok) throw new Error('Error al conectar con la API.');
+                const files = await response.json();
+                
+                const listEl = document.getElementById('history-list');
+                listEl.innerHTML = '';
+                
+                if (files.length === 0) {
+                    listEl.innerHTML = '<div class="text-xs text-gray-500 italic">No hay versiones históricas aún.</div>';
+                    return;
+                }
+                
+                files.forEach(f => {
+                    listEl.innerHTML += `
+                        <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <div>
+                                <p class="text-xs font-bold text-gray-800">${f.CreatedAt}</p>
+                                <p class="text-[10px] text-gray-400 font-mono mt-0.5">${f.FileName}</p>
+                            </div>
+                            <button onclick="restaurarVersion('${f.FileName}')" class="text-[10px] font-bold bg-gray-100 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-lg transition-colors border border-gray-200 hover:border-indigo-200">
+                                Restaurar
+                            </button>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function restaurarVersion(filename) {
+            if (confirm(`¿Estás seguro de que deseas restaurar esta versión anterior (${filename})?\n\nLa plantilla activa actual se guardará como copia de seguridad.`)) {
+                showStatus('<i class="fa-solid fa-spinner animate-spin mr-2"></i> Restaurando versión histórica...', 'info');
+                try {
+                    const response = await fetch(`${baseUrl}/plantilla-base/history/restore`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ FileName: filename })
+                    });
+                    
+                    if (response.ok) {
+                        showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Versión restaurada exitosamente!', 'success');
+                        loadActiveTemplate();
+                        loadHistory();
+                    } else {
+                        showStatus('Error al restaurar versión.', 'error');
                     }
                 } catch (err) {
                     console.error(err);

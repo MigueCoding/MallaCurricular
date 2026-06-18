@@ -71,16 +71,34 @@ async function actualizarInscribirGrupos() {
     } catch(e) { console.error(e); }
 }
 
+function actualizarNombreGenerado() {
+    const cursoSelect = document.getElementById('grupo-curso');
+    const codigo = cursoSelect.value;
+    const numero = document.getElementById('grupo-numero').value;
+    const inputGenerado = document.getElementById('grupo-nombre-generado');
+
+    if (!codigo && !numero) {
+        inputGenerado.value = '';
+    } else {
+        const codPart = codigo || '[Asignatura]';
+        const numPart = numero || '';
+        inputGenerado.value = `${codPart}-${numPart}`;
+    }
+}
+
 async function crearGrupo() {
-    const Nombre = document.getElementById('grupo-nombre').value.trim();
     const CursoCodigo = document.getElementById('grupo-curso').value;
+    const NumeroGrupo = document.getElementById('grupo-numero').value;
     const ProfesorId = document.getElementById('grupo-profesor').value;
     
-    if(!Nombre || !CursoCodigo || !ProfesorId) return alert('Llene todos los campos');
+    if(!CursoCodigo || !NumeroGrupo || !ProfesorId) return alert('Llene todos los campos (Asignatura, Número de Grupo y Docente)');
 
-    const grupoExiste = todosLosGrupos.some(g => g.Nombre.toLowerCase() === Nombre.toLowerCase() && g.CursoCodigo === CursoCodigo);
+    const Nombre = document.getElementById('grupo-nombre-generado').value;
+
+    // Validación de duplicados frontend
+    const grupoExiste = todosLosGrupos.some(g => g.Nombre.toLowerCase() === Nombre.toLowerCase());
     if(grupoExiste) {
-        return alert('Ya existe un grupo con ese nombre para esta asignatura.');
+        return alert(`El grupo "${Nombre}" ya existe en la base de datos. Por favor, asigne un número de grupo diferente.`);
     }
 
     const res = await fetch(API_GRUPOS + '/crear', {
@@ -90,7 +108,8 @@ async function crearGrupo() {
     });
     if(res.ok) {
         alert('Grupo creado Exitosamente!');
-        document.getElementById('grupo-nombre').value = '';
+        document.getElementById('grupo-numero').value = '';
+        actualizarNombreGenerado();
         actualizarInscribirGrupos();
     } else {
         const text = await res.text();

@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modal Rechazo -->
     <div id="modal-rechazo"
          class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[2000] no-print px-4">
         <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md border border-slate-200">
@@ -171,6 +171,52 @@
                         class="px-5 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-lg shadow-red-200 transition-all">
                     Enviar
                     Rechazo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aprobación - Aprobado por Comité Curricular -->
+    <div id="modal-aprobacion"
+         class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[2000] no-print px-4">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md border border-green-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-lg font-bold">✓</div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">Aprobado por</h2>
+                    <p class="text-xs text-slate-500">Complete los datos del Comité Curricular que aprueba este microdiseño.</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Número del Comité Curricular</label>
+                    <input type="number" id="input-comite-numero" min="1" 
+                           class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                           placeholder="Ej: 15" oninput="updateAprobadoPreview()">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Fecha del Comité</label>
+                    <input type="date" id="input-comite-fecha"
+                           class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                           onchange="updateAprobadoPreview()">
+                </div>
+                
+                <!-- Vista previa generada -->
+                <div class="border border-dashed border-green-300 bg-green-50 rounded-lg p-3">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-green-600 mb-1">Vista previa del campo "Aprobado por":</p>
+                    <p id="preview-aprobado-por" class="text-sm font-semibold text-slate-800 italic">Comité Curricular No. ___ de ___</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-5">
+                <button onclick="closeModalAprobacion()"
+                        class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                    Cancelar
+                </button>
+                <button onclick="submitAprobacion()"
+                        class="px-5 py-2 text-sm font-bold bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-lg shadow-green-200 transition-all">
+                    Aprobar Definitivamente
                 </button>
             </div>
         </div>

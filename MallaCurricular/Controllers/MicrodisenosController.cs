@@ -66,6 +66,7 @@ namespace MallaCurricular.Controllers
                         if (reader["FechaCreacion"] != DBNull.Value) mx.FechaCreacion = (DateTime)reader["FechaCreacion"];
                         if (reader["FechaAprobacion"] != DBNull.Value) mx.FechaAprobacion = (DateTime)reader["FechaAprobacion"];
                         mx.ContenidoJSON = reader["ContenidoJSON"]?.ToString();
+                        mx.VisibleParaTodos = reader["VisibleParaTodos"] != DBNull.Value && (bool)reader["VisibleParaTodos"];
                     }
                     else
                     {
@@ -178,18 +179,44 @@ namespace MallaCurricular.Controllers
         [Route("{id}/aprobar")]
         public IHttpActionResult Aprobar(int id, RevisionMicrodisenoDTO dto)
         {
+            // Generar texto de AprobadoPor a partir del Comité Curricular
+            string aprobadoPor = dto.RevisorNombre ?? "";
+            if (dto.ComiteNumero.HasValue && !string.IsNullOrEmpty(dto.ComiteFecha))
+            {
+                aprobadoPor = string.Format("Comité Curricular No. {0} de {1}", dto.ComiteNumero.Value, dto.ComiteFecha);
+            }
+
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
                 var cmd = new SqlCommand(@"
                     UPDATE Microdisenos 
-                    SET Estado = 'Aprobado', AprobadoPor = @rev, FechaAprobacion = GETDATE(), ObservacionesRechazo = NULL
+                    SET Estado = 'Aprobado', AprobadoPor = @rev, FechaAprobacion = GETDATE(), ObservacionesRechazo = NULL, VisibleParaTodos = 0
                     WHERE Id = @id AND Estado = 'PendienteJefe'", conn);
                 cmd.Parameters.AddWithValue("@id", id);
-                cmd.Parameters.AddWithValue("@rev", dto.RevisorNombre ?? "");
+                cmd.Parameters.AddWithValue("@rev", aprobadoPor);
                 
                 if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Aprobado" });
                 return BadRequest("No se pudo aprobar.");
+            }
+        }
+
+        // 4.5 Publicar (hacer visible para todos)
+        [HttpPost]
+        [Route("{id}/publicar")]
+        public IHttpActionResult Publicar(int id)
+        {
+            using (var conn = new SqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                var cmd = new SqlCommand(@"
+                    UPDATE Microdisenos 
+                    SET VisibleParaTodos = 1
+                    WHERE Id = @id AND Estado = 'Aprobado'", conn);
+                cmd.Parameters.AddWithValue("@id", id);
+                
+                if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Publicado exitosamente" });
+                return BadRequest("No se pudo publicar. Asegúrese de que el microdiseño esté aprobado.");
             }
         }
 
@@ -225,7 +252,7 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
-                var cmd = new SqlCommand("SELECT TOP 1 * FROM Microdisenos WHERE CursoCodigo = @c AND Estado = 'Aprobado' ORDER BY FechaAprobacion DESC", conn);
+                var cmd = new SqlCommand("SELECT TOP 1 * FROM Microdisenos WHERE CursoCodigo = @c AND Estado = 'Aprobado' AND VisibleParaTodos = 1 ORDER BY FechaAprobacion DESC", conn);
                 cmd.Parameters.AddWithValue("@c", cursoCodigo);
 
                 using (var reader = cmd.ExecuteReader())
@@ -244,6 +271,7 @@ namespace MallaCurricular.Controllers
                         mx.ElaboradoPor = reader["ElaboradoPor"]?.ToString();
                         mx.RevisadoPor = reader["RevisadoPor"]?.ToString();
                         mx.AprobadoPor = reader["AprobadoPor"]?.ToString();
+                        mx.VisibleParaTodos = reader["VisibleParaTodos"] != DBNull.Value && (bool)reader["VisibleParaTodos"];
                         if (reader["FechaAprobacion"] != DBNull.Value) mx.FechaAprobacion = (DateTime)reader["FechaAprobacion"];
                         mx.ContenidoJSON = reader["ContenidoJSON"]?.ToString();
                     }
@@ -269,13 +297,13 @@ namespace MallaCurricular.Controllers
                 conn.Open();
                 var cmd = new SqlCommand(@"
                     SELECT m.Id, m.CursoCodigo, m.Semestre, m.ElaboradoPor, m.FechaCreacion, m.Estado, c.Asignatura,
-                           u1.nombre as CreadorNombre, u2.nombre as AvalNombre
+                           u1.nombre as CreadorNombre, u2.nombre as AvalNombre, m.AprobadoPor, m.VisibleParaTodos
                     FROM Microdisenos m
                     LEFT JOIN Cursos c ON LTRIM(RTRIM(m.CursoCodigo)) = LTRIM(RTRIM(c.Codigo))
                     LEFT JOIN MicrodisenoRoles r ON LTRIM(RTRIM(m.CursoCodigo)) = LTRIM(RTRIM(r.CursoCodigo))
                     LEFT JOIN Usuarios u1 ON r.CreadorId = u1.id_usuario
                     LEFT JOIN Usuarios u2 ON r.AvalId = u2.id_usuario
-                    WHERE m.Estado = 'PendienteJefe' 
+                    WHERE m.Estado = 'PendienteJefe' OR (m.Estado = 'Aprobado' AND m.VisibleParaTodos = 0)
                     ORDER BY m.FechaCreacion DESC", conn);
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -291,7 +319,9 @@ namespace MallaCurricular.Controllers
                             CreadorNombre = reader["CreadorNombre"]?.ToString(),
                             AvalNombre = reader["AvalNombre"]?.ToString(),
                             FechaCreacion = reader["FechaCreacion"] != DBNull.Value ? (DateTime)reader["FechaCreacion"] : DateTime.MinValue,
-                            Estado = reader["Estado"].ToString()
+                            Estado = reader["Estado"].ToString(),
+                            AprobadoPor = reader["AprobadoPor"]?.ToString(),
+                            VisibleParaTodos = reader["VisibleParaTodos"] != DBNull.Value && (bool)reader["VisibleParaTodos"]
                         });
                     }
                 }
@@ -447,6 +477,15 @@ namespace MallaCurricular.Controllers
                     string dir = Path.GetDirectoryName(path);
                     if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                     
+                    // Backup existente si hay uno
+                    if (File.Exists(path))
+                    {
+                        string historyDir = Path.Combine(dir, "PlantillaHistory");
+                        if (!Directory.Exists(historyDir)) Directory.CreateDirectory(historyDir);
+                        string backupFileName = "plantilla_base_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".html";
+                        File.Copy(path, Path.Combine(historyDir, backupFileName));
+                    }
+                    
                     File.WriteAllText(path, html, Encoding.UTF8);
                     
                     return Ok(new { Message = "Plantilla cargada y actualizada con éxito", html });
@@ -471,6 +510,71 @@ namespace MallaCurricular.Controllers
                     File.Delete(path);
                 }
                 return Ok(new { Message = "Plantilla restaurada con éxito" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // 13. Obtener Historial de Plantillas Base
+        [HttpGet]
+        [Route("plantilla-base/history")]
+        public IHttpActionResult GetPlantillaHistory()
+        {
+            try
+            {
+                string historyDir = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/PlantillaHistory");
+                if (!Directory.Exists(historyDir))
+                {
+                    return Ok(new List<object>()); // Empty list if no history yet
+                }
+
+                var files = Directory.GetFiles(historyDir, "*.html")
+                                     .Select(f => new FileInfo(f))
+                                     .OrderByDescending(f => f.CreationTime)
+                                     .Select(f => new {
+                                         FileName = f.Name,
+                                         CreatedAt = f.CreationTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                                         Size = f.Length
+                                     })
+                                     .ToList();
+
+                return Ok(files);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // 14. Restaurar Plantilla Histórica
+        [HttpPost]
+        [Route("plantilla-base/history/restore")]
+        public IHttpActionResult RestorePlantillaHistory([FromBody] JObject data)
+        {
+            try
+            {
+                string filename = data["FileName"]?.ToString();
+                if (string.IsNullOrEmpty(filename)) return BadRequest("Nombre de archivo inválido");
+
+                string historyDir = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/PlantillaHistory");
+                string sourcePath = Path.Combine(historyDir, filename);
+
+                if (!File.Exists(sourcePath)) return NotFound();
+
+                string targetPath = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_base.html");
+                
+                // Hacemos backup de la actual antes de restaurar la vieja, por si acaso
+                if (File.Exists(targetPath))
+                {
+                    string backupFileName = "plantilla_base_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".html";
+                    File.Copy(targetPath, Path.Combine(historyDir, backupFileName));
+                }
+
+                File.Copy(sourcePath, targetPath, true);
+
+                return Ok(new { Message = "Versión histórica restaurada con éxito" });
             }
             catch (Exception ex)
             {

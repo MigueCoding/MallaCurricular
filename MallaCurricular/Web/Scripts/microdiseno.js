@@ -67,6 +67,13 @@ async function fetchCourseInfo(codigo) {
             if (document.getElementById('header-asig-title')) {
                 document.getElementById('header-asig-title').textContent = 'Microdiseño: ' + (curso.Asignatura || '');
             }
+            const prereqInput = document.getElementById('txt-prereq');
+            if (prereqInput) {
+                prereqInput.value = curso.Prerequisito || 'Ninguno';
+                prereqInput.disabled = true;
+                prereqInput.title = "Campo automático desde base de datos";
+                prereqInput.classList.add('bg-gray-50', 'text-gray-500');
+            }
         }
     } catch (err) { console.error('Error fetching course info:', err); }
 }
@@ -353,7 +360,7 @@ function checkStateUI() {
         inputs.forEach(el => el.disabled = false);
         
         // Forzar bloqueo de campos automáticos para que no se alteren manualmente
-        const lockedFields = ['asig-nombre', 'asig-codigo'];
+        const lockedFields = ['asig-nombre', 'asig-codigo', 'txt-prereq'];
         lockedFields.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -380,8 +387,15 @@ function checkStateUI() {
         blocks.forEach(el => el.style.display = 'none');
     } else {
         if (st === 'Aprobado') {
-            readonlyMsg = 'Publicado oficialmente.';
-            htmlBtns += `<button onclick="window.print()" class="bg-blue-600 text-white px-3 py-1 text-sm font-bold rounded ml-4 shadow">Imprimir PDF</button>`;
+            if (currentMicrodiseno.VisibleParaTodos) {
+                readonlyMsg = 'Publicado oficialmente.';
+            } else {
+                readonlyMsg = 'Aprobado (No Público).';
+                if (isJefe) {
+                    htmlBtns += `<button onclick="publicarMicrodiseno()" class="bg-indigo-600 text-white px-3 py-1 text-sm font-bold rounded ml-4 shadow hover:bg-indigo-700 transition">Hacer Visible para Todos</button>`;
+                }
+            }
+            htmlBtns += `<button onclick="window.print()" class="bg-blue-600 text-white px-3 py-1 text-sm font-bold rounded ml-4 shadow hover:bg-blue-700 transition">Imprimir PDF</button>`;
         } else {
             readonlyMsg = 'En proceso. Solo lectura.';
         }
@@ -488,19 +502,95 @@ async function actionAval(action) {
 
 async function actionJefe(action) {
     if (action === 'aprobar') {
-        if (confirm('¿Aprobar definitivamente este microdiseño?')) {
-            try {
-                const dto = { RevisorNombre: localStorage.getItem('userName') || 'Jefe' };
-                const res = await fetch(`${API_BASE_URL}/api/microdisenos/${currentMicrodiseno.Id}/aprobar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dto)
-                });
-                if (res.ok) { location.reload(); }
-                else alert('Error al aprobar por el jefe.');
-            } catch (e) { console.error(e); }
-        }
+        openModalAprobacion();
     } else if (action === 'rechazar') {
         openRechazoModal();
+    }
+}
+
+function openModalAprobacion() {
+    const m = document.getElementById('modal-aprobacion');
+    if (m) {
+        document.getElementById('input-comite-numero').value = '';
+        document.getElementById('input-comite-fecha').value = '';
+        updateAprobadoPreview();
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+}
+
+function closeModalAprobacion() {
+    const m = document.getElementById('modal-aprobacion');
+    if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+}
+
+function updateAprobadoPreview() {
+    const num = document.getElementById('input-comite-numero').value;
+    const dateVal = document.getElementById('input-comite-fecha').value;
+    
+    let formattedDate = "___";
+    if (dateVal) {
+        const parts = dateVal.split('-');
+        if (parts.length === 3) {
+            const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+            const mesStr = meses[parseInt(parts[1], 10) - 1];
+            const dia = parseInt(parts[2], 10);
+            formattedDate = `${dia} de ${mesStr} de ${parts[0]}`;
+        }
+    }
+    
+    const previewEl = document.getElementById('preview-aprobado-por');
+    if (previewEl) {
+        previewEl.textContent = `Comité Curricular No. ${num || "___"} de ${formattedDate}`;
+    }
+}
+
+async function submitAprobacion() {
+    const num = document.getElementById('input-comite-numero').value;
+    const dateVal = document.getElementById('input-comite-fecha').value;
+    
+    if (!num) return alert('Debe ingresar el número del Comité Curricular.');
+    if (!dateVal) return alert('Debe seleccionar la fecha del Comité.');
+    
+    let formattedDate = "";
+    const parts = dateVal.split('-');
+    if (parts.length === 3) {
+        const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+        const mesStr = meses[parseInt(parts[1], 10) - 1];
+        const dia = parseInt(parts[2], 10);
+        formattedDate = `${dia} de ${mesStr} de ${parts[0]}`;
+    }
+
+    try {
+        const dto = { 
+            RevisorNombre: localStorage.getItem('userName') || 'Jefe',
+            ComiteNumero: parseInt(num),
+            ComiteFecha: formattedDate
+        };
+        const res = await fetch(`${API_BASE_URL}/api/microdisenos/${currentMicrodiseno.Id}/aprobar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dto)
+        });
+        if (res.ok) { location.reload(); }
+        else alert('Error al aprobar por el jefe.');
+    } catch (e) { console.error(e); }
+}
+
+async function publicarMicrodiseno() {
+    if (confirm('¿Desea hacer visible este microdiseño para todos los estudiantes y docentes?')) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/microdisenos/${currentMicrodiseno.Id}/publicar`, {
+                method: 'POST'
+            });
+            if (res.ok) { 
+                alert('¡El microdiseño ahora es visible para todos!');
+                location.reload(); 
+            }
+            else alert('Error al publicar el microdiseño.');
+        } catch (e) { console.error(e); }
     }
 }

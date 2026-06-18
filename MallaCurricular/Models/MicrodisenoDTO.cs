@@ -22,6 +22,7 @@ namespace MallaCurricular.Models
         public DateTime? FechaCreacion { get; set; }
         public DateTime? FechaAprobacion { get; set; }
         public string ContenidoJSON { get; set; }
+        public bool VisibleParaTodos { get; set; }
         
         public int? CreadorId { get; set; }
         public string CreadorNombre { get; set; }
@@ -33,6 +34,8 @@ namespace MallaCurricular.Models
     {
         public string Observaciones { get; set; }
         public string RevisorNombre { get; set; }
+        public int? ComiteNumero { get; set; }
+        public string ComiteFecha { get; set; }
     }
 
     public class MicrodisenoRolesDTO

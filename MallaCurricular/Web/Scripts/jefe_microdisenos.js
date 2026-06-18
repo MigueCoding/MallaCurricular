@@ -60,6 +60,23 @@ async function fetchMicrodisenosPendientes() {
                 } catch(e) {}
             }
 
+            let estadoHTML = '';
+            let btnText = 'Revisar y Decidir';
+            let btnClass = 'bg-indigo-600 hover:bg-indigo-700 text-white';
+            
+            if (m.Estado === 'Aprobado') {
+                estadoHTML = `<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold border border-green-200">Aprobado (No Público)</span>`;
+                btnText = 'Revisar / Publicar';
+                btnClass = 'bg-green-600 hover:bg-green-700 text-white';
+            } else {
+                estadoHTML = `<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200">${m.Estado}</span>`;
+            }
+
+            let extraInfo = '';
+            if (m.AprobadoPor) {
+                extraInfo = `<div class="text-[11px] mt-1"><span class="font-bold text-green-600">Aprobado por:</span><br>${m.AprobadoPor}</div>`;
+            }
+
             const tr = document.createElement('tr');
             tr.className = "border-b hover:bg-gray-50 transition";
             tr.innerHTML = `
@@ -68,14 +85,15 @@ async function fetchMicrodisenosPendientes() {
                 <td class="p-4">
                     <div class="text-[11px]"><span class="font-bold text-gray-500">Creado por:</span><br>${creadorNombre || m.ElaboradoPor || 'No asignado'}</div>
                     <div class="text-[11px] mt-1"><span class="font-bold text-indigo-500">Avalado por:</span><br>${avalNombre || 'No asignado'}</div>
+                    ${extraInfo}
                 </td>
                 <td class="p-4 text-[10px] text-gray-400">${new Date(m.FechaCreacion).toLocaleString()}</td>
                 <td class="p-4 text-center">
-                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200">${m.Estado}</span>
+                    ${estadoHTML}
                 </td>
                 <td class="p-4 text-center">
-                    <button onclick="revisarMicrodiseno('${codigo}', '${m.Semestre}', '${asigNombre}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold shadow transition-all transform hover:scale-105">
-                        Revisar y Decidir
+                    <button onclick="revisarMicrodiseno('${codigo}', '${m.Semestre}', '${asigNombre}')" class="${btnClass} px-5 py-1.5 rounded-lg text-xs font-bold shadow transition-all transform hover:scale-105">
+                        ${btnText}
                     </button>
                 </td>
             `;
