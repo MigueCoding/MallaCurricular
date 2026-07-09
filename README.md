@@ -16,7 +16,7 @@
 </p>
 ---
 📋 Descripción
-<strong>Sistema Integrado de Gestión Curricular Académica</strong> es una aplicación web completa diseñada para la gestión académica del programa de Ingeniería de Sistemas del Instituto Tecnológico Metropolitano (ITM). El sistema permite visualizar, crear y administrar la malla curricular de forma interactiva, gestionar microdiseños curriculares con flujo de aprobación, y administrar grupos académicos con inscripción de estudiantes.
+<strong>Sistema Integrado de Gestión Curricular Académica</strong> es una aplicación web completa diseñada para la gestión académica del programa de Ingeniería de Sistemas del Instituto Tecnológico Metropolitano (ITM). El sistema permite visualizar, crear y administrar la malla curricular de forma interactiva, gestionar microdiseños curriculares con flujo de aprobación, y administrar grupos académicos con inscripción de estudiantes...
 
 🗺️ Malla Curricular Interactiva
 
