@@ -6,6 +6,8 @@ using System.Data.SqlClient;
 using System.Web.Http;
 using System.IO;
 using System.Text;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 using MallaCurricular.Models;
 
 namespace MallaCurricular.Controllers
@@ -230,13 +232,42 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
+
+                // Fetch current version and increment it
+                string currentVersion = "1.0";
+                var cmdGet = new SqlCommand("SELECT Version FROM Microdisenos WHERE Id = @id", conn);
+                cmdGet.Parameters.AddWithValue("@id", id);
+                var versionObj = cmdGet.ExecuteScalar();
+                if (versionObj != null && versionObj != DBNull.Value)
+                {
+                    currentVersion = versionObj.ToString();
+                }
+
+                string newVersion = "2.0";
+                if (currentVersion.Contains("."))
+                {
+                    var parts = currentVersion.Split('.');
+                    if (int.TryParse(parts[0], out int major))
+                    {
+                        newVersion = (major + 1) + "." + (parts.Length > 1 ? parts[1] : "0");
+                    }
+                }
+                else
+                {
+                    if (int.TryParse(currentVersion, out int major))
+                    {
+                        newVersion = (major + 1).ToString();
+                    }
+                }
+
                 var cmd = new SqlCommand(@"
                     UPDATE Microdisenos 
-                    SET Estado = 'Rechazado', RevisadoPor = @rev, ObservacionesRechazo = @obs
+                    SET Estado = 'Rechazado', RevisadoPor = @rev, ObservacionesRechazo = @obs, Version = @ver
                     WHERE Id = @id AND Estado IN ('PendienteAval', 'PendienteJefe')", conn);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.Parameters.AddWithValue("@rev", dto.RevisorNombre ?? "");
                 cmd.Parameters.AddWithValue("@obs", dto.Observaciones);
+                cmd.Parameters.AddWithValue("@ver", newVersion);
                 
                 if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Rechazado" });
                 return BadRequest("No se pudo rechazar.");
