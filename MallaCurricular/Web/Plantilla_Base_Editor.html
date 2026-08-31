@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parametrización de Plantilla Base - Jefe de Programa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="Content/tailwind.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
@@ -121,6 +121,168 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
+
+        /* Version badge animation */
+        .version-badge {
+            animation: pulse-version 2s ease-in-out infinite;
+        }
+        @keyframes pulse-version {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+        }
+
+        /* History entry hover */
+        .history-entry {
+            transition: all 0.2s ease;
+        }
+        .history-entry:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        /* ===== CELL CONFIGURATOR STYLES ===== */
+        
+        /* Configurable cell hover effect */
+        .cell-configurable {
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+        .cell-configurable:hover {
+            outline: 2px solid #6366f1;
+            outline-offset: -2px;
+            background-color: #eef2ff !important;
+        }
+        .cell-configurable.cell-selected {
+            outline: 2px solid #4f46e5;
+            outline-offset: -2px;
+            background-color: #e0e7ff !important;
+        }
+
+        /* Cell type badges */
+        .cell-type-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 6px;
+            z-index: 5;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .cell-type-badge.type-text {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+        }
+        .cell-type-badge.type-number {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fcd34d;
+        }
+        .cell-type-badge.type-textarea {
+            background: #d1fae5;
+            color: #047857;
+            border: 1px solid #6ee7b7;
+        }
+        .cell-type-badge.type-select {
+            background: #ede9fe;
+            color: #6d28d9;
+            border: 1px solid #c4b5fd;
+        }
+
+        /* Popover card */
+        .config-popover {
+            position: fixed;
+            z-index: 1000;
+            width: 340px;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.1);
+            animation: popoverIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes popoverIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Radio cards */
+        .type-option-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .type-option-card:hover {
+            border-color: #a5b4fc;
+            background: #f5f3ff;
+        }
+        .type-option-card.selected {
+            border-color: #6366f1;
+            background: #eef2ff;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+        .type-option-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* Option chips */
+        .option-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #334155;
+            transition: all 0.1s;
+        }
+        .option-chip:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+        .option-chip .remove-opt {
+            cursor: pointer;
+            font-weight: 700;
+            color: #ef4444;
+            font-size: 12px;
+        }
+
+        /* Config mode toggle */
+        .mode-toggle {
+            transition: all 0.3s ease;
+        }
+        .mode-toggle.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Overlay for popover */
+        .popover-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: transparent;
+        }
     </style>
 </head>
 <body class="pb-12">
@@ -136,7 +298,15 @@
                 <p class="text-xs text-gray-500">Administración de Microdiseño Curricular</p>
             </div>
         </div>
-        <div class="flex gap-3">
+        <div class="flex items-center gap-3">
+            <!-- Version Badge -->
+            <div id="version-badge" class="version-badge flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2">
+                <i class="fa-solid fa-code-branch text-indigo-600"></i>
+                <div class="text-right">
+                    <div class="text-xs font-bold text-indigo-700">Versión <span id="nav-version">...</span></div>
+                    <div class="text-[10px] text-indigo-400" id="nav-fecha">...</div>
+                </div>
+            </div>
             <button onclick="window.location.href='Jefe.html'" class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Panel Jefe
             </button>
@@ -164,7 +334,7 @@
                         <div class="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-md">1</div>
                         <div class="space-y-2">
                             <h3 class="font-bold text-gray-800 text-sm">Exportar Plantilla Base</h3>
-                            <p class="text-xs text-gray-500">Descarga la plantilla actual como un archivo editable de Word (.docx) con todas las tablas e identificadores.</p>
+                            <p class="text-xs text-gray-500">Descarga la plantilla actual como archivo Word (.docx) para editar la <strong>estructura visual</strong> (tablas, textos, secciones).</p>
                             <button onclick="exportarPlantilla()" class="btn-hover-effect w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-download"></i> Descargar Plantilla Word
                             </button>
@@ -176,13 +346,7 @@
                         <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">2</div>
                         <div class="space-y-1">
                             <h3 class="font-bold text-gray-800 text-sm">Edición en Word</h3>
-                            <p class="text-xs text-gray-500">Abre el archivo Word en tu computador local. Modifica textos, reordena tablas o parametriza nuevos campos utilizando el formato:</p>
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 font-mono text-[9px] text-gray-600 mt-2 space-y-1">
-                                <div>• <b>[Campo: id_campo]</b>: Input de texto</div>
-                                <div>• <b>[Texto: id_campo]</b>: Área de texto</div>
-                                <div>• <b>[Numero: id_campo]</b>: Input numérico</div>
-                                <div>• <b>[Lista: id | Op1; Op2; ...]</b>: Desplegable</div>
-                            </div>
+                            <p class="text-xs text-gray-500">Abre el archivo Word y modifica <strong>solo la estructura</strong>: agrega tablas, elimina filas, reordena secciones. <span class="text-indigo-600 font-semibold">No necesitas escribir comandos.</span></p>
                         </div>
                     </div>
 
@@ -191,7 +355,7 @@
                         <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">3</div>
                         <div class="space-y-2 w-full">
                             <h3 class="font-bold text-gray-800 text-sm">Subir Nueva Plantilla</h3>
-                            <p class="text-xs text-gray-500">Arrastra el archivo Word editado para sincronizar los cambios de estructura en el sistema de inmediato.</p>
+                            <p class="text-xs text-gray-500">Arrastra el archivo Word editado para sincronizar los cambios de estructura.</p>
                             
                             <!-- Drag & Drop Field -->
                             <div id="dropzone" class="dropzone rounded-2xl p-6 bg-indigo-50/50 cursor-pointer text-center flex flex-col items-center justify-center hover:bg-indigo-50/80">
@@ -206,12 +370,18 @@
                         </div>
                     </div>
 
-                    <!-- Step 4: Sincronizacion -->
+                    <!-- Step 4: Configure Fields -->
                     <div class="flex gap-4 relative">
-                        <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">4</div>
-                        <div class="space-y-1">
-                            <h3 class="font-bold text-gray-800 text-sm">Actualización Automática</h3>
-                            <p class="text-xs text-gray-500">El backend procesará el documento y la nueva plantilla se propagará instantáneamente a las vistas de estudiantes y profesores.</p>
+                        <div class="h-8 w-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-md">4</div>
+                        <div class="space-y-2 w-full">
+                            <h3 class="font-bold text-gray-800 text-sm">Configurar Tipos de Campo <span class="text-violet-600">✨ Nuevo</span></h3>
+                            <p class="text-xs text-gray-500">Activa el <strong>modo configuración</strong> y haz clic en las celdas editables de la vista previa para definir el tipo de dato (texto, numérico o lista desplegable).</p>
+                            <button id="btn-config-mode" onclick="toggleConfigMode()" class="mode-toggle btn-hover-effect w-full font-semibold text-xs py-2.5 px-4 rounded-xl border border-violet-300 text-violet-700 bg-violet-50 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="config-mode-label">Activar Modo Configuración</span>
+                            </button>
+                            <button id="btn-save-config" onclick="saveFieldConfig()" class="hidden btn-hover-effect w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Guardar Configuración de Campos
+                            </button>
                         </div>
                     </div>
 
@@ -219,11 +389,30 @@
             </div>
             
             <!-- History Panel -->
-            <div class="glass-panel rounded-2xl p-6 shadow-sm mt-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
                 <h2 class="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Versiones
                 </h2>
-                <div class="max-h-64 overflow-y-auto pr-2 space-y-3" id="history-list">
+                
+                <!-- Current Version Card -->
+                <div id="current-version-card" class="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">ACTIVA</span>
+                            <span class="text-sm font-bold text-indigo-800" id="current-version-label">Versión ...</span>
+                        </div>
+                    </div>
+                    <div class="text-[11px] text-gray-500 mt-1">
+                        <div><i class="fa-regular fa-calendar mr-1"></i> <span id="current-version-date">...</span></div>
+                        <div class="mt-0.5"><i class="fa-regular fa-file-word mr-1"></i> <span id="current-version-file">...</span></div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-3 mb-3">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Versiones Anteriores</p>
+                </div>
+                
+                <div class="max-h-72 overflow-y-auto pr-2 space-y-3" id="history-list">
                     <div class="text-xs text-gray-500 italic">Cargando historial...</div>
                 </div>
             </div>
@@ -231,7 +420,32 @@
 
         <!-- Right Side: Live Template Preview -->
         <div class="lg:col-span-8 space-y-4">
-            <div class="flex justify-between items-center bg-slate-800 text-white rounded-xl px-5 py-3 shadow-md">
+            <!-- Config Mode Banner -->
+            <div id="config-mode-banner" class="hidden flex items-center justify-between bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl px-5 py-3 shadow-lg shadow-indigo-200/40">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm">Modo Configuración Activo</div>
+                        <div class="text-[11px] text-violet-200">Haz clic en cualquier celda editable para definir su tipo de dato</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex gap-2 text-[10px]">
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-font mr-1"></i>Texto</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-hashtag mr-1"></i>Número</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-align-left mr-1"></i>Área</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-list mr-1"></i>Lista</span>
+                    </div>
+                    <button onclick="toggleConfigMode()" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg font-semibold transition">
+                        <i class="fa-solid fa-xmark mr-1"></i> Salir
+                    </button>
+                </div>
+            </div>
+
+            <!-- Normal header bar (hidden in config mode) -->
+            <div id="normal-header-bar" class="flex justify-between items-center bg-slate-800 text-white rounded-xl px-5 py-3 shadow-md">
                 <div class="flex items-center gap-2">
                     <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -255,12 +469,138 @@
 
     </div>
 
+    <!-- Popover for cell configuration (inserted dynamically) -->
+    <div id="config-popover-overlay" class="popover-overlay hidden" onclick="closePopover()"></div>
+    <div id="config-popover" class="config-popover hidden">
+        <div class="p-4 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="h-7 w-7 bg-violet-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-sliders text-violet-600 text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Tipo de Campo</h3>
+                        <p class="text-[10px] text-gray-400" id="popover-cell-id">celda</p>
+                    </div>
+                </div>
+                <button onclick="closePopover()" class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-4 space-y-2">
+            <!-- Type Options -->
+            <div class="type-option-card" data-type="text" onclick="selectType('text')">
+                <div class="type-option-icon bg-blue-100 text-blue-600"><i class="fa-solid fa-font"></i></div>
+                <div>
+                    <div class="font-semibold text-sm text-gray-800">Texto</div>
+                    <div class="text-[10px] text-gray-400">Campo de texto libre, una sola línea</div>
+                </div>
+            </div>
+            <div class="type-option-card" data-type="number" onclick="selectType('number')">
+                <div class="type-option-icon bg-amber-100 text-amber-600"><i class="fa-solid fa-hashtag"></i></div>
+                <div>
+                    <div class="font-semibold text-sm text-gray-800">Numérico</div>
+                    <div class="text-[10px] text-gray-400">Solo permite números (enteros y decimales)</div>
+                </div>
+            </div>
+            <div class="type-option-card" data-type="textarea" onclick="selectType('textarea')">
+                <div class="type-option-icon bg-emerald-100 text-emerald-600"><i class="fa-solid fa-align-left"></i></div>
+                <div>
+                    <div class="font-semibold text-sm text-gray-800">Área de Texto</div>
+                    <div class="text-[10px] text-gray-400">Campo multilínea para textos largos</div>
+                </div>
+            </div>
+            <div class="type-option-card" data-type="select" onclick="selectType('select')">
+                <div class="type-option-icon bg-violet-100 text-violet-600"><i class="fa-solid fa-list"></i></div>
+                <div>
+                    <div class="font-semibold text-sm text-gray-800">Lista Desplegable</div>
+                    <div class="text-[10px] text-gray-400">Opciones predefinidas para seleccionar</div>
+                </div>
+            </div>
+
+            <!-- Select options input (hidden by default) -->
+            <div id="select-options-area" class="hidden mt-3 p-3 bg-violet-50 rounded-xl border border-violet-200">
+                <label class="text-xs font-bold text-violet-800 block mb-2"><i class="fa-solid fa-list-ul mr-1"></i> Opciones de la lista:</label>
+                <div id="options-list" class="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
+                    <!-- Chips rendered here -->
+                </div>
+                <div class="flex gap-2">
+                    <input id="new-option-input" type="text" placeholder="Escriba una opción..." class="flex-1 border border-violet-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white" onkeydown="if(event.key==='Enter'){event.preventDefault();addOption();}">
+                    <button onclick="addOption()" class="bg-violet-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-violet-700 transition">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-100 flex justify-between items-center">
+            <button onclick="removeFieldConfig()" class="text-xs text-red-500 hover:text-red-700 font-semibold transition">
+                <i class="fa-solid fa-trash-can mr-1"></i> Quitar config
+            </button>
+            <button onclick="applyFieldType()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2 rounded-lg shadow transition">
+                <i class="fa-solid fa-check mr-1"></i> Aplicar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Advertencia Descarga Word -->
+    <div id="modal-advertencia-descarga" class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-amber-100 space-y-5">
+            <div class="flex items-start gap-4">
+                <div class="h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-xl shadow-inner">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-900 text-base">Recordatorio sobre la Plantilla Word</h3>
+                    <p class="text-xs text-amber-700 font-semibold mt-0.5">Por favor lea antes de descargar</p>
+                </div>
+                <button onclick="cerrarModalAdvertenciaDescarga()" class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 text-xs text-gray-700 leading-relaxed">
+                <div class="flex gap-2.5 items-start">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 shrink-0"></i>
+                    <span><strong>¿Qué SÍ editar en Word?</strong> Modifique únicamente la <strong>estructura del documento</strong> (agregar o eliminar tablas, reordenar secciones o modificar títulos estáticos).</span>
+                </div>
+                <div class="flex gap-2.5 items-start">
+                    <i class="fa-solid fa-circle-xmark text-red-500 mt-0.5 shrink-0"></i>
+                    <span><strong>¿Qué NO editar en Word?</strong> No escriba ni edite comandos de texto como <code>[Campo:]</code> o <code>[Lista:]</code>.</span>
+                </div>
+                <div class="flex gap-2.5 items-start border-t border-amber-200/60 pt-2.5">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-600 mt-0.5 shrink-0"></i>
+                    <span><strong>Configuración de tipos de campo:</strong> La selección del tipo de dato (texto, numérico, listas con opciones) se hace haciendo clic en las celdas desde el <strong>Paso 4 en esta web</strong>.</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 justify-end pt-1">
+                <button onclick="cerrarModalAdvertenciaDescarga()" class="px-4 py-2.5 border border-gray-300 text-gray-700 text-xs font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
+                    Cancelar
+                </button>
+                <button onclick="confirmarDescargaWord()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-200 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-download"></i> Entendido, Descargar Word
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const baseUrl = '/api/microdisenos';
         const docContainer = document.getElementById('doc-container');
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const uploadStatus = document.getElementById('uploadStatus');
+
+        // =========================================
+        // FIELD CONFIG STATE
+        // =========================================
+        let fieldConfig = {}; // { "cellKey": { type: "text"|"number"|"textarea"|"select", options: [] } }
+        let configMode = false;
+        let currentPopoverCell = null;
+        let currentPopoverKey = null;
+        let selectedType = 'text';
+        let currentOptions = [];
 
         // Load the active template on mount
         document.addEventListener('DOMContentLoaded', () => {
@@ -286,8 +626,17 @@
                             el.value = el.value || '[Área de texto base]';
                         }
                     });
+
+                    // After loading template, also load field config
+                    await loadFieldConfig();
                 } else {
                     docContainer.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">No se encontró contenido para la plantilla.</div>`;
+                }
+                
+                // Update version info in the nav
+                if (data.version) {
+                    document.getElementById('nav-version').textContent = data.version;
+                    document.getElementById('nav-fecha').textContent = data.fecha || '';
                 }
             } catch (err) {
                 console.error(err);
@@ -295,7 +644,296 @@
             }
         }
 
+        // =========================================
+        // FIELD CONFIG LOGIC
+        // =========================================
+        
+        async function loadFieldConfig() {
+            try {
+                const res = await fetch(`${baseUrl}/plantilla-base/field-config`);
+                if (res.ok) {
+                    const data = await res.json();
+                    fieldConfig = data.fields || {};
+                    applyBadgesToCells();
+                }
+            } catch(e) { console.error('Error loading field config:', e); }
+        }
+
+        async function saveFieldConfig() {
+            try {
+                const res = await fetch(`${baseUrl}/plantilla-base/field-config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fields: fieldConfig })
+                });
+                if (res.ok) {
+                    showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Configuración de campos guardada exitosamente!', 'success');
+                } else {
+                    showStatus('Error al guardar configuración de campos.', 'error');
+                }
+            } catch(e) {
+                showStatus('Error de red al guardar configuración.', 'error');
+            }
+        }
+
+        function toggleConfigMode() {
+            configMode = !configMode;
+            const btn = document.getElementById('btn-config-mode');
+            const label = document.getElementById('config-mode-label');
+            const banner = document.getElementById('config-mode-banner');
+            const normalBar = document.getElementById('normal-header-bar');
+            const saveBtn = document.getElementById('btn-save-config');
+
+            if (configMode) {
+                btn.classList.add('active');
+                label.textContent = 'Desactivar Modo Configuración';
+                banner.classList.remove('hidden');
+                normalBar.classList.add('hidden');
+                saveBtn.classList.remove('hidden');
+                makeConfigurable();
+            } else {
+                btn.classList.remove('active');
+                label.textContent = 'Activar Modo Configuración';
+                banner.classList.add('hidden');
+                normalBar.classList.remove('hidden');
+                saveBtn.classList.add('hidden');
+                removeConfigurable();
+                closePopover();
+            }
+        }
+
+        function makeConfigurable() {
+            // Find all non-label cells in the template that contain inputs/textareas/selects
+            const cells = docContainer.querySelectorAll('td');
+            cells.forEach((cell, idx) => {
+                // Skip label cells (bg-label, bg-gray-50, bg-gray-100)
+                if (cell.classList.contains('bg-label') || cell.classList.contains('bg-gray-50') || cell.classList.contains('bg-gray-100')) return;
+                // Skip cells that are purely static text with no children elements or only text
+                const hasInput = cell.querySelector('input, textarea, select');
+                const hasOnlyText = !hasInput && cell.children.length === 0 && cell.textContent.trim().length > 0;
+                // Only make configurable if the cell has an input/textarea/select OR is an empty data cell
+                if (!hasInput && hasOnlyText) return;
+                // Skip cells from the header table (first table) and footer table (last table)
+                const parentTable = cell.closest('table');
+                const allTables = docContainer.querySelectorAll('table');
+                if (allTables.length > 0 && (parentTable === allTables[0] || parentTable === allTables[allTables.length - 1])) return;
+
+                // Create a unique key for this cell
+                const cellKey = getCellKey(cell);
+                cell.setAttribute('data-cell-key', cellKey);
+                cell.classList.add('cell-configurable');
+                cell.style.position = 'relative';
+                
+                cell.addEventListener('click', onCellClick);
+            });
+        }
+
+        function removeConfigurable() {
+            docContainer.querySelectorAll('.cell-configurable').forEach(cell => {
+                cell.classList.remove('cell-configurable', 'cell-selected');
+                cell.removeEventListener('click', onCellClick);
+            });
+        }
+
+        function getCellKey(cell) {
+            // Generate a stable key based on input id or position
+            const input = cell.querySelector('input, textarea, select');
+            if (input && input.id) return input.id;
+            
+            // Fallback to positional key
+            const row = cell.parentElement;
+            const table = row.closest('table');
+            const allTables = Array.from(docContainer.querySelectorAll('table'));
+            const tableIdx = allTables.indexOf(table);
+            const rowIdx = Array.from(table.querySelectorAll('tr')).indexOf(row);
+            const cellIdx = Array.from(row.children).indexOf(cell);
+            return `cell-t${tableIdx}-r${rowIdx}-c${cellIdx}`;
+        }
+
+        function onCellClick(e) {
+            e.stopPropagation();
+            if (!configMode) return;
+
+            const cell = e.currentTarget;
+            const key = cell.getAttribute('data-cell-key');
+
+            // Remove selection from previous
+            docContainer.querySelectorAll('.cell-selected').forEach(c => c.classList.remove('cell-selected'));
+            cell.classList.add('cell-selected');
+
+            currentPopoverCell = cell;
+            currentPopoverKey = key;
+
+            // Load existing config for this cell
+            const existing = fieldConfig[key];
+            if (existing) {
+                selectedType = existing.type || 'text';
+                currentOptions = existing.options ? [...existing.options] : [];
+            } else {
+                selectedType = 'text';
+                currentOptions = [];
+            }
+
+            showPopover(cell);
+        }
+
+        function showPopover(cell) {
+            const popover = document.getElementById('config-popover');
+            const overlay = document.getElementById('config-popover-overlay');
+
+            // Position popover near the cell
+            const rect = cell.getBoundingClientRect();
+            let top = rect.bottom + 8;
+            let left = rect.left;
+            
+            // Ensure it doesn't go off screen
+            if (top + 450 > window.innerHeight) {
+                top = rect.top - 450;
+                if (top < 10) top = 10;
+            }
+            if (left + 340 > window.innerWidth) {
+                left = window.innerWidth - 360;
+            }
+
+            popover.style.top = top + 'px';
+            popover.style.left = left + 'px';
+            
+            // Update UI
+            document.getElementById('popover-cell-id').textContent = currentPopoverKey;
+            updateTypeSelection();
+            renderOptions();
+
+            overlay.classList.remove('hidden');
+            popover.classList.remove('hidden');
+        }
+
+        function closePopover() {
+            document.getElementById('config-popover').classList.add('hidden');
+            document.getElementById('config-popover-overlay').classList.add('hidden');
+            docContainer.querySelectorAll('.cell-selected').forEach(c => c.classList.remove('cell-selected'));
+            currentPopoverCell = null;
+            currentPopoverKey = null;
+        }
+
+        function selectType(type) {
+            selectedType = type;
+            updateTypeSelection();
+        }
+
+        function updateTypeSelection() {
+            document.querySelectorAll('.type-option-card').forEach(card => {
+                card.classList.toggle('selected', card.getAttribute('data-type') === selectedType);
+            });
+            // Show/hide select options area
+            document.getElementById('select-options-area').classList.toggle('hidden', selectedType !== 'select');
+        }
+
+        function renderOptions() {
+            const container = document.getElementById('options-list');
+            container.innerHTML = '';
+            currentOptions.forEach((opt, idx) => {
+                const chip = document.createElement('span');
+                chip.className = 'option-chip';
+                chip.innerHTML = `${opt} <span class="remove-opt" onclick="removeOption(${idx})">×</span>`;
+                container.appendChild(chip);
+            });
+        }
+
+        function addOption() {
+            const input = document.getElementById('new-option-input');
+            const val = input.value.trim();
+            if (!val) return;
+            if (currentOptions.includes(val)) { input.value = ''; return; }
+            currentOptions.push(val);
+            renderOptions();
+            input.value = '';
+            input.focus();
+        }
+
+        function removeOption(idx) {
+            currentOptions.splice(idx, 1);
+            renderOptions();
+        }
+
+        function applyFieldType() {
+            if (!currentPopoverKey) return;
+
+            if (selectedType === 'select' && currentOptions.length === 0) {
+                alert('Debe agregar al menos una opción para una lista desplegable.');
+                return;
+            }
+
+            const config = { type: selectedType };
+            if (selectedType === 'select') {
+                config.options = [...currentOptions];
+            }
+            fieldConfig[currentPopoverKey] = config;
+
+            applyBadgesToCells();
+            closePopover();
+        }
+
+        function removeFieldConfig() {
+            if (!currentPopoverKey) return;
+            delete fieldConfig[currentPopoverKey];
+            applyBadgesToCells();
+            closePopover();
+        }
+
+        function applyBadgesToCells() {
+            // Remove existing badges
+            docContainer.querySelectorAll('.cell-type-badge').forEach(b => b.remove());
+
+            // Apply badges
+            for (const [key, config] of Object.entries(fieldConfig)) {
+                // Find cell by data-cell-key or by input id
+                let cell = docContainer.querySelector(`[data-cell-key="${key}"]`);
+                if (!cell) {
+                    // Try finding by input id
+                    const input = docContainer.getElementById(key);
+                    if (input) cell = input.closest('td');
+                }
+                if (!cell) continue;
+                cell.style.position = 'relative';
+
+                const badge = document.createElement('span');
+                badge.className = 'cell-type-badge';
+
+                const typeLabels = {
+                    text: ['Texto', 'type-text'],
+                    number: ['Número', 'type-number'],
+                    textarea: ['Área', 'type-textarea'],
+                    select: ['Lista', 'type-select']
+                };
+
+                const [label, cls] = typeLabels[config.type] || typeLabels.text;
+                badge.classList.add(cls);
+                badge.textContent = label;
+                if (config.type === 'select' && config.options) {
+                    badge.title = 'Opciones: ' + config.options.join(', ');
+                }
+                cell.appendChild(badge);
+            }
+        }
+
+        // =========================================
+        // ORIGINAL FUNCTIONALITY & WARNING MODAL
+        // =========================================
+
         function exportarPlantilla() {
+            abrirModalAdvertenciaDescarga();
+        }
+
+        function abrirModalAdvertenciaDescarga() {
+            document.getElementById('modal-advertencia-descarga').classList.remove('hidden');
+        }
+
+        function cerrarModalAdvertenciaDescarga() {
+            document.getElementById('modal-advertencia-descarga').classList.add('hidden');
+        }
+
+        function confirmarDescargaWord() {
+            cerrarModalAdvertenciaDescarga();
             window.location.href = `${baseUrl}/plantilla-base/export`;
         }
 
@@ -344,8 +982,8 @@
 
                 const result = await response.json();
                 if (response.ok) {
-                    showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Plantilla actualizada exitosamente!', 'success');
-                    // Reload the template preview immediately
+                    showStatus(`<i class="fa-solid fa-circle-check mr-2"></i> ¡Plantilla actualizada a Versión ${result.version}!`, 'success');
+                    // Reload the template preview and history immediately
                     loadActiveTemplate();
                     loadHistory();
                 } else {
@@ -374,11 +1012,6 @@
             if (confirm('¿Estás seguro de que deseas restaurar la plantilla base por defecto? Se perderán las modificaciones locales.')) {
                 showStatus('<i class="fa-solid fa-spinner animate-spin mr-2"></i> Restaurando...', 'info');
                 try {
-                    // To restore, we can just upload a blank post or ask the server to clear App_Data/plantilla_base.html
-                    // Wait, we can add a delete/reset call or simply post a request to reset.
-                    // Or let's just make a POST to a reset endpoint. Let's look if we have one. We can add a simple reset logic.
-                    // Actually, if we post a DELETE to api/microdisenos/plantilla-base or a specific endpoint, the server will delete the file
-                    // and then the next load will automatically recreate the default one.
                     const response = await fetch(`${baseUrl}/plantilla-base/reset`, { method: 'POST' });
                     if (response.ok) {
                         showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Plantilla base restaurada por defecto!', 'success');
@@ -392,59 +1025,81 @@
                 }
             }
         }
+        
         async function loadHistory() {
             try {
                 const response = await fetch(`${baseUrl}/plantilla-base/history`);
                 if (!response.ok) throw new Error('Error al conectar con la API.');
-                const files = await response.json();
+                const data = await response.json();
+                
+                // Update current version card
+                document.getElementById('current-version-label').textContent = `Versión ${data.versionActual}`;
+                document.getElementById('current-version-date').textContent = data.fechaActual || 'Sin fecha';
+                document.getElementById('current-version-file').textContent = data.archivoActual || 'Plantilla base';
                 
                 const listEl = document.getElementById('history-list');
                 listEl.innerHTML = '';
                 
-                if (files.length === 0) {
-                    listEl.innerHTML = '<div class="text-xs text-gray-500 italic">No hay versiones históricas aún.</div>';
+                const historial = data.historial || [];
+                
+                if (historial.length === 0) {
+                    listEl.innerHTML = '<div class="text-xs text-gray-500 italic text-center py-4"><i class="fa-regular fa-folder-open mr-1"></i> No hay versiones anteriores en el historial.</div>';
                     return;
                 }
                 
-                files.forEach(f => {
-                    listEl.innerHTML += `
-                        <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-                            <div>
-                                <p class="text-xs font-bold text-gray-800">${f.CreatedAt}</p>
-                                <p class="text-[10px] text-gray-400 font-mono mt-0.5">${f.FileName}</p>
+                // Sort by version descending (most recent first)
+                historial.sort((a, b) => b.Version - a.Version);
+                
+                historial.forEach(entry => {
+                    const card = document.createElement('div');
+                    card.className = 'history-entry flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm cursor-default';
+                    card.innerHTML = `
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-gray-200">V${entry.Version}</span>
+                                <span class="text-[11px] font-semibold text-gray-700">${entry.Fecha || 'Sin fecha'}</span>
                             </div>
-                            <button onclick="restaurarVersion('${f.FileName}')" class="text-[10px] font-bold bg-gray-100 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-lg transition-colors border border-gray-200 hover:border-indigo-200">
-                                Restaurar
-                            </button>
+                            <p class="text-[10px] text-gray-400 truncate" title="${entry.ArchivoWord || ''}">
+                                <i class="fa-regular fa-file-word mr-1"></i> ${entry.ArchivoWord || 'Sin archivo'}
+                            </p>
                         </div>
+                        <button onclick="revertirVersion(${entry.Version})" class="shrink-0 ml-3 text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg transition-colors border border-amber-200 hover:border-amber-300 flex items-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Revertir
+                        </button>
                     `;
+                    listEl.appendChild(card);
                 });
             } catch (err) {
                 console.error(err);
+                document.getElementById('history-list').innerHTML = '<div class="text-xs text-red-500">Error al cargar historial.</div>';
             }
         }
 
-        async function restaurarVersion(filename) {
-            if (confirm(`¿Estás seguro de que deseas restaurar esta versión anterior (${filename})?\n\nLa plantilla activa actual se guardará como copia de seguridad.`)) {
-                showStatus('<i class="fa-solid fa-spinner animate-spin mr-2"></i> Restaurando versión histórica...', 'info');
-                try {
-                    const response = await fetch(`${baseUrl}/plantilla-base/history/restore`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ FileName: filename })
-                    });
-                    
-                    if (response.ok) {
-                        showStatus('<i class="fa-solid fa-circle-check mr-2"></i> ¡Versión restaurada exitosamente!', 'success');
-                        loadActiveTemplate();
-                        loadHistory();
-                    } else {
-                        showStatus('Error al restaurar versión.', 'error');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    showStatus('Error de red al intentar restaurar.', 'error');
+        async function revertirVersion(version) {
+            if (!confirm(`¿Estás seguro de que deseas revertir a la Versión ${version}?\n\nLa versión actual será enviada al historial y podrás restaurarla después si es necesario.`)) {
+                return;
+            }
+            
+            showStatus('<i class="fa-solid fa-spinner animate-spin mr-2"></i> Revirtiendo a versión anterior...', 'info');
+            try {
+                const response = await fetch(`${baseUrl}/plantilla-base/revertir`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ version: version })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus(`<i class="fa-solid fa-circle-check mr-2"></i> ¡Revertido a Versión ${version} exitosamente!`, 'success');
+                    loadActiveTemplate();
+                    loadHistory();
+                } else {
+                    showStatus(result.Message || 'Error al revertir versión.', 'error');
                 }
+            } catch (err) {
+                console.error(err);
+                showStatus('Error de red al intentar revertir.', 'error');
             }
         }
     </script>

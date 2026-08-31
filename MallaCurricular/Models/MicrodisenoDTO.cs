@@ -21,6 +21,8 @@ namespace MallaCurricular.Models
         public string AprobadoPor { get; set; }
         public DateTime? FechaCreacion { get; set; }
         public DateTime? FechaAprobacion { get; set; }
+        public DateTime? FechaEnvio { get; set; }
+        public DateTime? FechaAval { get; set; }
         public string ContenidoJSON { get; set; }
         public bool VisibleParaTodos { get; set; }
         

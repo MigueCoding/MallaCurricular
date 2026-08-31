@@ -1,6 +1,7 @@
 const API_BASE_URL = 'http://localhost:49513';
 let currentMicrodiseno = { Id: 0 };
 let currentEvaluaciones = [];
+let fieldConfigMap = {}; // loaded from /api/microdisenos/plantilla-base/field-config
 
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
@@ -30,6 +31,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error al cargar plantilla base:', err);
     }
 
+    // Paso 1.5: Cargar configuración de tipos de campo (definida por el Jefe visualmente)
+    try {
+        const cfgRes = await fetch(`${API_BASE_URL}/api/microdisenos/plantilla-base/field-config`);
+        if (cfgRes.ok) {
+            const cfgData = await cfgRes.json();
+            fieldConfigMap = cfgData.fields || {};
+            applyFieldConfigToForm();
+        }
+    } catch(e) { console.error('Error cargando field config:', e); }
+
     // Paso 2: Ahora que el HTML del formulario existe, cargar datos del microdiseño
     if (document.getElementById('asig-codigo')) document.getElementById('asig-codigo').value = cursoCodigo || '';
     if (document.getElementById('asig-nombre')) document.getElementById('asig-nombre').value = asigNombre || '';
@@ -42,6 +53,147 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert("Falta información del curso para editar.");
     }
 });
+
+/**
+ * Apply field type configurations set by the Jefe.
+ * This transforms cells in the loaded template according to the fieldConfigMap.
+ * - text: ensures the cell has a text input (default, no change needed usually)
+ * - number: converts input to type=number with validation
+ * - textarea: converts input to textarea
+ * - select: replaces input with a <select> element with predefined options
+ */
+function applyFieldConfigToForm() {
+    const container = document.getElementById('doc-container');
+    if (!container) return;
+
+    for (const [key, config] of Object.entries(fieldConfigMap)) {
+        // Find the element by id first
+        let targetEl = document.getElementById(key);
+        let parentCell = targetEl ? targetEl.closest('td') : null;
+
+        // If not found by id, try finding cell by positional key (cell-tX-rX-cX)
+        if (!targetEl && key.startsWith('cell-')) {
+            parentCell = findCellByPositionalKey(container, key);
+            if (parentCell) {
+                targetEl = parentCell.querySelector('input, textarea, select');
+            }
+        }
+
+        if (!targetEl && !parentCell) continue;
+
+        const fieldId = targetEl ? targetEl.id : key;
+        const existingValue = targetEl ? (targetEl.value || '') : '';
+
+        switch (config.type) {
+            case 'number':
+                if (targetEl && targetEl.tagName === 'INPUT') {
+                    targetEl.type = 'number';
+                    targetEl.setAttribute('inputmode', 'numeric');
+                    // Add validation: block non-numeric key presses
+                    targetEl.addEventListener('keypress', function(e) {
+                        const char = String.fromCharCode(e.which || e.keyCode);
+                        if (!/[\d.\-]/.test(char)) {
+                            e.preventDefault();
+                        }
+                    });
+                    targetEl.addEventListener('paste', function(e) {
+                        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                        if (!/^[\d.\-]+$/.test(pasted)) {
+                            e.preventDefault();
+                        }
+                    });
+                } else if (targetEl && targetEl.tagName === 'TEXTAREA') {
+                    // Replace textarea with number input
+                    const newInput = document.createElement('input');
+                    newInput.type = 'number';
+                    newInput.id = fieldId;
+                    newInput.className = targetEl.className;
+                    newInput.classList.add('doc-input');
+                    newInput.value = existingValue;
+                    newInput.setAttribute('inputmode', 'numeric');
+                    newInput.addEventListener('keypress', function(e) {
+                        const char = String.fromCharCode(e.which || e.keyCode);
+                        if (!/[\d.\-]/.test(char)) e.preventDefault();
+                    });
+                    targetEl.parentNode.replaceChild(newInput, targetEl);
+                }
+                break;
+
+            case 'textarea':
+                if (targetEl && targetEl.tagName === 'INPUT') {
+                    // Replace input with textarea
+                    const newTextarea = document.createElement('textarea');
+                    newTextarea.id = fieldId;
+                    newTextarea.className = targetEl.className + ' min-h-[60px]';
+                    newTextarea.classList.add('doc-input');
+                    newTextarea.value = existingValue;
+                    newTextarea.placeholder = 'Escriba aquí...';
+                    targetEl.parentNode.replaceChild(newTextarea, targetEl);
+                }
+                // If already textarea, nothing to do
+                break;
+
+            case 'select':
+                if (config.options && config.options.length > 0) {
+                    const newSelect = document.createElement('select');
+                    newSelect.id = fieldId;
+                    newSelect.className = 'input-doc doc-input';
+
+                    // Default empty option
+                    const defaultOpt = document.createElement('option');
+                    defaultOpt.value = '';
+                    defaultOpt.textContent = 'Seleccione...';
+                    newSelect.appendChild(defaultOpt);
+
+                    config.options.forEach(optVal => {
+                        const opt = document.createElement('option');
+                        opt.value = optVal;
+                        opt.textContent = optVal;
+                        newSelect.appendChild(opt);
+                    });
+
+                    // Set existing value if matches
+                    if (existingValue) {
+                        newSelect.value = existingValue;
+                    }
+
+                    if (targetEl) {
+                        targetEl.parentNode.replaceChild(newSelect, targetEl);
+                    } else if (parentCell) {
+                        parentCell.innerHTML = '';
+                        parentCell.appendChild(newSelect);
+                    }
+                }
+                break;
+
+            case 'text':
+            default:
+                // Text is the default, no transformation needed
+                break;
+        }
+    }
+}
+
+/**
+ * Given a positional key like "cell-t2-r1-c3", find the corresponding TD.
+ */
+function findCellByPositionalKey(container, key) {
+    const match = key.match(/^cell-t(\d+)-r(\d+)-c(\d+)$/);
+    if (!match) return null;
+    const tableIdx = parseInt(match[1]);
+    const rowIdx = parseInt(match[2]);
+    const cellIdx = parseInt(match[3]);
+
+    const allTables = container.querySelectorAll('table');
+    if (tableIdx >= allTables.length) return null;
+    const table = allTables[tableIdx];
+    const rows = table.querySelectorAll('tr');
+    if (rowIdx >= rows.length) return null;
+    const cells = rows[rowIdx].children;
+    if (cellIdx >= cells.length) return null;
+    return cells[cellIdx];
+}
+
 
 function goBack() {
     const role = parseInt(localStorage.getItem('userRole'));
@@ -195,10 +347,10 @@ function fillForm(m) {
     if (txtRevisado) txtRevisado.textContent = m.RevisadoPor || '';
     
     const txtVersion = document.getElementById('txt-version');
-    if (txtVersion) txtVersion.textContent = m.Version || '05';
+    if (txtVersion) txtVersion.textContent = m.Version || '1.0';
     
     const txtFecha = document.getElementById('txt-fecha');
-    if (txtFecha) txtFecha.textContent = m.FechaAprobacion ? m.FechaAprobacion.substring(0, 10) : '30-07-2024';
+    if (txtFecha) txtFecha.textContent = m.FechaAprobacion ? m.FechaAprobacion.substring(0, 10) : '';
     
     const txtAprobado = document.getElementById('txt-aprobado');
     if (txtAprobado) txtAprobado.textContent = m.AprobadoPor || '';

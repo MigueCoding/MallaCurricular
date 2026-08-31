@@ -1,0 +1,19 @@
+﻿{
+  "VersionActual": 7,
+  "FechaVersionActual": "25-08-2026",
+  "ArchivoVersionActual": "plantilla_base_reunion.docx",
+  "Historial": [
+    {
+      "Version": 6,
+      "Fecha": "11-08-2026",
+      "ArchivoWord": "plantilla_base_pruebabug6.docx",
+      "ArchivoBackup": "plantilla_v6_20260825_091431.html"
+    },
+    {
+      "Version": 5,
+      "Fecha": "30-07-2024",
+      "ArchivoWord": "plantilla_base_v5.docx",
+      "ArchivoBackup": "plantilla_v5_20260825_091645.html"
+    }
+  ]
+}

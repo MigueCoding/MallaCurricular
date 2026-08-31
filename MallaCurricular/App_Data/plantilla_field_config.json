@@ -1,0 +1,20 @@
+﻿{
+  "fields": {
+    "txt-area": {
+      "type": "select",
+      "options": [
+        "Ingeniería",
+        "Artes",
+        "Humanas"
+      ]
+    },
+    "txt-justificacion": {
+      "type": "select",
+      "options": [
+        "a",
+        "b",
+        "c"
+      ]
+    }
+  }
+}
