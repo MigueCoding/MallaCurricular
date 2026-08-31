@@ -4,7 +4,7 @@ const API_CURSOS_BASE = 'http://localhost:49513/api/cursos';
 async function fetchMicrodisenosPendientes() {
     const tbody = document.getElementById('microdisenos-list-body');
     if(!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Cargando microdiseños...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-400 italic">Cargando microdiseños...</td></tr>';
 
     try {
         // 1. Obtener lista base de pendientes
@@ -15,7 +15,7 @@ async function fetchMicrodisenosPendientes() {
         tbody.innerHTML = '';
 
         if(data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500 italic">No hay microdiseños pendientes de revisión.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-500 italic">No hay microdiseños pendientes de revisión.</td></tr>';
             return;
         }
 
@@ -77,6 +77,9 @@ async function fetchMicrodisenosPendientes() {
                 extraInfo = `<div class="text-[11px] mt-1"><span class="font-bold text-green-600">Aprobado por:</span><br>${m.AprobadoPor}</div>`;
             }
 
+            const fechaEnvioStr = m.FechaEnvio ? new Date(m.FechaEnvio).toLocaleString() : '<span class="text-gray-400 italic">Sin fecha</span>';
+            const fechaAvalStr = m.FechaAval ? new Date(m.FechaAval).toLocaleString() : '<span class="text-gray-400 italic">Sin fecha</span>';
+
             const tr = document.createElement('tr');
             tr.className = "border-b hover:bg-gray-50 transition";
             tr.innerHTML = `
@@ -87,7 +90,8 @@ async function fetchMicrodisenosPendientes() {
                     <div class="text-[11px] mt-1"><span class="font-bold text-indigo-500">Avalado por:</span><br>${avalNombre || 'No asignado'}</div>
                     ${extraInfo}
                 </td>
-                <td class="p-4 text-[10px] text-gray-400">${new Date(m.FechaCreacion).toLocaleString()}</td>
+                <td class="p-4 text-[11px] text-gray-500">${fechaEnvioStr}</td>
+                <td class="p-4 text-[11px] text-gray-500">${fechaAvalStr}</td>
                 <td class="p-4 text-center">
                     ${estadoHTML}
                 </td>
@@ -101,7 +105,7 @@ async function fetchMicrodisenosPendientes() {
         }
     } catch(e) { 
         console.error(e);
-        if(tbody) tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-500 font-bold">Error al cargar datos del servidor.</td></tr>';
+        if(tbody) tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-red-500 font-bold">Error al cargar datos del servidor.</td></tr>';
     }
 }
 
