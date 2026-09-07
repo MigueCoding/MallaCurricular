@@ -192,6 +192,18 @@
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\MallasController.cs" />
     <Compile Include="Controllers\MicrodisenosController.cs" />
+    <Compile Include="Infrastructure\Data\Microdiseno.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\MicrodisenoRole.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\MomentosEvaluativo.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\RespuestasCompromiso.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\MicrodisenoDTO.cs" />
     <Compile Include="Models\WordTemplateHelper.cs" />
     <Compile Include="Global.asax.cs">

@@ -12,13 +12,11 @@ namespace MallaCurricular.Infrastructure.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class MallaCurso
+    public partial class MicrodisenoRole
     {
-        public int MallaId { get; set; }
+        public int Id { get; set; }
         public string CursoCodigo { get; set; }
-        public int Semestre { get; set; }
-    
-        public virtual Curso Curso { get; set; }
-        public virtual Malla Malla { get; set; }
+        public int CreadorId { get; set; }
+        public int AvalId { get; set; }
     }
 }

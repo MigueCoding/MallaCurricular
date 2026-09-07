@@ -197,8 +197,15 @@ body {
 }
 
 .summary-cell {
-    border: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
     padding: 0.5rem;
+}
+.summary-cell:nth-child(3n) {
+    border-right: none;
+}
+.summary-cell:nth-last-child(-n+3) {
+    border-bottom: none;
 }
 
 .legend { /* Para la lista de definiciones */

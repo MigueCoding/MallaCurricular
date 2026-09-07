@@ -23,6 +23,12 @@
         <AssociationConnector Association="MallaDBModel.FK_Grupos_Usuarios" />
         <AssociationConnector Association="MallaDBModel.FK_Inscripciones_Grupos" />
         <AssociationConnector Association="MallaDBModel.FK_Inscripciones_Usuarios" />
+        <EntityTypeShape EntityType="MallaDBModel.MicrodisenoRole" Width="1.5" PointX="7.75" PointY="7.75" />
+        <EntityTypeShape EntityType="MallaDBModel.Microdiseno" Width="1.5" PointX="0.75" PointY="8.75" />
+        <EntityTypeShape EntityType="MallaDBModel.MomentosEvaluativo" Width="1.5" PointX="12.875" PointY="0.875" />
+        <EntityTypeShape EntityType="MallaDBModel.RespuestasCompromiso" Width="1.5" PointX="12.875" PointY="8" />
+        <AssociationConnector Association="MallaDBModel.FK_Grupo_Momentos" />
+        <AssociationConnector Association="MallaDBModel.FK_Resp_Grupo" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

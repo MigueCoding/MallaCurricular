@@ -169,8 +169,15 @@ body {
 }
 
 .summary-cell {
-    border: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
     padding: 0.5rem;
+}
+.summary-cell:nth-child(3n) {
+    border-right: none;
+}
+.summary-cell:nth-last-child(-n+3) {
+    border-bottom: none;
 }
 
 .legend {
@@ -198,7 +205,7 @@ body {
             border-bottom: none;
         }
 
-.color-legend {
+.color-palette {
     background: white;
     border: 1px solid #d1d5db;
     border-radius: 10px;
@@ -207,6 +214,26 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     position: sticky;
     top: 1rem;
+}
+
+.color-palette h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.color-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.color-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
 }
 
 .enabler-tag {
