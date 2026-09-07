@@ -65,6 +65,50 @@
           <Property Name="UpdatedAt" Type="datetime" />
           <Property Name="Nombre" Type="nvarchar" MaxLength="100" />
         </EntityType>
+        <EntityType Name="MicrodisenoRoles">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CursoCodigo" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreadorId" Type="int" Nullable="false" />
+          <Property Name="AvalId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Microdisenos">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CursoCodigo" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Semestre" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Facultad" Type="nvarchar" MaxLength="100" />
+          <Property Name="Modalidad" Type="nvarchar" MaxLength="50" />
+          <Property Name="TipoCredito" Type="nvarchar" MaxLength="50" />
+          <Property Name="TipoAsignatura" Type="nvarchar" MaxLength="50" />
+          <Property Name="Estado" Type="nvarchar" MaxLength="20" />
+          <Property Name="Version" Type="nvarchar" MaxLength="10" />
+          <Property Name="ElaboradoPor" Type="nvarchar" MaxLength="100" />
+          <Property Name="RevisadoPor" Type="nvarchar" MaxLength="100" />
+          <Property Name="AprobadoPor" Type="nvarchar" MaxLength="100" />
+          <Property Name="FechaCreacion" Type="datetime" />
+          <Property Name="FechaAprobacion" Type="datetime" />
+          <Property Name="ObservacionesRechazo" Type="nvarchar(max)" />
+          <Property Name="ContenidoJSON" Type="nvarchar(max)" />
+          <Property Name="VisibleParaTodos" Type="bit" Nullable="false" />
+          <Property Name="FechaEnvio" Type="datetime" />
+          <Property Name="FechaAval" Type="datetime" />
+        </EntityType>
+        <EntityType Name="MomentosEvaluativos">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GrupoId" Type="int" Nullable="false" />
+          <Property Name="EventoEvaluativo" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="TipoEvento" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Ponderacion" Type="decimal" Precision="5" Scale="2" Nullable="false" />
+          <Property Name="Fecha" Type="nvarchar" MaxLength="50" />
+        </EntityType>
         <EntityType Name="Optativas">
           <Key>
             <PropertyRef Name="Codigo" />
@@ -84,6 +128,17 @@
           </Key>
           <Property Name="Curso" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Prerequisito" Type="varchar" MaxLength="10" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RespuestasCompromiso">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GrupoId" Type="int" Nullable="false" />
+          <Property Name="EstudianteId" Type="int" Nullable="false" />
+          <Property Name="Estado" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Observacion" Type="nvarchar(max)" />
+          <Property Name="Fecha" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="Roles">
           <Key>
@@ -113,6 +168,20 @@
           <Property Name="id_rol" Type="int" Nullable="false" />
           <Property Name="fecha_registro" Type="datetime" />
         </EntityType>
+        <Association Name="FK_Grupo_Momentos">
+          <End Role="Grupos" Type="Self.Grupos" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="MomentosEvaluativos" Type="Self.MomentosEvaluativos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Grupos">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="MomentosEvaluativos">
+              <PropertyRef Name="GrupoId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Grupos_Cursos">
           <End Role="Cursos" Type="Self.Cursos" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -219,6 +288,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Resp_Grupo">
+          <End Role="Grupos" Type="Self.Grupos" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="RespuestasCompromiso" Type="Self.RespuestasCompromiso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Grupos">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RespuestasCompromiso">
+              <PropertyRef Name="GrupoId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_rol_usuario">
           <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
           <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="*" />
@@ -269,11 +352,19 @@
           <EntitySet Name="Inscripciones" EntityType="Self.Inscripciones" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="MallaCursos" EntityType="Self.MallaCursos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Mallas" EntityType="Self.Mallas" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MicrodisenoRoles" EntityType="Self.MicrodisenoRoles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Microdisenos" EntityType="Self.Microdisenos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MomentosEvaluativos" EntityType="Self.MomentosEvaluativos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Optativas" EntityType="Self.Optativas" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Prerequisitos" EntityType="Self.Prerequisitos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RespuestasCompromiso" EntityType="Self.RespuestasCompromiso" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Usuarios" EntityType="Self.Usuarios" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Grupo_Momentos" Association="Self.FK_Grupo_Momentos">
+            <End Role="Grupos" EntitySet="Grupos" />
+            <End Role="MomentosEvaluativos" EntitySet="MomentosEvaluativos" />
+          </AssociationSet>
           <AssociationSet Name="FK_Grupos_Cursos" Association="Self.FK_Grupos_Cursos">
             <End Role="Cursos" EntitySet="Cursos" />
             <End Role="Grupos" EntitySet="Grupos" />
@@ -305,6 +396,10 @@
           <AssociationSet Name="FK_Prerequisito_CursoRequisito" Association="Self.FK_Prerequisito_CursoRequisito">
             <End Role="Cursos" EntitySet="Cursos" />
             <End Role="Prerequisitos" EntitySet="Prerequisitos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Resp_Grupo" Association="Self.FK_Resp_Grupo">
+            <End Role="Grupos" EntitySet="Grupos" />
+            <End Role="RespuestasCompromiso" EntitySet="RespuestasCompromiso" />
           </AssociationSet>
           <AssociationSet Name="fk_rol_usuario" Association="Self.fk_rol_usuario">
             <End Role="Roles" EntitySet="Roles" />
@@ -525,6 +620,18 @@
             <End Role="Usuario" EntitySet="Usuarios" />
             <End Role="Inscripcione" EntitySet="Inscripciones" />
           </AssociationSet>
+          <EntitySet Name="MicrodisenoRoles" EntityType="MallaDBModel.MicrodisenoRole" />
+          <EntitySet Name="Microdisenos" EntityType="MallaDBModel.Microdiseno" />
+          <EntitySet Name="MomentosEvaluativos" EntityType="MallaDBModel.MomentosEvaluativo" />
+          <EntitySet Name="RespuestasCompromisoes" EntityType="MallaDBModel.RespuestasCompromiso" />
+          <AssociationSet Name="FK_Grupo_Momentos" Association="MallaDBModel.FK_Grupo_Momentos">
+            <End Role="Grupos" EntitySet="Grupos" />
+            <End Role="MomentosEvaluativo" EntitySet="MomentosEvaluativos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Resp_Grupo" Association="MallaDBModel.FK_Resp_Grupo">
+            <End Role="Grupos" EntitySet="Grupos" />
+            <End Role="RespuestasCompromiso" EntitySet="RespuestasCompromisoes" />
+          </AssociationSet>
         </EntityContainer>
         <ComplexType Name="sp_helpdiagramdefinition_Result">
           <Property Type="Int32" Name="version" Nullable="true" />
@@ -549,6 +656,8 @@
           <NavigationProperty Name="Curso" Relationship="MallaDBModel.FK_Grupos_Cursos" FromRole="Grupos" ToRole="Curso" />
           <NavigationProperty Name="Usuario" Relationship="MallaDBModel.FK_Grupos_Usuarios" FromRole="Grupos" ToRole="Usuario" />
           <NavigationProperty Name="Inscripciones" Relationship="MallaDBModel.FK_Inscripciones_Grupos" FromRole="Grupos" ToRole="Inscripcione" />
+          <NavigationProperty Name="MomentosEvaluativos" Relationship="MallaDBModel.FK_Grupo_Momentos" FromRole="Grupos" ToRole="MomentosEvaluativo" />
+          <NavigationProperty Name="RespuestasCompromisoes" Relationship="MallaDBModel.FK_Resp_Grupo" FromRole="Grupos" ToRole="RespuestasCompromiso" />
         </EntityType>
         <EntityType Name="Inscripcione">
           <Key>
@@ -609,6 +718,91 @@
             </Principal>
             <Dependent Role="Inscripcione">
               <PropertyRef Name="EstudianteId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="MicrodisenoRole">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CursoCodigo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreadorId" Type="Int32" Nullable="false" />
+          <Property Name="AvalId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Microdiseno">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CursoCodigo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Semestre" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Facultad" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Modalidad" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="TipoCredito" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="TipoAsignatura" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Estado" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Version" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="ElaboradoPor" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="RevisadoPor" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="AprobadoPor" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="FechaCreacion" Type="DateTime" Precision="3" />
+          <Property Name="FechaAprobacion" Type="DateTime" Precision="3" />
+          <Property Name="ObservacionesRechazo" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ContenidoJSON" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="VisibleParaTodos" Type="Boolean" Nullable="false" />
+          <Property Name="FechaEnvio" Type="DateTime" Precision="3" />
+          <Property Name="FechaAval" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="MomentosEvaluativo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GrupoId" Type="Int32" Nullable="false" />
+          <Property Name="EventoEvaluativo" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="TipoEvento" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Ponderacion" Type="Decimal" Nullable="false" Precision="5" Scale="2" />
+          <Property Name="Fecha" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Grupos" Relationship="MallaDBModel.FK_Grupo_Momentos" FromRole="MomentosEvaluativo" ToRole="Grupos" />
+        </EntityType>
+        <EntityType Name="RespuestasCompromiso">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GrupoId" Type="Int32" Nullable="false" />
+          <Property Name="EstudianteId" Type="Int32" Nullable="false" />
+          <Property Name="Estado" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Observacion" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Fecha" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Grupos" Relationship="MallaDBModel.FK_Resp_Grupo" FromRole="RespuestasCompromiso" ToRole="Grupos" />
+        </EntityType>
+        <Association Name="FK_Grupo_Momentos">
+          <End Type="MallaDBModel.Grupos" Role="Grupos" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="MallaDBModel.MomentosEvaluativo" Role="MomentosEvaluativo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Grupos">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="MomentosEvaluativo">
+              <PropertyRef Name="GrupoId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Resp_Grupo">
+          <End Type="MallaDBModel.Grupos" Role="Grupos" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="MallaDBModel.RespuestasCompromiso" Role="RespuestasCompromiso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Grupos">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RespuestasCompromiso">
+              <PropertyRef Name="GrupoId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -753,6 +947,65 @@
           <EntitySetMapping Name="Inscripciones">
             <EntityTypeMapping TypeName="MallaDBModel.Inscripcione">
               <MappingFragment StoreEntitySet="Inscripciones">
+                <ScalarProperty Name="EstudianteId" ColumnName="EstudianteId" />
+                <ScalarProperty Name="GrupoId" ColumnName="GrupoId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MicrodisenoRoles">
+            <EntityTypeMapping TypeName="MallaDBModel.MicrodisenoRole">
+              <MappingFragment StoreEntitySet="MicrodisenoRoles">
+                <ScalarProperty Name="AvalId" ColumnName="AvalId" />
+                <ScalarProperty Name="CreadorId" ColumnName="CreadorId" />
+                <ScalarProperty Name="CursoCodigo" ColumnName="CursoCodigo" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Microdisenos">
+            <EntityTypeMapping TypeName="MallaDBModel.Microdiseno">
+              <MappingFragment StoreEntitySet="Microdisenos">
+                <ScalarProperty Name="FechaAval" ColumnName="FechaAval" />
+                <ScalarProperty Name="FechaEnvio" ColumnName="FechaEnvio" />
+                <ScalarProperty Name="VisibleParaTodos" ColumnName="VisibleParaTodos" />
+                <ScalarProperty Name="ContenidoJSON" ColumnName="ContenidoJSON" />
+                <ScalarProperty Name="ObservacionesRechazo" ColumnName="ObservacionesRechazo" />
+                <ScalarProperty Name="FechaAprobacion" ColumnName="FechaAprobacion" />
+                <ScalarProperty Name="FechaCreacion" ColumnName="FechaCreacion" />
+                <ScalarProperty Name="AprobadoPor" ColumnName="AprobadoPor" />
+                <ScalarProperty Name="RevisadoPor" ColumnName="RevisadoPor" />
+                <ScalarProperty Name="ElaboradoPor" ColumnName="ElaboradoPor" />
+                <ScalarProperty Name="Version" ColumnName="Version" />
+                <ScalarProperty Name="Estado" ColumnName="Estado" />
+                <ScalarProperty Name="TipoAsignatura" ColumnName="TipoAsignatura" />
+                <ScalarProperty Name="TipoCredito" ColumnName="TipoCredito" />
+                <ScalarProperty Name="Modalidad" ColumnName="Modalidad" />
+                <ScalarProperty Name="Facultad" ColumnName="Facultad" />
+                <ScalarProperty Name="Semestre" ColumnName="Semestre" />
+                <ScalarProperty Name="CursoCodigo" ColumnName="CursoCodigo" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MomentosEvaluativos">
+            <EntityTypeMapping TypeName="MallaDBModel.MomentosEvaluativo">
+              <MappingFragment StoreEntitySet="MomentosEvaluativos">
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="Ponderacion" ColumnName="Ponderacion" />
+                <ScalarProperty Name="TipoEvento" ColumnName="TipoEvento" />
+                <ScalarProperty Name="EventoEvaluativo" ColumnName="EventoEvaluativo" />
+                <ScalarProperty Name="GrupoId" ColumnName="GrupoId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RespuestasCompromisoes">
+            <EntityTypeMapping TypeName="MallaDBModel.RespuestasCompromiso">
+              <MappingFragment StoreEntitySet="RespuestasCompromiso">
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="Observacion" ColumnName="Observacion" />
+                <ScalarProperty Name="Estado" ColumnName="Estado" />
                 <ScalarProperty Name="EstudianteId" ColumnName="EstudianteId" />
                 <ScalarProperty Name="GrupoId" ColumnName="GrupoId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />

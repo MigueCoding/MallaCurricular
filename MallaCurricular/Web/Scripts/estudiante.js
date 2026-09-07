@@ -172,14 +172,29 @@ async function fetchCoursesByMalla() {
         summaryContainer.appendChild(legend);
 
         const colorLegend = document.createElement("div");
-        colorLegend.className = "color-legend mt-6 text-sm text-gray-700";
+        colorLegend.className = "color-palette mt-6";
         colorLegend.innerHTML = `
-            <h3 class="font-semibold text-gray-800 mb-2">Leyenda de Colores</h3>
-            <div><span class="inline-block w-4 h-4 bg-[#10b981] rounded-sm mr-2"></span> Ciencias Básicas</div>
-            <div><span class="inline-block w-4 h-4 bg-[#3b82f6] rounded-sm mr-2"></span> Ciencias Básicas Tecnología - Ingeniería</div>
-            <div><span class="inline-block w-4 h-4 bg-[#8b5cf6] rounded-sm mr-2"></span> Formación Profesional</div>
-            <div><span class="inline-block w-4 h-4 bg-[#ef4444] rounded-sm mr-2"></span> Formación Complementaria</div>
-            <div><span class="inline-block w-4 h-4 bg-[#b6ffff] rounded-sm mr-2"></span> Asignatura que la habilitó</div>`;
+            <h4>Leyenda de Colores</h4>
+            <div class="color-item">
+                <div class="color-swatch" style="background-color: #10b981;"></div>
+                <span>Ciencias Básicas</span>
+            </div>
+            <div class="color-item">
+                <div class="color-swatch" style="background-color: #3b82f6;"></div>
+                <span>Ciencias Básicas Tecnología - Ingeniería</span>
+            </div>
+            <div class="color-item">
+                <div class="color-swatch" style="background-color: #8b5cf6;"></div>
+                <span>Formación Profesional</span>
+            </div>
+            <div class="color-item">
+                <div class="color-swatch" style="background-color: #ef4444;"></div>
+                <span>Formación Complementaria</span>
+            </div>
+            <div class="color-item">
+                <div class="color-swatch" style="background-color: #b6ffff; border: 1px solid #ccc;"></div>
+                <span>Asignatura que la habilitó</span>
+            </div>`;
         summaryContainer.appendChild(colorLegend);
 
         renderSemesters();
@@ -699,13 +714,13 @@ function computeSemesterSums() {
             const box = document.createElement("div");
             box.className = "summary-box grid grid-cols-3 border border-black text-center";
             box.innerHTML = `
-                <div class="col-span-2 grid grid-cols-2 border-r border-black">
-                    <div class="border-b border-black">${s1}</div>
-                    <div class="border-b border-l border-black">${s3}</div>
-                    <div class="border-black">${s2}</div>
-                    <div class="border-l border-black">${s4}</div>
+                <div class="grid grid-cols-2 border-r border-black" style="grid-column: span 2;">
+                    <div class="border-b border-r border-black p-2">${s1}</div>
+                    <div class="border-b border-black p-2">${s3}</div>
+                    <div class="border-r border-black p-2">${s2}</div>
+                    <div class="border-black p-2">${s4}</div>
                 </div>
-                <div class="flex items-center justify-center text-lg font-bold border-l border-black">${s5}</div>
+                <div class="flex items-center justify-center text-lg font-bold border-l border-black p-2">${s5}</div>
             `;
             cont.appendChild(box);
         }

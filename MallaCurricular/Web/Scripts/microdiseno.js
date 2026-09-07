@@ -198,7 +198,7 @@ function findCellByPositionalKey(container, key) {
 function goBack() {
     const role = parseInt(localStorage.getItem('userRole'));
     if (role === 1) window.location.href = 'Jefe.html?tab=microdisenos';
-    else if (role === 3) window.location.href = 'estudiante.html';
+    else if (role === 3) window.location.href = 'Estudiante.html?tab=asignaturas';
     else window.location.href = 'profesor.html';
 }
 
@@ -492,7 +492,6 @@ function checkStateUI() {
                     <h2 class="text-xl font-bold text-gray-800">Microdiseño No Publicado</h2>
                     <p class="text-gray-500 mt-2">Este microdiseño aún no ha sido aprobado oficialmente por la coordinación para su consulta pública.</p>
                 </div>`;
-            btns.innerHTML = `<button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>`;
             return;
         }
 
@@ -502,7 +501,6 @@ function checkStateUI() {
             msg = 'El microcurrículo aún no ha sido enviado a revisión por el Creador. Podrá acceder cuando el docente lo envíe formalmente.';
         }
         document.getElementById('doc-container').innerHTML = `<div class="text-center py-20 text-red-600 font-bold text-xl">Acceso Denegado: <br><span class="text-sm font-normal text-gray-500">${msg}</span></div>`;
-        btns.innerHTML = `<button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>`;
         return;
     }
 
