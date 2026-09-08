@@ -1,5 +1,6 @@
 using System;
 using System.Web.Mvc;
+using System.Web.Security;
 using MallaCurricular.Infrastructure.Data;
 using MallaCurricular.Infrastructure.Repositories;
 using MallaCurricular.Core.Domain.Interfaces;
@@ -35,6 +36,9 @@ namespace MallaCurricular.Controllers
                     Session["UsuarioID"] = usuario.id_usuario;
                     Session["NombreUsuario"] = usuario.nombre;
                     Session["RolID"] = usuario.id_rol;
+                    // Cookie firmada por el servidor: las APIs pueden validar
+                    // al usuario incluso cuando Web API no recupera la sesión.
+                    FormsAuthentication.SetAuthCookie(usuario.email, false);
 
                     // 4. Lógica de redirección según el ID del Rol
                     // Rol 1: Jefe -> index.html
@@ -85,6 +89,7 @@ namespace MallaCurricular.Controllers
         {
             Session.Clear();
             Session.Abandon();
+            FormsAuthentication.SignOut();
             return Redirect("/login.html"); // Cambia por tu página de inicio
         }
     }

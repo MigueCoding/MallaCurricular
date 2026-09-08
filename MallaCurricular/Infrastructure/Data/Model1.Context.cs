@@ -40,7 +40,11 @@ namespace MallaCurricular.Infrastructure.Data
         public virtual DbSet<MicrodisenoRole> MicrodisenoRoles { get; set; }
         public virtual DbSet<Microdiseno> Microdisenos { get; set; }
         public virtual DbSet<MomentosEvaluativo> MomentosEvaluativos { get; set; }
-        public virtual DbSet<RespuestasCompromiso> RespuestasCompromisoes { get; set; }
+        public virtual DbSet<RA_Programa> RA_Programa { get; set; }
+        public virtual DbSet<RA_Version> RA_Version { get; set; }
+        public virtual DbSet<RA_Competencia> RA_Competencia { get; set; }
+        public virtual DbSet<RA_Momento> RA_Momento { get; set; }
+        public virtual DbSet<RA_Resultado> RA_Resultado { get; set; }
     
         public virtual int sp_alterdiagram(string diagramname, Nullable<int> owner_id, Nullable<int> version, byte[] definition)
         {

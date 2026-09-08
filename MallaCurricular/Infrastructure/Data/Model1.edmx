@@ -129,16 +129,70 @@
           <Property Name="Curso" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Prerequisito" Type="varchar" MaxLength="10" Nullable="false" />
         </EntityType>
-        <EntityType Name="RespuestasCompromiso">
+        <EntityType Name="RA_Competencia">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="GrupoId" Type="int" Nullable="false" />
-          <Property Name="EstudianteId" Type="int" Nullable="false" />
-          <Property Name="Estado" Type="nvarchar" MaxLength="50" Nullable="false" />
-          <Property Name="Observacion" Type="nvarchar(max)" />
-          <Property Name="Fecha" Type="nvarchar" MaxLength="50" />
+          <Property Name="ProgramaId" Type="int" Nullable="false" />
+          <Property Name="Codigo" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Descripcion" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Orden" Type="int" Nullable="false" />
+          <Property Name="Activo" Type="bit" Nullable="false" />
+          <Property Name="CreadoEn" Type="datetime" Nullable="false" />
+          <Property Name="ActualizadoEn" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RA_Momento">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ResultadoId" Type="int" Nullable="false" />
+          <Property Name="Codigo" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Descripcion" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Orden" Type="int" Nullable="false" />
+          <Property Name="Activo" Type="bit" Nullable="false" />
+          <Property Name="CreadoEn" Type="datetime" Nullable="false" />
+          <Property Name="ActualizadoEn" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RA_Programa">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Codigo" Type="nvarchar" MaxLength="80" Nullable="false" />
+          <Property Name="PerfilEgreso" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="PerfilOcupacional" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="TituloCompetencias" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="Activo" Type="bit" Nullable="false" />
+          <Property Name="CreadoEn" Type="datetime" Nullable="false" />
+          <Property Name="ActualizadoEn" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RA_Resultado">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CompetenciaId" Type="int" Nullable="false" />
+          <Property Name="Codigo" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Descripcion" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Orden" Type="int" Nullable="false" />
+          <Property Name="Activo" Type="bit" Nullable="false" />
+          <Property Name="CreadoEn" Type="datetime" Nullable="false" />
+          <Property Name="ActualizadoEn" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RA_Version">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProgramaId" Type="int" Nullable="false" />
+          <Property Name="Version" Type="int" Nullable="false" />
+          <Property Name="FechaCambio" Type="datetime" Nullable="false" />
+          <Property Name="UsuarioId" Type="int" />
+          <Property Name="Accion" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="VersionOrigen" Type="int" />
+          <Property Name="SnapshotJson" Type="nvarchar(max)" Nullable="false" />
         </EntityType>
         <EntityType Name="Roles">
           <Key>
@@ -288,17 +342,51 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resp_Grupo">
-          <End Role="Grupos" Type="Self.Grupos" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="RespuestasCompromiso" Type="Self.RespuestasCompromiso" Multiplicity="*" />
+        <Association Name="FK_RA_Competencia_Programa">
+          <End Role="RA_Programa" Type="Self.RA_Programa" Multiplicity="1" />
+          <End Role="RA_Competencia" Type="Self.RA_Competencia" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Grupos">
+            <Principal Role="RA_Programa">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="RespuestasCompromiso">
-              <PropertyRef Name="GrupoId" />
+            <Dependent Role="RA_Competencia">
+              <PropertyRef Name="ProgramaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RA_Momento_Resultado">
+          <End Role="RA_Resultado" Type="Self.RA_Resultado" Multiplicity="1" />
+          <End Role="RA_Momento" Type="Self.RA_Momento" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RA_Resultado">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RA_Momento">
+              <PropertyRef Name="ResultadoId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RA_Resultado_Competencia">
+          <End Role="RA_Competencia" Type="Self.RA_Competencia" Multiplicity="1" />
+          <End Role="RA_Resultado" Type="Self.RA_Resultado" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RA_Competencia">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RA_Resultado">
+              <PropertyRef Name="CompetenciaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RA_Version_Programa">
+          <End Role="RA_Programa" Type="Self.RA_Programa" Multiplicity="1" />
+          <End Role="RA_Version" Type="Self.RA_Version" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RA_Programa">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RA_Version">
+              <PropertyRef Name="ProgramaId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -357,7 +445,11 @@
           <EntitySet Name="MomentosEvaluativos" EntityType="Self.MomentosEvaluativos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Optativas" EntityType="Self.Optativas" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Prerequisitos" EntityType="Self.Prerequisitos" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="RespuestasCompromiso" EntityType="Self.RespuestasCompromiso" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RA_Competencia" EntityType="Self.RA_Competencia" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RA_Momento" EntityType="Self.RA_Momento" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RA_Programa" EntityType="Self.RA_Programa" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RA_Resultado" EntityType="Self.RA_Resultado" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RA_Version" EntityType="Self.RA_Version" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Usuarios" EntityType="Self.Usuarios" Schema="dbo" store:Type="Tables" />
@@ -397,9 +489,21 @@
             <End Role="Cursos" EntitySet="Cursos" />
             <End Role="Prerequisitos" EntitySet="Prerequisitos" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resp_Grupo" Association="Self.FK_Resp_Grupo">
-            <End Role="Grupos" EntitySet="Grupos" />
-            <End Role="RespuestasCompromiso" EntitySet="RespuestasCompromiso" />
+          <AssociationSet Name="FK_RA_Competencia_Programa" Association="Self.FK_RA_Competencia_Programa">
+            <End Role="RA_Programa" EntitySet="RA_Programa" />
+            <End Role="RA_Competencia" EntitySet="RA_Competencia" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RA_Momento_Resultado" Association="Self.FK_RA_Momento_Resultado">
+            <End Role="RA_Resultado" EntitySet="RA_Resultado" />
+            <End Role="RA_Momento" EntitySet="RA_Momento" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RA_Resultado_Competencia" Association="Self.FK_RA_Resultado_Competencia">
+            <End Role="RA_Competencia" EntitySet="RA_Competencia" />
+            <End Role="RA_Resultado" EntitySet="RA_Resultado" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RA_Version_Programa" Association="Self.FK_RA_Version_Programa">
+            <End Role="RA_Programa" EntitySet="RA_Programa" />
+            <End Role="RA_Version" EntitySet="RA_Version" />
           </AssociationSet>
           <AssociationSet Name="fk_rol_usuario" Association="Self.fk_rol_usuario">
             <End Role="Roles" EntitySet="Roles" />
@@ -623,14 +727,30 @@
           <EntitySet Name="MicrodisenoRoles" EntityType="MallaDBModel.MicrodisenoRole" />
           <EntitySet Name="Microdisenos" EntityType="MallaDBModel.Microdiseno" />
           <EntitySet Name="MomentosEvaluativos" EntityType="MallaDBModel.MomentosEvaluativo" />
-          <EntitySet Name="RespuestasCompromisoes" EntityType="MallaDBModel.RespuestasCompromiso" />
           <AssociationSet Name="FK_Grupo_Momentos" Association="MallaDBModel.FK_Grupo_Momentos">
             <End Role="Grupos" EntitySet="Grupos" />
             <End Role="MomentosEvaluativo" EntitySet="MomentosEvaluativos" />
           </AssociationSet>
-          <AssociationSet Name="FK_Resp_Grupo" Association="MallaDBModel.FK_Resp_Grupo">
-            <End Role="Grupos" EntitySet="Grupos" />
-            <End Role="RespuestasCompromiso" EntitySet="RespuestasCompromisoes" />
+          <EntitySet Name="RA_Programa" EntityType="MallaDBModel.RA_Programa" />
+          <EntitySet Name="RA_Version" EntityType="MallaDBModel.RA_Version" />
+          <AssociationSet Name="FK_RA_Version_Programa" Association="MallaDBModel.FK_RA_Version_Programa">
+            <End Role="RA_Programa" EntitySet="RA_Programa" />
+            <End Role="RA_Version" EntitySet="RA_Version" />
+          </AssociationSet>
+          <EntitySet Name="RA_Competencia" EntityType="MallaDBModel.RA_Competencia" />
+          <EntitySet Name="RA_Momento" EntityType="MallaDBModel.RA_Momento" />
+          <EntitySet Name="RA_Resultado" EntityType="MallaDBModel.RA_Resultado" />
+          <AssociationSet Name="FK_RA_Competencia_Programa" Association="MallaDBModel.FK_RA_Competencia_Programa">
+            <End Role="RA_Programa" EntitySet="RA_Programa" />
+            <End Role="RA_Competencia" EntitySet="RA_Competencia" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RA_Resultado_Competencia" Association="MallaDBModel.FK_RA_Resultado_Competencia">
+            <End Role="RA_Competencia" EntitySet="RA_Competencia" />
+            <End Role="RA_Resultado" EntitySet="RA_Resultado" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RA_Momento_Resultado" Association="MallaDBModel.FK_RA_Momento_Resultado">
+            <End Role="RA_Resultado" EntitySet="RA_Resultado" />
+            <End Role="RA_Momento" EntitySet="RA_Momento" />
           </AssociationSet>
         </EntityContainer>
         <ComplexType Name="sp_helpdiagramdefinition_Result">
@@ -657,7 +777,6 @@
           <NavigationProperty Name="Usuario" Relationship="MallaDBModel.FK_Grupos_Usuarios" FromRole="Grupos" ToRole="Usuario" />
           <NavigationProperty Name="Inscripciones" Relationship="MallaDBModel.FK_Inscripciones_Grupos" FromRole="Grupos" ToRole="Inscripcione" />
           <NavigationProperty Name="MomentosEvaluativos" Relationship="MallaDBModel.FK_Grupo_Momentos" FromRole="Grupos" ToRole="MomentosEvaluativo" />
-          <NavigationProperty Name="RespuestasCompromisoes" Relationship="MallaDBModel.FK_Resp_Grupo" FromRole="Grupos" ToRole="RespuestasCompromiso" />
         </EntityType>
         <EntityType Name="Inscripcione">
           <Key>
@@ -766,18 +885,6 @@
           <Property Name="Fecha" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Grupos" Relationship="MallaDBModel.FK_Grupo_Momentos" FromRole="MomentosEvaluativo" ToRole="Grupos" />
         </EntityType>
-        <EntityType Name="RespuestasCompromiso">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="GrupoId" Type="Int32" Nullable="false" />
-          <Property Name="EstudianteId" Type="Int32" Nullable="false" />
-          <Property Name="Estado" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="Observacion" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="Fecha" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Grupos" Relationship="MallaDBModel.FK_Resp_Grupo" FromRole="RespuestasCompromiso" ToRole="Grupos" />
-        </EntityType>
         <Association Name="FK_Grupo_Momentos">
           <End Type="MallaDBModel.Grupos" Role="Grupos" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -792,17 +899,124 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Resp_Grupo">
-          <End Type="MallaDBModel.Grupos" Role="Grupos" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Type="MallaDBModel.RespuestasCompromiso" Role="RespuestasCompromiso" Multiplicity="*" />
+        <EntityType Name="RA_Programa">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Codigo" Type="String" Nullable="false" MaxLength="80" FixedLength="false" Unicode="true" />
+          <Property Name="PerfilEgreso" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="PerfilOcupacional" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="TituloCompetencias" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Activo" Type="Boolean" Nullable="false" />
+          <Property Name="CreadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ActualizadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="RA_Version" Relationship="MallaDBModel.FK_RA_Version_Programa" FromRole="RA_Programa" ToRole="RA_Version" />
+          <NavigationProperty Name="RA_Competencia" Relationship="MallaDBModel.FK_RA_Competencia_Programa" FromRole="RA_Programa" ToRole="RA_Competencia" />
+        </EntityType>
+        <EntityType Name="RA_Version">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProgramaId" Type="Int32" Nullable="false" />
+          <Property Name="Version" Type="Int32" Nullable="false" />
+          <Property Name="FechaCambio" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UsuarioId" Type="Int32" />
+          <Property Name="Accion" Type="String" Nullable="false" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="VersionOrigen" Type="Int32" />
+          <Property Name="SnapshotJson" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="RA_Programa" Relationship="MallaDBModel.FK_RA_Version_Programa" FromRole="RA_Version" ToRole="RA_Programa" />
+        </EntityType>
+        <Association Name="FK_RA_Version_Programa">
+          <End Type="MallaDBModel.RA_Programa" Role="RA_Programa" Multiplicity="1" />
+          <End Type="MallaDBModel.RA_Version" Role="RA_Version" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Grupos">
+            <Principal Role="RA_Programa">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="RespuestasCompromiso">
-              <PropertyRef Name="GrupoId" />
+            <Dependent Role="RA_Version">
+              <PropertyRef Name="ProgramaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="RA_Competencia">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProgramaId" Type="Int32" Nullable="false" />
+          <Property Name="Codigo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Descripcion" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Orden" Type="Int32" Nullable="false" />
+          <Property Name="Activo" Type="Boolean" Nullable="false" />
+          <Property Name="CreadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ActualizadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="RA_Programa" Relationship="MallaDBModel.FK_RA_Competencia_Programa" FromRole="RA_Competencia" ToRole="RA_Programa" />
+          <NavigationProperty Name="RA_Resultado" Relationship="MallaDBModel.FK_RA_Resultado_Competencia" FromRole="RA_Competencia" ToRole="RA_Resultado" />
+        </EntityType>
+        <EntityType Name="RA_Momento">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ResultadoId" Type="Int32" Nullable="false" />
+          <Property Name="Codigo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Descripcion" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Orden" Type="Int32" Nullable="false" />
+          <Property Name="Activo" Type="Boolean" Nullable="false" />
+          <Property Name="CreadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ActualizadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="RA_Resultado" Relationship="MallaDBModel.FK_RA_Momento_Resultado" FromRole="RA_Momento" ToRole="RA_Resultado" />
+        </EntityType>
+        <EntityType Name="RA_Resultado">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CompetenciaId" Type="Int32" Nullable="false" />
+          <Property Name="Codigo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Descripcion" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Orden" Type="Int32" Nullable="false" />
+          <Property Name="Activo" Type="Boolean" Nullable="false" />
+          <Property Name="CreadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ActualizadoEn" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="RA_Competencia" Relationship="MallaDBModel.FK_RA_Resultado_Competencia" FromRole="RA_Resultado" ToRole="RA_Competencia" />
+          <NavigationProperty Name="RA_Momento" Relationship="MallaDBModel.FK_RA_Momento_Resultado" FromRole="RA_Resultado" ToRole="RA_Momento" />
+        </EntityType>
+        <Association Name="FK_RA_Competencia_Programa">
+          <End Type="MallaDBModel.RA_Programa" Role="RA_Programa" Multiplicity="1" />
+          <End Type="MallaDBModel.RA_Competencia" Role="RA_Competencia" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RA_Programa">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RA_Competencia">
+              <PropertyRef Name="ProgramaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RA_Resultado_Competencia">
+          <End Type="MallaDBModel.RA_Competencia" Role="RA_Competencia" Multiplicity="1" />
+          <End Type="MallaDBModel.RA_Resultado" Role="RA_Resultado" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RA_Competencia">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RA_Resultado">
+              <PropertyRef Name="CompetenciaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RA_Momento_Resultado">
+          <End Type="MallaDBModel.RA_Resultado" Role="RA_Resultado" Multiplicity="1" />
+          <End Type="MallaDBModel.RA_Momento" Role="RA_Momento" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RA_Resultado">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RA_Momento">
+              <PropertyRef Name="ResultadoId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1000,14 +1214,72 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="RespuestasCompromisoes">
-            <EntityTypeMapping TypeName="MallaDBModel.RespuestasCompromiso">
-              <MappingFragment StoreEntitySet="RespuestasCompromiso">
-                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
-                <ScalarProperty Name="Observacion" ColumnName="Observacion" />
-                <ScalarProperty Name="Estado" ColumnName="Estado" />
-                <ScalarProperty Name="EstudianteId" ColumnName="EstudianteId" />
-                <ScalarProperty Name="GrupoId" ColumnName="GrupoId" />
+          <EntitySetMapping Name="RA_Programa">
+            <EntityTypeMapping TypeName="MallaDBModel.RA_Programa">
+              <MappingFragment StoreEntitySet="RA_Programa">
+                <ScalarProperty Name="ActualizadoEn" ColumnName="ActualizadoEn" />
+                <ScalarProperty Name="CreadoEn" ColumnName="CreadoEn" />
+                <ScalarProperty Name="Activo" ColumnName="Activo" />
+                <ScalarProperty Name="TituloCompetencias" ColumnName="TituloCompetencias" />
+                <ScalarProperty Name="PerfilOcupacional" ColumnName="PerfilOcupacional" />
+                <ScalarProperty Name="PerfilEgreso" ColumnName="PerfilEgreso" />
+                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RA_Version">
+            <EntityTypeMapping TypeName="MallaDBModel.RA_Version">
+              <MappingFragment StoreEntitySet="RA_Version">
+                <ScalarProperty Name="SnapshotJson" ColumnName="SnapshotJson" />
+                <ScalarProperty Name="VersionOrigen" ColumnName="VersionOrigen" />
+                <ScalarProperty Name="Accion" ColumnName="Accion" />
+                <ScalarProperty Name="UsuarioId" ColumnName="UsuarioId" />
+                <ScalarProperty Name="FechaCambio" ColumnName="FechaCambio" />
+                <ScalarProperty Name="Version" ColumnName="Version" />
+                <ScalarProperty Name="ProgramaId" ColumnName="ProgramaId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RA_Competencia">
+            <EntityTypeMapping TypeName="MallaDBModel.RA_Competencia">
+              <MappingFragment StoreEntitySet="RA_Competencia">
+                <ScalarProperty Name="ActualizadoEn" ColumnName="ActualizadoEn" />
+                <ScalarProperty Name="CreadoEn" ColumnName="CreadoEn" />
+                <ScalarProperty Name="Activo" ColumnName="Activo" />
+                <ScalarProperty Name="Orden" ColumnName="Orden" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
+                <ScalarProperty Name="ProgramaId" ColumnName="ProgramaId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RA_Momento">
+            <EntityTypeMapping TypeName="MallaDBModel.RA_Momento">
+              <MappingFragment StoreEntitySet="RA_Momento">
+                <ScalarProperty Name="ActualizadoEn" ColumnName="ActualizadoEn" />
+                <ScalarProperty Name="CreadoEn" ColumnName="CreadoEn" />
+                <ScalarProperty Name="Activo" ColumnName="Activo" />
+                <ScalarProperty Name="Orden" ColumnName="Orden" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
+                <ScalarProperty Name="ResultadoId" ColumnName="ResultadoId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RA_Resultado">
+            <EntityTypeMapping TypeName="MallaDBModel.RA_Resultado">
+              <MappingFragment StoreEntitySet="RA_Resultado">
+                <ScalarProperty Name="ActualizadoEn" ColumnName="ActualizadoEn" />
+                <ScalarProperty Name="CreadoEn" ColumnName="CreadoEn" />
+                <ScalarProperty Name="Activo" ColumnName="Activo" />
+                <ScalarProperty Name="Orden" ColumnName="Orden" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
+                <ScalarProperty Name="CompetenciaId" ColumnName="CompetenciaId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
