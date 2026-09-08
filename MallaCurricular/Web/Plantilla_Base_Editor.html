@@ -283,6 +283,24 @@
             z-index: 999;
             background: transparent;
         }
+
+        /* Results of learning administration */
+        .ra-overlay { position: fixed; inset: 0; z-index: 1500; background: rgba(15,23,42,.62); backdrop-filter: blur(3px); padding: 1rem; overflow-y: auto; }
+        .ra-dialog { max-width: 1120px; margin: 1rem auto; background: #f8fafc; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 25px 65px rgba(15,23,42,.32); }
+        .ra-scroll { max-height: calc(100vh - 11rem); overflow-y: auto; }
+        .ra-matrix-wrap { overflow-x: auto; border: 1px solid #cbd5e1; border-radius: .9rem; background: white; box-shadow: 0 2px 8px rgba(15,23,42,.05); }
+        .ra-matrix { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: fixed; }
+        .ra-matrix th { background: #b7c9e8; color: #0f172a; border: 1px solid #64748b; padding: .8rem; font-size: .75rem; font-weight: 800; text-align: center; text-transform: uppercase; }
+        .ra-matrix td { border: 1px solid #94a3b8; padding: .8rem; vertical-align: top; }
+        .ra-matrix .ra-cell-competencia { width: 35%; vertical-align: middle; background: #f8fafc; }
+        .ra-matrix .ra-cell-resultado { width: 31%; }
+        .ra-matrix .ra-cell-momento { width: 34%; }
+        .ra-matrix .ra-row-resultado:hover td { background: #f8fafc; }
+        .ra-matrix .ra-cell-competencia:hover { background: #f1f5f9; }
+        .ra-cell-actions { display: flex; flex-wrap: wrap; gap: .15rem; margin-top: .65rem; }
+        .ra-momento-line + .ra-momento-line { border-top: 1px solid #dbeafe; margin-top: .55rem; padding-top: .55rem; }
+        .ra-long-text { white-space: pre-wrap; line-height: 1.55; }
+        .ra-btn-icon { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .5rem; }
     </style>
 </head>
 <body class="pb-12">
@@ -307,6 +325,9 @@
                     <div class="text-[10px] text-indigo-400" id="nav-fecha">...</div>
                 </div>
             </div>
+            <button onclick="openRaAdmin()" class="px-4 py-2 border border-indigo-200 text-indigo-700 text-sm font-semibold rounded-xl bg-indigo-50 hover:bg-indigo-100 transition">
+                <i class="fa-solid fa-diagram-project mr-2"></i> RA
+            </button>
             <button onclick="window.location.href='Jefe.html'" class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Panel Jefe
             </button>
@@ -540,6 +561,39 @@
             <button onclick="applyFieldType()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2 rounded-lg shadow transition">
                 <i class="fa-solid fa-check mr-1"></i> Aplicar
             </button>
+        </div>
+    </div>
+
+    <!-- Administrador de perfil, competencias, RA y momentos. El contenido se carga exclusivamente desde la API. -->
+    <div id="ra-admin-overlay" class="ra-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ra-admin-title">
+        <div class="ra-dialog">
+            <header class="bg-gradient-to-r from-indigo-700 to-violet-700 text-white px-5 py-4 flex flex-wrap gap-3 justify-between items-center">
+                <div>
+                    <h2 id="ra-admin-title" class="font-bold text-lg"><i class="fa-solid fa-diagram-project mr-2"></i>Administrador de Resultados de Aprendizaje</h2>
+                    <p class="text-indigo-100 text-xs mt-1">Los cambios se guardan, versionan y permanecen disponibles para restauración.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openRaHistory()" class="px-3 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Historial</button>
+                    <button onclick="closeRaAdmin()" class="ra-btn-icon bg-white/15 hover:bg-white/25" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </header>
+            <main id="ra-admin-content" class="ra-scroll p-4 md:p-6">
+                <div class="py-16 text-center text-slate-500"><i class="fa-solid fa-spinner animate-spin text-2xl text-indigo-500 mb-3"></i><p>Cargando información del programa...</p></div>
+            </main>
+        </div>
+    </div>
+
+    <div id="ra-form-overlay" class="ra-overlay hidden" role="dialog" aria-modal="true">
+        <div class="ra-dialog max-w-2xl">
+            <header class="bg-white px-5 py-4 border-b flex justify-between items-center"><h2 id="ra-form-title" class="font-bold text-slate-900">Editar</h2><button onclick="closeRaForm()" class="ra-btn-icon text-slate-500 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></header>
+            <form id="ra-form" class="p-5 space-y-4" onsubmit="saveRaEntity(event)"></form>
+        </div>
+    </div>
+
+    <div id="ra-history-overlay" class="ra-overlay hidden" role="dialog" aria-modal="true">
+        <div class="ra-dialog max-w-4xl">
+            <header class="bg-white px-5 py-4 border-b flex justify-between items-center"><div><h2 class="font-bold text-slate-900">Historial de versiones RA</h2><p class="text-xs text-slate-500">Restaurar crea una versión nueva; nunca elimina las anteriores.</p></div><button onclick="closeRaHistory()" class="ra-btn-icon text-slate-500 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></header>
+            <div id="ra-history-content" class="ra-scroll p-5"></div>
         </div>
     </div>
 
@@ -1102,6 +1156,161 @@
                 showStatus('Error de red al intentar revertir.', 'error');
             }
         }
+    </script>
+    <script>
+        // RA data never originates in this page: it is retrieved and persisted through this API.
+        const raApi = '/api/resultados-aprendizaje';
+        let raState = null;
+        let raFormState = null;
+
+        const raEsc = value => String(value == null ? '' : value).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
+        const raText = value => raEsc(value).replace(/\n/g, '<br>');
+        const raButton = (title, icon, action, color = 'text-slate-500 hover:bg-slate-100') => `<button type="button" title="${title}" onclick="${action}" class="ra-btn-icon ${color}"><i class="fa-solid ${icon}"></i></button>`;
+
+        async function raRequest(path = '', options = {}) {
+            const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+            const response = await fetch(raApi + path, Object.assign({}, options, { headers }));
+            if (!response.ok) {
+                let detail = 'No fue posible completar la operación.';
+                try { const error = await response.json(); detail = error.Message || error.message || detail; } catch (_) { }
+                if (response.status === 401) detail = 'Solo el Jefe de Programa puede modificar esta información.';
+                throw new Error(detail);
+            }
+            return response.status === 204 ? null : response.json();
+        }
+
+        async function openRaAdmin() {
+            document.getElementById('ra-admin-overlay').classList.remove('hidden');
+            await loadRaState();
+        }
+        function closeRaAdmin() { document.getElementById('ra-admin-overlay').classList.add('hidden'); }
+        async function loadRaState() {
+            const target = document.getElementById('ra-admin-content');
+            target.innerHTML = '<div class="py-16 text-center text-slate-500"><i class="fa-solid fa-spinner animate-spin text-2xl text-indigo-500 mb-3"></i><p>Cargando información del programa...</p></div>';
+            try { raState = await raRequest(); renderRaAdmin(); }
+            catch (error) { target.innerHTML = `<div class="p-5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"><strong>No se pudo cargar el módulo.</strong><br>${raEsc(error.message)}<br><span class="text-xs">Confirme que se ejecutó <code>MigracionResultadosAprendizaje.sql</code>.</span></div>`; }
+        }
+
+        function renderRaAdmin() {
+            const profile = raState.Perfil;
+            const competencies = raState.Competencias || [];
+            document.getElementById('ra-admin-content').innerHTML = `
+                <section class="bg-white rounded-xl border border-slate-200 p-5 mb-5 shadow-sm">
+                    <div class="flex justify-between gap-3 items-start"><div><h3 class="font-bold text-slate-900"><i class="fa-solid fa-user-graduate text-indigo-600 mr-2"></i>Perfil del programa</h3><p class="text-xs text-slate-500 mt-1">Información institucional editable y versionada.</p></div>${raButton('Editar perfiles y título', 'fa-pen', 'openProfileForm()', 'text-indigo-600 hover:bg-indigo-50')}</div>
+                    <div class="grid md:grid-cols-2 gap-5 mt-4 text-sm"><div><h4 class="font-bold text-slate-700 mb-2">Perfil de egreso</h4><p class="ra-long-text text-slate-600">${raText(profile.PerfilEgreso)}</p></div><div><h4 class="font-bold text-slate-700 mb-2">Perfil ocupacional</h4><p class="ra-long-text text-slate-600">${raText(profile.PerfilOcupacional)}</p></div></div>
+                </section>
+                <section><div class="flex flex-wrap justify-between gap-3 items-center mb-4"><div><h3 class="font-bold text-slate-900 uppercase tracking-wide text-sm">${raEsc(profile.TituloCompetencias)}</h3><p class="text-xs text-slate-500 mt-1">${competencies.length} competencia(s) activa(s)</p></div><button type="button" onclick="openEntityForm('competencia')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow"><i class="fa-solid fa-plus mr-2"></i>Nueva competencia</button></div>
+                ${competencies.length ? renderRaMatrix(competencies) : '<div class="bg-white border border-dashed border-slate-300 rounded-xl p-8 text-center text-slate-500 text-sm">Aún no hay competencias. Cree la primera.</div>'}</section>`;
+        }
+
+        function renderRaMatrix(competencies) {
+            return `<div class="ra-matrix-wrap"><table class="ra-matrix"><thead><tr><th>Competencia disciplinar</th><th>Resultado de aprendizaje de egreso</th><th>Momentos de evaluación<br><span class="normal-case font-medium">Aspectos a evaluar (criterios de desempeño)</span></th></tr></thead><tbody>${competencies.map((c, index) => renderRaMatrixCompetencia(c, index)).join('')}</tbody></table></div>`;
+        }
+
+        function renderRaMatrixCompetencia(c, index) {
+            const results = (c.Resultados && c.Resultados.length) ? c.Resultados : [null];
+            const compActions = `${raButton('Subir competencia', 'fa-arrow-up', `moveRaItem('competencia',0,${index},-1)`, index ? 'text-slate-600 hover:bg-white' : 'text-slate-300 cursor-not-allowed')}${raButton('Bajar competencia', 'fa-arrow-down', `moveRaItem('competencia',0,${index},1)`, index < raState.Competencias.length - 1 ? 'text-slate-600 hover:bg-white' : 'text-slate-300 cursor-not-allowed')}${raButton('Editar competencia', 'fa-pen', `openEntityForm('competencia',${c.Id})`, 'text-indigo-600 hover:bg-indigo-50')}${raButton('Desactivar competencia', 'fa-trash-can', `deleteRaEntity('competencia',${c.Id})`, 'text-red-500 hover:bg-red-50')}`;
+            const compCell = `<td rowspan="${results.length}" class="ra-cell-competencia"><span class="inline-block bg-indigo-100 text-indigo-700 rounded-md px-2 py-1 text-xs font-black">${raEsc(c.Codigo)}</span><p class="ra-long-text text-sm text-slate-800 mt-3">${raText(c.Descripcion)}</p><div class="ra-cell-actions">${compActions}</div><button type="button" onclick="openEntityForm('resultado',0,${c.Id})" class="mt-3 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-2 rounded-lg"><i class="fa-solid fa-plus mr-1"></i>Agregar resultado de egreso</button></td>`;
+            return results.map((r, resultIndex) => `<tr class="ra-row-resultado">${resultIndex === 0 ? compCell : ''}${renderRaMatrixResultado(c, r, resultIndex)}</tr>`).join('');
+        }
+
+        function renderRaMatrixResultado(c, r, index) {
+            if (!r) return `<td class="ra-cell-resultado text-xs text-slate-400 italic">Sin resultados de aprendizaje.</td><td class="ra-cell-momento text-xs text-slate-400 italic">Agregue un RA para registrar momentos de evaluación.</td>`;
+            const resultActions = `${raButton('Subir RA', 'fa-arrow-up', `moveRaItem('resultado',${c.Id},${index},-1)`, index ? 'text-slate-600 hover:bg-white' : 'text-slate-300 cursor-not-allowed')}${raButton('Bajar RA', 'fa-arrow-down', `moveRaItem('resultado',${c.Id},${index},1)`, index < c.Resultados.length - 1 ? 'text-slate-600 hover:bg-white' : 'text-slate-300 cursor-not-allowed')}${raButton('Editar RA', 'fa-pen', `openEntityForm('resultado',${r.Id})`, 'text-sky-700 hover:bg-sky-50')}${raButton('Desactivar RA', 'fa-trash-can', `deleteRaEntity('resultado',${r.Id})`, 'text-red-500 hover:bg-red-50')}`;
+            const moments = (r.Momentos || []).map((m, momentIndex) => renderRaMatrixMomento(r, m, momentIndex)).join('') || '<p class="text-xs text-slate-400 italic">Sin momentos de evaluación.</p>';
+            return `<td class="ra-cell-resultado"><span class="inline-block bg-sky-100 text-sky-700 rounded px-2 py-1 text-xs font-black">${raEsc(r.Codigo)}</span><p class="ra-long-text text-sm text-slate-700 mt-3">${raText(r.Descripcion)}</p><div class="ra-cell-actions">${resultActions}</div></td><td class="ra-cell-momento"><div class="flex justify-between items-start gap-2"><p class="text-xs font-bold text-slate-600">Criterios de desempeño</p><button type="button" onclick="openEntityForm('momento',0,${r.Id})" class="shrink-0 text-xs font-bold text-emerald-700 hover:bg-emerald-50 px-2 py-1.5 rounded"><i class="fa-solid fa-plus mr-1"></i>Momento</button></div><div class="mt-2">${moments}</div></td>`;
+        }
+
+        function renderRaMatrixMomento(r, m, index) {
+            const actions = `${raButton('Subir momento', 'fa-arrow-up', `moveRaItem('momento',${r.Id},${index},-1)`, index ? 'text-slate-600 hover:bg-emerald-50' : 'text-slate-300 cursor-not-allowed')}${raButton('Bajar momento', 'fa-arrow-down', `moveRaItem('momento',${r.Id},${index},1)`, index < r.Momentos.length - 1 ? 'text-slate-600 hover:bg-emerald-50' : 'text-slate-300 cursor-not-allowed')}${raButton('Editar momento', 'fa-pen', `openEntityForm('momento',${m.Id})`, 'text-emerald-700 hover:bg-emerald-50')}${raButton('Desactivar momento', 'fa-trash-can', `deleteRaEntity('momento',${m.Id})`, 'text-red-500 hover:bg-red-50')}`;
+            return `<div class="ra-momento-line"><div class="flex gap-2 justify-between"><div class="min-w-0"><span class="font-black text-xs text-emerald-700">${raEsc(m.Codigo)}</span><p class="ra-long-text text-xs text-slate-600 mt-1">${raText(m.Descripcion)}</p></div><div class="flex shrink-0 self-start">${actions}</div></div></div>`;
+        }
+
+        function openProfileForm() {
+            raFormState = { type: 'perfil' }; document.getElementById('ra-form-title').textContent = 'Editar perfil y título';
+            const p = raState.Perfil;
+            document.getElementById('ra-form').innerHTML = `<label class="block text-sm font-bold text-slate-700">Perfil de egreso<textarea required maxlength="8000" name="PerfilEgreso" class="mt-1 w-full min-h-[130px] border rounded-lg p-3 font-normal">${raEsc(p.PerfilEgreso)}</textarea></label><label class="block text-sm font-bold text-slate-700">Perfil ocupacional<textarea required maxlength="16000" name="PerfilOcupacional" class="mt-1 w-full min-h-[180px] border rounded-lg p-3 font-normal">${raEsc(p.PerfilOcupacional)}</textarea></label><label class="block text-sm font-bold text-slate-700">Título de competencias<input required maxlength="500" name="TituloCompetencias" value="${raEsc(p.TituloCompetencias)}" class="mt-1 w-full border rounded-lg p-3 font-normal"></label>${raFormActions('Guardar perfiles')}`;
+            document.getElementById('ra-form-overlay').classList.remove('hidden');
+        }
+
+        function allResultados() { return (raState.Competencias || []).reduce((items, c) => items.concat(c.Resultados || []), []); }
+        function findRaEntity(type, id) { for (const c of raState.Competencias || []) { if (type === 'competencia' && c.Id === id) return c; for (const r of c.Resultados || []) { if (type === 'resultado' && r.Id === id) return r; for (const m of r.Momentos || []) if (type === 'momento' && m.Id === id) return m; } } return null; }
+        function openEntityForm(type, id = 0, parentId = 0) {
+            const entity = id ? findRaEntity(type, id) : null; raFormState = { type, id, parentId };
+            const names = { competencia: 'competencia', resultado: 'resultado de aprendizaje', momento: 'momento de evaluación' };
+            document.getElementById('ra-form-title').textContent = `${entity ? 'Editar' : 'Crear'} ${names[type]}`;
+            let relation = '';
+            if (type === 'resultado') relation = `<label class="block text-sm font-bold text-slate-700">Competencia<select name="CompetenciaId" required class="mt-1 w-full border rounded-lg p-3 font-normal">${raState.Competencias.map(c => `<option value="${c.Id}" ${(entity ? entity.CompetenciaId : parentId) === c.Id ? 'selected' : ''}>${raEsc(c.Codigo)} — ${raEsc(c.Descripcion.slice(0, 80))}</option>`).join('')}</select></label>`;
+            if (type === 'momento') relation = `<label class="block text-sm font-bold text-slate-700">Resultado de aprendizaje<select name="ResultadoId" required class="mt-1 w-full border rounded-lg p-3 font-normal">${allResultados().map(r => `<option value="${r.Id}" ${(entity ? entity.ResultadoId : parentId) === r.Id ? 'selected' : ''}>${raEsc(r.Codigo)} — ${raEsc(r.Descripcion.slice(0, 80))}</option>`).join('')}</select></label>`;
+            const order = entity ? entity.Orden : 1;
+            document.getElementById('ra-form').innerHTML = `<label class="block text-sm font-bold text-slate-700">Código<input required maxlength="50" name="Codigo" value="${raEsc(entity ? entity.Codigo : '')}" placeholder="Ej. C1, RA1, M1" class="mt-1 w-full border rounded-lg p-3 font-normal"></label><label class="block text-sm font-bold text-slate-700">Descripción<textarea required maxlength="8000" name="Descripcion" class="mt-1 w-full min-h-[150px] border rounded-lg p-3 font-normal">${raEsc(entity ? entity.Descripcion : '')}</textarea></label><label class="block text-sm font-bold text-slate-700">Orden<input required min="1" type="number" name="Orden" value="${order}" class="mt-1 w-full border rounded-lg p-3 font-normal"></label>${relation}${raFormActions(entity ? 'Guardar cambios' : 'Crear')}`;
+            document.getElementById('ra-form-overlay').classList.remove('hidden');
+        }
+        function raFormActions(label) { return `<div class="pt-2 flex justify-end gap-3"><button type="button" onclick="closeRaForm()" class="px-4 py-2 border rounded-lg text-sm font-bold">Cancelar</button><button class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold"><i class="fa-solid fa-floppy-disk mr-1"></i>${label}</button></div>`; }
+        function closeRaForm() { document.getElementById('ra-form-overlay').classList.add('hidden'); raFormState = null; }
+
+        async function saveRaEntity(event) {
+            event.preventDefault(); const data = Object.fromEntries(new FormData(event.target).entries());
+            Object.keys(data).filter(k => k === 'Orden' || k === 'CompetenciaId' || k === 'ResultadoId').forEach(k => data[k] = Number(data[k]));
+            const state = raFormState;
+            try {
+                if (state.type === 'perfil') raState = await raRequest('/perfil', { method: 'PUT', body: JSON.stringify(data) });
+                else { const paths = { competencia: '/competencias', resultado: '/resultados', momento: '/momentos' }; const path = paths[state.type] + (state.id ? '/' + state.id : ''); raState = await raRequest(path, { method: state.id ? 'PUT' : 'POST', body: JSON.stringify(data) }); }
+                closeRaForm(); renderRaAdmin();
+            } catch (error) { alert(error.message); }
+        }
+
+        async function deleteRaEntity(type, id) {
+            const labels = { competencia: 'Esta competencia y sus RA/momentos', resultado: 'Este RA y sus momentos', momento: 'Este momento' };
+            if (!confirm(`${labels[type]} se desactivará. El historial se conservará. ¿Continuar?`)) return;
+            try { const path = { competencia: '/competencias/', resultado: '/resultados/', momento: '/momentos/' }[type] + id; raState = await raRequest(path, { method: 'DELETE' }); renderRaAdmin(); } catch (error) { alert(error.message); }
+        }
+
+        async function moveRaItem(type, parentId, index, direction) {
+            let list, endpoint;
+            if (type === 'competencia') { list = raState.Competencias; endpoint = '/competencias/orden'; }
+            else if (type === 'resultado') { const c = findRaEntity('competencia', parentId); list = c.Resultados; endpoint = `/resultados/${parentId}/orden`; }
+            else { const r = findRaEntity('resultado', parentId); list = r.Momentos; endpoint = `/momentos/${parentId}/orden`; }
+            if (!list || index + direction < 0 || index + direction >= list.length) return;
+            const copy = list.slice(); const moved = copy.splice(index, 1)[0]; copy.splice(index + direction, 0, moved);
+            try { raState = await raRequest(endpoint, { method: 'PUT', body: JSON.stringify({ Ids: copy.map(x => x.Id) }) }); renderRaAdmin(); } catch (error) { alert(error.message); }
+        }
+
+        async function openRaHistory() {
+            document.getElementById('ra-history-overlay').classList.remove('hidden'); const content = document.getElementById('ra-history-content'); content.innerHTML = '<p class="text-sm text-slate-500"><i class="fa-solid fa-spinner animate-spin mr-2"></i>Cargando historial...</p>';
+            try { const entries = await raRequest('/historial'); content.innerHTML = entries.length ? `<div class="space-y-3">${entries.map(v => `<div class="bg-slate-50 border rounded-xl p-4 flex flex-wrap justify-between gap-3"><div><div class="font-bold text-indigo-700">Versión ${v.version}${v.versionOrigen ? ` <span class="text-xs text-slate-500">(restaurada desde V${v.versionOrigen})</span>` : ''}</div><p class="text-xs text-slate-500 mt-1">${new Date(v.fecha).toLocaleString()} · ${raEsc(v.accion)}${v.usuarioId ? ` · usuario #${v.usuarioId}` : ''}</p></div><div class="flex gap-2"><button onclick="viewRaVersion(${v.version})" class="text-xs font-bold px-3 py-2 rounded-lg bg-white border hover:bg-slate-100">Ver</button><button onclick="restoreRaVersion(${v.version})" class="text-xs font-bold px-3 py-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200">Restaurar</button></div></div>`).join('')}</div>` : '<p class="text-sm text-slate-500">Aún no hay cambios registrados. La primera modificación conservará también el estado inicial.</p>'; } catch (error) { content.innerHTML = `<p class="text-sm text-red-600">${raEsc(error.message)}</p>`; }
+        }
+        function closeRaHistory() { document.getElementById('ra-history-overlay').classList.add('hidden'); }
+        async function viewRaVersion(version) {
+            try {
+                const previous = await raRequest('/historial/' + version);
+                const current = raState || await raRequest();
+                const changes = raChanges(previous, current);
+                const content = document.getElementById('ra-history-content');
+                content.innerHTML = `<button onclick="openRaHistory()" class="text-xs font-bold text-indigo-700 mb-4"><i class="fa-solid fa-arrow-left mr-1"></i>Volver al historial</button><section class="bg-white border rounded-xl p-5"><h3 class="font-bold text-slate-900">Versión ${version}: comparación con la versión vigente</h3><p class="text-xs text-slate-500 mt-1">${raEsc(previous.Perfil.TituloCompetencias)}</p><div class="grid sm:grid-cols-3 gap-3 mt-4 text-center"><div class="bg-indigo-50 p-3 rounded-lg"><strong class="block text-lg text-indigo-700">${previous.Competencias.length}</strong><span class="text-xs">Competencias</span></div><div class="bg-sky-50 p-3 rounded-lg"><strong class="block text-lg text-sky-700">${allResultCount(previous)}</strong><span class="text-xs">Resultados</span></div><div class="bg-emerald-50 p-3 rounded-lg"><strong class="block text-lg text-emerald-700">${allMomentCount(previous)}</strong><span class="text-xs">Momentos</span></div></div><h4 class="font-bold text-sm text-slate-700 mt-5">Cambios detectados</h4><ul class="mt-2 text-sm text-slate-600 space-y-2">${changes.length ? changes.map(x => `<li class="flex gap-2"><i class="fa-solid fa-circle-info text-indigo-500 mt-1"></i><span>${raEsc(x)}</span></li>`).join('') : '<li>No hay diferencias frente al estado vigente.</li>'}</ul></section>`;
+            } catch (error) { alert(error.message); }
+        }
+        function raChanges(oldState, currentState) {
+            const changes = [];
+            if (oldState.Perfil.PerfilEgreso !== currentState.Perfil.PerfilEgreso) changes.push('El perfil de egreso cambió.');
+            if (oldState.Perfil.PerfilOcupacional !== currentState.Perfil.PerfilOcupacional) changes.push('El perfil ocupacional cambió.');
+            if (oldState.Perfil.TituloCompetencias !== currentState.Perfil.TituloCompetencias) changes.push('El título de competencias cambió.');
+            const compare = (label, before, after) => {
+                const left = before.map(x => x.Codigo).join('|'), right = after.map(x => x.Codigo).join('|');
+                if (left !== right) changes.push(`${label}: cambió la composición o el orden.`);
+                const descriptions = before.map(x => `${x.Codigo}:${x.Descripcion}`).join('|') !== after.map(x => `${x.Codigo}:${x.Descripcion}`).join('|');
+                if (descriptions) changes.push(`${label}: cambió al menos una descripción.`);
+            };
+            compare('Competencias', oldState.Competencias || [], currentState.Competencias || []);
+            compare('Resultados de aprendizaje', raFlattenResults(oldState), raFlattenResults(currentState));
+            compare('Momentos de evaluación', raFlattenMoments(oldState), raFlattenMoments(currentState));
+            return changes;
+        }
+        function raFlattenResults(state) { return (state.Competencias || []).reduce((all, c) => all.concat(c.Resultados || []), []); }
+        function raFlattenMoments(state) { return raFlattenResults(state).reduce((all, r) => all.concat(r.Momentos || []), []); }
+        const allResultCount = s => (s.Competencias || []).reduce((n, c) => n + (c.Resultados || []).length, 0);
+        const allMomentCount = s => (s.Competencias || []).reduce((n, c) => n + (c.Resultados || []).reduce((x, r) => x + (r.Momentos || []).length, 0), 0);
+        async function restoreRaVersion(version) { if (!confirm(`¿Restaurar la versión ${version}? La versión vigente y todas las anteriores se conservarán; se creará una nueva versión.`)) return; try { await raRequest(`/historial/${version}/restaurar`, { method: 'POST', body: '{}' }); closeRaHistory(); await loadRaState(); } catch (error) { alert(error.message); } }
     </script>
 </body>
 </html>

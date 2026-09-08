@@ -12,15 +12,17 @@ namespace MallaCurricular.Infrastructure.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class RespuestasCompromiso
+    public partial class RA_Momento
     {
         public int Id { get; set; }
-        public int GrupoId { get; set; }
-        public int EstudianteId { get; set; }
-        public string Estado { get; set; }
-        public string Observacion { get; set; }
-        public string Fecha { get; set; }
+        public int ResultadoId { get; set; }
+        public string Codigo { get; set; }
+        public string Descripcion { get; set; }
+        public int Orden { get; set; }
+        public bool Activo { get; set; }
+        public System.DateTime CreadoEn { get; set; }
+        public System.DateTime ActualizadoEn { get; set; }
     
-        public virtual Grupos Grupos { get; set; }
+        public virtual RA_Resultado RA_Resultado { get; set; }
     }
 }

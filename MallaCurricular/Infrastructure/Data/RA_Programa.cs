@@ -12,26 +12,27 @@ namespace MallaCurricular.Infrastructure.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class Grupos
+    public partial class RA_Programa
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Grupos()
+        public RA_Programa()
         {
-            this.Inscripciones = new HashSet<Inscripcione>();
-            this.MomentosEvaluativos = new HashSet<MomentosEvaluativo>();
+            this.RA_Version = new HashSet<RA_Version>();
+            this.RA_Competencia = new HashSet<RA_Competencia>();
         }
     
         public int Id { get; set; }
-        public string Nombre { get; set; }
-        public string CursoCodigo { get; set; }
-        public int ProfesorId { get; set; }
-        public string Novedades { get; set; }
+        public string Codigo { get; set; }
+        public string PerfilEgreso { get; set; }
+        public string PerfilOcupacional { get; set; }
+        public string TituloCompetencias { get; set; }
+        public bool Activo { get; set; }
+        public System.DateTime CreadoEn { get; set; }
+        public System.DateTime ActualizadoEn { get; set; }
     
-        public virtual Curso Curso { get; set; }
-        public virtual Usuario Usuario { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Inscripcione> Inscripciones { get; set; }
+        public virtual ICollection<RA_Version> RA_Version { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MomentosEvaluativo> MomentosEvaluativos { get; set; }
+        public virtual ICollection<RA_Competencia> RA_Competencia { get; set; }
     }
 }
