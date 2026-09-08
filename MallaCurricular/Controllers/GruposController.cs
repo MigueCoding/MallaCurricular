@@ -54,21 +54,8 @@ namespace MallaCurricular.Controllers
                     }
                 }
 
-                var cmdResp = new SqlCommand("SELECT * FROM RespuestasCompromiso WHERE GrupoId=@g", conn);
-                cmdResp.Parameters.AddWithValue("@g", grupoId);
-                using(var r = cmdResp.ExecuteReader()) {
-                    while(r.Read()) {
-                        JObject n = new JObject();
-                        n["estudianteId"] = r["EstudianteId"].ToString();
-                        n["estado"] = r["Estado"].ToString();
-                        n["observacion"] = r["Observacion"].ToString();
-                        n["fecha"] = r["Fecha"].ToString();
-                        resp.Add(n);
-                    }
-                }
             }
             json["evaluaciones"] = evs;
-            json["respuestas"] = resp;
             return json.ToString();
         }
 

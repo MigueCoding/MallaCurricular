@@ -6,6 +6,9 @@ using System.Data.SqlClient;
 using System.Web.Http;
 using System.IO;
 using System.Text;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using MallaCurricular.Models;
 
 namespace MallaCurricular.Controllers
@@ -147,7 +150,7 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
-                var cmd = new SqlCommand("UPDATE Microdisenos SET Estado = 'PendienteAval' WHERE Id = @id AND Estado IN ('Borrador', 'Rechazado')", conn);
+                var cmd = new SqlCommand("UPDATE Microdisenos SET Estado = 'PendienteAval', FechaEnvio = GETDATE() WHERE Id = @id AND Estado IN ('Borrador', 'Rechazado')", conn);
                 cmd.Parameters.AddWithValue("@id", id);
                 if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Enviado a revisión de aval" });
                 return BadRequest("No se pudo enviar.");
@@ -164,7 +167,7 @@ namespace MallaCurricular.Controllers
                 conn.Open();
                 var cmd = new SqlCommand(@"
                     UPDATE Microdisenos 
-                    SET Estado = 'PendienteJefe', RevisadoPor = @rev, ObservacionesRechazo = NULL
+                    SET Estado = 'PendienteJefe', RevisadoPor = @rev, ObservacionesRechazo = NULL, FechaAval = GETDATE()
                     WHERE Id = @id AND Estado = 'PendienteAval'", conn);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.Parameters.AddWithValue("@rev", dto.RevisorNombre ?? "");
@@ -230,13 +233,42 @@ namespace MallaCurricular.Controllers
             using (var conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
+
+                // Fetch current version and increment it
+                string currentVersion = "1.0";
+                var cmdGet = new SqlCommand("SELECT Version FROM Microdisenos WHERE Id = @id", conn);
+                cmdGet.Parameters.AddWithValue("@id", id);
+                var versionObj = cmdGet.ExecuteScalar();
+                if (versionObj != null && versionObj != DBNull.Value)
+                {
+                    currentVersion = versionObj.ToString();
+                }
+
+                string newVersion = "2.0";
+                if (currentVersion.Contains("."))
+                {
+                    var parts = currentVersion.Split('.');
+                    if (int.TryParse(parts[0], out int major))
+                    {
+                        newVersion = (major + 1) + "." + (parts.Length > 1 ? parts[1] : "0");
+                    }
+                }
+                else
+                {
+                    if (int.TryParse(currentVersion, out int major))
+                    {
+                        newVersion = (major + 1).ToString();
+                    }
+                }
+
                 var cmd = new SqlCommand(@"
                     UPDATE Microdisenos 
-                    SET Estado = 'Rechazado', RevisadoPor = @rev, ObservacionesRechazo = @obs
+                    SET Estado = 'Rechazado', RevisadoPor = @rev, ObservacionesRechazo = @obs, Version = @ver
                     WHERE Id = @id AND Estado IN ('PendienteAval', 'PendienteJefe')", conn);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.Parameters.AddWithValue("@rev", dto.RevisorNombre ?? "");
                 cmd.Parameters.AddWithValue("@obs", dto.Observaciones);
+                cmd.Parameters.AddWithValue("@ver", newVersion);
                 
                 if (cmd.ExecuteNonQuery() > 0) return Ok(new { Message = "Rechazado" });
                 return BadRequest("No se pudo rechazar.");
@@ -297,7 +329,8 @@ namespace MallaCurricular.Controllers
                 conn.Open();
                 var cmd = new SqlCommand(@"
                     SELECT m.Id, m.CursoCodigo, m.Semestre, m.ElaboradoPor, m.FechaCreacion, m.Estado, c.Asignatura,
-                           u1.nombre as CreadorNombre, u2.nombre as AvalNombre, m.AprobadoPor, m.VisibleParaTodos
+                           u1.nombre as CreadorNombre, u2.nombre as AvalNombre, m.AprobadoPor, m.VisibleParaTodos,
+                           m.FechaEnvio, m.FechaAval
                     FROM Microdisenos m
                     LEFT JOIN Cursos c ON LTRIM(RTRIM(m.CursoCodigo)) = LTRIM(RTRIM(c.Codigo))
                     LEFT JOIN MicrodisenoRoles r ON LTRIM(RTRIM(m.CursoCodigo)) = LTRIM(RTRIM(r.CursoCodigo))
@@ -319,6 +352,8 @@ namespace MallaCurricular.Controllers
                             CreadorNombre = reader["CreadorNombre"]?.ToString(),
                             AvalNombre = reader["AvalNombre"]?.ToString(),
                             FechaCreacion = reader["FechaCreacion"] != DBNull.Value ? (DateTime)reader["FechaCreacion"] : DateTime.MinValue,
+                            FechaEnvio = reader["FechaEnvio"] != DBNull.Value ? (DateTime)reader["FechaEnvio"] : (DateTime?)null,
+                            FechaAval = reader["FechaAval"] != DBNull.Value ? (DateTime)reader["FechaAval"] : (DateTime?)null,
                             Estado = reader["Estado"].ToString(),
                             AprobadoPor = reader["AprobadoPor"]?.ToString(),
                             VisibleParaTodos = reader["VisibleParaTodos"] != DBNull.Value && (bool)reader["VisibleParaTodos"]
@@ -401,6 +436,43 @@ namespace MallaCurricular.Controllers
             return Ok(new { CreadorId = 0, AvalId = 0 });
         }
 
+        // =============================================
+        // PLANTILLA BASE - SISTEMA DE VERSIONES
+        // =============================================
+
+        private string GetVersionesFilePath()
+        {
+            return System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_versiones.json");
+        }
+
+        private PlantillaVersionInfo LoadVersionInfo()
+        {
+            string path = GetVersionesFilePath();
+            if (File.Exists(path))
+            {
+                string json = File.ReadAllText(path, Encoding.UTF8);
+                return JsonConvert.DeserializeObject<PlantillaVersionInfo>(json) ?? new PlantillaVersionInfo();
+            }
+            // Inicializar con versión base 5
+            var info = new PlantillaVersionInfo
+            {
+                VersionActual = 5,
+                FechaVersionActual = "30-07-2024",
+                ArchivoVersionActual = "plantilla_base_v5.docx",
+                Historial = new List<PlantillaVersionEntry>()
+            };
+            SaveVersionInfo(info);
+            return info;
+        }
+
+        private void SaveVersionInfo(PlantillaVersionInfo info)
+        {
+            string path = GetVersionesFilePath();
+            string dir = Path.GetDirectoryName(path);
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            File.WriteAllText(path, JsonConvert.SerializeObject(info, Formatting.Indented), Encoding.UTF8);
+        }
+
         // 9. Obtener Plantilla Base HTML
         [HttpGet]
         [Route("plantilla-base")]
@@ -414,7 +486,13 @@ namespace MallaCurricular.Controllers
                 File.WriteAllText(path, WordTemplateHelper.DefaultTemplateHtml, Encoding.UTF8);
             }
             string html = File.ReadAllText(path, Encoding.UTF8);
-            return Ok(new { html });
+            var versionInfo = LoadVersionInfo();
+            return Ok(new { 
+                html, 
+                version = versionInfo.VersionActual, 
+                fecha = versionInfo.FechaVersionActual,
+                archivo = versionInfo.ArchivoVersionActual
+            });
         }
 
         // 10. Exportar Plantilla Base a DOCX
@@ -445,7 +523,7 @@ namespace MallaCurricular.Controllers
             return response;
         }
 
-        // 11. Importar Plantilla Base desde DOCX
+        // 11. Importar Plantilla Base desde DOCX (sube versión)
         [HttpPost]
         [Route("plantilla-base/import")]
         public IHttpActionResult ImportPlantillaBase()
@@ -466,9 +544,11 @@ namespace MallaCurricular.Controllers
             {
                 using (var stream = file.InputStream)
                 {
-                    string html = WordTemplateHelper.ImportDocxToHtml(stream);
+                    // Extract only the body content from the Word document
+                    // (skips the header table with logo/version and the footer control table)
+                    string bodyHtml = WordTemplateHelper.ImportDocxToHtml(stream);
                     
-                    if (string.IsNullOrWhiteSpace(html))
+                    if (string.IsNullOrWhiteSpace(bodyHtml))
                     {
                         return BadRequest("No se pudo extraer el contenido del documento Word.");
                     }
@@ -477,18 +557,74 @@ namespace MallaCurricular.Controllers
                     string dir = Path.GetDirectoryName(path);
                     if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                     
-                    // Backup existente si hay uno
+                    // Cargar info de versiones
+                    var versionInfo = LoadVersionInfo();
+                    
+                    // Backup del HTML actual en PlantillaHistory con nombre de versión
                     if (File.Exists(path))
                     {
                         string historyDir = Path.Combine(dir, "PlantillaHistory");
                         if (!Directory.Exists(historyDir)) Directory.CreateDirectory(historyDir);
-                        string backupFileName = "plantilla_base_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".html";
-                        File.Copy(path, Path.Combine(historyDir, backupFileName));
+                        string backupFileName = "plantilla_v" + versionInfo.VersionActual + ".html";
+                        string backupPath = Path.Combine(historyDir, backupFileName);
+                        // Si ya existe un backup de esta versión, usa timestamp
+                        if (File.Exists(backupPath))
+                        {
+                            backupFileName = "plantilla_v" + versionInfo.VersionActual + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".html";
+                            backupPath = Path.Combine(historyDir, backupFileName);
+                        }
+                        File.Copy(path, backupPath);
                     }
                     
-                    File.WriteAllText(path, html, Encoding.UTF8);
+                    // Calcular nueva versión
+                    int nuevaVersion = versionInfo.VersionActual + 1;
+                    string fechaNueva = DateTime.Now.ToString("dd-MM-yyyy");
+                    string nombreArchivo = file.FileName ?? "archivo_desconocido.docx";
                     
-                    return Ok(new { Message = "Plantilla cargada y actualizada con éxito", html });
+                    // Reconstruct the full HTML: canonical header + imported body + canonical footer
+                    // This preserves the logo, rowspan, CSS classes, and full structure
+                    string headerHtml = WordTemplateHelper.BuildHeaderHtml(nuevaVersion, fechaNueva);
+                    string footerHtml = WordTemplateHelper.BuildFooterControlHtml();
+                    string fullHtml = headerHtml + "\n" + bodyHtml + "\n" + footerHtml;
+                    
+                    // Escribir nuevo HTML completo
+                    File.WriteAllText(path, fullHtml, Encoding.UTF8);
+                    
+                    // Guardar la versión actual en el historial antes de subir
+                    string backupRef = "plantilla_v" + versionInfo.VersionActual + ".html";
+                    // Verificar si el backup con timestamp fue creado
+                    string histDirCheck = Path.Combine(dir, "PlantillaHistory");
+                    if (!File.Exists(Path.Combine(histDirCheck, backupRef)))
+                    {
+                        // Buscar el archivo con timestamp
+                        var matchFiles = Directory.GetFiles(histDirCheck, "plantilla_v" + versionInfo.VersionActual + "_*.html");
+                        if (matchFiles.Length > 0)
+                        {
+                            backupRef = Path.GetFileName(matchFiles.Last());
+                        }
+                    }
+                    
+                    versionInfo.Historial.Add(new PlantillaVersionEntry
+                    {
+                        Version = versionInfo.VersionActual,
+                        Fecha = versionInfo.FechaVersionActual,
+                        ArchivoWord = versionInfo.ArchivoVersionActual,
+                        ArchivoBackup = backupRef
+                    });
+                    
+                    versionInfo.VersionActual = nuevaVersion;
+                    versionInfo.FechaVersionActual = fechaNueva;
+                    versionInfo.ArchivoVersionActual = nombreArchivo;
+                    
+                    SaveVersionInfo(versionInfo);
+                    
+                    return Ok(new { 
+                        Message = "Plantilla cargada y actualizada con éxito", 
+                        html = fullHtml, 
+                        version = nuevaVersion, 
+                        fecha = fechaNueva,
+                        archivo = nombreArchivo
+                    });
                 }
             }
             catch (Exception ex)
@@ -517,30 +653,21 @@ namespace MallaCurricular.Controllers
             }
         }
 
-        // 13. Obtener Historial de Plantillas Base
+        // 13. Obtener Historial de Versiones de Plantilla
         [HttpGet]
         [Route("plantilla-base/history")]
         public IHttpActionResult GetPlantillaHistory()
         {
             try
             {
-                string historyDir = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/PlantillaHistory");
-                if (!Directory.Exists(historyDir))
+                var versionInfo = LoadVersionInfo();
+                return Ok(new
                 {
-                    return Ok(new List<object>()); // Empty list if no history yet
-                }
-
-                var files = Directory.GetFiles(historyDir, "*.html")
-                                     .Select(f => new FileInfo(f))
-                                     .OrderByDescending(f => f.CreationTime)
-                                     .Select(f => new {
-                                         FileName = f.Name,
-                                         CreatedAt = f.CreationTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                                         Size = f.Length
-                                     })
-                                     .ToList();
-
-                return Ok(files);
+                    versionActual = versionInfo.VersionActual,
+                    fechaActual = versionInfo.FechaVersionActual,
+                    archivoActual = versionInfo.ArchivoVersionActual,
+                    historial = versionInfo.Historial ?? new List<PlantillaVersionEntry>()
+                });
             }
             catch (Exception ex)
             {
@@ -548,38 +675,140 @@ namespace MallaCurricular.Controllers
             }
         }
 
-        // 14. Restaurar Plantilla Histórica
+        // 14. Revertir a una versión anterior
         [HttpPost]
-        [Route("plantilla-base/history/restore")]
-        public IHttpActionResult RestorePlantillaHistory([FromBody] JObject data)
+        [Route("plantilla-base/revertir")]
+        public IHttpActionResult RevertirVersion([FromBody] JObject data)
         {
             try
             {
-                string filename = data["FileName"]?.ToString();
-                if (string.IsNullOrEmpty(filename)) return BadRequest("Nombre de archivo inválido");
+                int versionObjetivo = data["version"]?.Value<int>() ?? 0;
+                if (versionObjetivo <= 0) return BadRequest("Versión inválida.");
 
-                string historyDir = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/PlantillaHistory");
-                string sourcePath = Path.Combine(historyDir, filename);
+                var versionInfo = LoadVersionInfo();
 
-                if (!File.Exists(sourcePath)) return NotFound();
+                // Buscar en historial la versión a restaurar
+                var entradaHistorial = versionInfo.Historial
+                    .FirstOrDefault(h => h.Version == versionObjetivo);
 
-                string targetPath = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_base.html");
-                
-                // Hacemos backup de la actual antes de restaurar la vieja, por si acaso
-                if (File.Exists(targetPath))
+                if (entradaHistorial == null)
+                    return BadRequest("No se encontró esa versión en el historial.");
+
+                string dir = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data");
+                string historyDir = Path.Combine(dir, "PlantillaHistory");
+                string backupFile = Path.Combine(historyDir, entradaHistorial.ArchivoBackup);
+
+                if (!File.Exists(backupFile))
+                    return BadRequest("El archivo de respaldo de esa versión no existe.");
+
+                string plantillaActualPath = Path.Combine(dir, "plantilla_base.html");
+
+                // La versión actual pasa al historial
+                if (File.Exists(plantillaActualPath))
                 {
-                    string backupFileName = "plantilla_base_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".html";
-                    File.Copy(targetPath, Path.Combine(historyDir, backupFileName));
+                    string backupActual = "plantilla_v" + versionInfo.VersionActual + ".html";
+                    string backupActualPath = Path.Combine(historyDir, backupActual);
+                    if (File.Exists(backupActualPath))
+                    {
+                        backupActual = "plantilla_v" + versionInfo.VersionActual + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".html";
+                        backupActualPath = Path.Combine(historyDir, backupActual);
+                    }
+                    File.Copy(plantillaActualPath, backupActualPath);
+
+                    // Agregar la versión actual al historial
+                    versionInfo.Historial.Add(new PlantillaVersionEntry
+                    {
+                        Version = versionInfo.VersionActual,
+                        Fecha = versionInfo.FechaVersionActual,
+                        ArchivoWord = versionInfo.ArchivoVersionActual,
+                        ArchivoBackup = backupActual
+                    });
                 }
 
-                File.Copy(sourcePath, targetPath, true);
+                // Restaurar el archivo de la versión objetivo
+                File.Copy(backupFile, plantillaActualPath, true);
 
-                return Ok(new { Message = "Versión histórica restaurada con éxito" });
+                // Eliminar la entrada del historial que acabamos de restaurar
+                versionInfo.Historial.Remove(entradaHistorial);
+
+                // Actualizar la versión actual
+                versionInfo.VersionActual = entradaHistorial.Version;
+                versionInfo.FechaVersionActual = entradaHistorial.Fecha;
+                versionInfo.ArchivoVersionActual = entradaHistorial.ArchivoWord;
+
+                SaveVersionInfo(versionInfo);
+
+                return Ok(new
+                {
+                    Message = $"Versión {versionObjetivo} restaurada exitosamente. La versión anterior fue enviada al historial.",
+                    version = versionInfo.VersionActual,
+                    fecha = versionInfo.FechaVersionActual
+                });
             }
             catch (Exception ex)
             {
                 return InternalServerError(ex);
             }
         }
+        // 15. Get Field Config for Plantilla Base cells
+        [HttpGet]
+        [Route("plantilla-base/field-config")]
+        public IHttpActionResult GetFieldConfig()
+        {
+            try
+            {
+                string path = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_field_config.json");
+                if (!File.Exists(path))
+                {
+                    return Ok(new { fields = new object() });
+                }
+                string json = File.ReadAllText(path, Encoding.UTF8);
+                var obj = JsonConvert.DeserializeObject<object>(json);
+                return Ok(obj);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // 16. Save Field Config for Plantilla Base cells
+        [HttpPost]
+        [Route("plantilla-base/field-config")]
+        public IHttpActionResult SaveFieldConfig([FromBody] JObject data)
+        {
+            try
+            {
+                string path = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/plantilla_field_config.json");
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                
+                string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+                File.WriteAllText(path, json, Encoding.UTF8);
+                
+                return Ok(new { Message = "Configuración de campos guardada con éxito" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+    }
+
+    // Clases para el manejo de versiones de plantilla
+    public class PlantillaVersionInfo
+    {
+        public int VersionActual { get; set; }
+        public string FechaVersionActual { get; set; }
+        public string ArchivoVersionActual { get; set; }
+        public List<PlantillaVersionEntry> Historial { get; set; } = new List<PlantillaVersionEntry>();
+    }
+
+    public class PlantillaVersionEntry
+    {
+        public int Version { get; set; }
+        public string Fecha { get; set; }
+        public string ArchivoWord { get; set; }
+        public string ArchivoBackup { get; set; }
     }
 }

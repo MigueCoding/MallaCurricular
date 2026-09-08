@@ -13,6 +13,69 @@ namespace MallaCurricular.Models
 {
     public static class WordTemplateHelper
     {
+        /// <summary>
+        /// Generates the FDE 058 header HTML table with logo, code, version and date.
+        /// This is the canonical header that must be preserved across Word round-trips.
+        /// </summary>
+        public static string BuildHeaderHtml(int version, string fecha)
+        {
+            string versionPadded = version.ToString("D2");
+            return $@"
+        <!-- FORMATO FDE 058 HEADER -->
+        <table class=""mb-5"">
+            <tr>
+                <td rowspan=""3"" class=""w-[20%] text-center"">
+                    <img src=""LOGO ITM 2020-02.png"" alt=""ITM"" class=""h-14 mx-auto opacity-100"">
+                </td>
+                <td rowspan=""3"" class=""text-center font-bold text-sm"">MICRODISEÑO CURRICULAR</td>
+                <td class=""bg-gray-50 font-bold w-16"">Código</td>
+                <td class=""w-20"">FDE 058</td>
+            </tr>
+            <tr>
+                <td class=""bg-gray-50 font-bold"">Versión</td>
+                <td>{versionPadded}</td>
+            </tr>
+            <tr>
+                <td class=""bg-gray-50 font-bold"">Fecha</td>
+                <td>{fecha}</td>
+            </tr>
+        </table>";
+        }
+
+        /// <summary>
+        /// Generates the footer control section HTML.
+        /// The VERSIÓN/FECHA fields here belong to the microdiseño workflow
+        /// (starts at 1.0, increments on rejection) - NOT the template version.
+        /// They are populated dynamically by JavaScript from the microdiseño data.
+        /// </summary>
+        public static string BuildFooterControlHtml()
+        {
+            return @"
+        <!-- CONTROL DE DOCUMENTO -->
+        <table class=""mt-8"">
+            <tr>
+                <td class=""bg-gray-50 font-bold w-1/2"">Elaborado por:</td>
+                <td class=""bg-gray-50 font-bold"">Revisado por:</td>
+            </tr>
+            <tr class=""h-12"">
+                <td id=""txt-elaborado"" class=""italic align-bottom text-[9px]""></td>
+                <td id=""txt-revisado"" class=""italic align-bottom text-[9px]""></td>
+            </tr>
+            <tr>
+                <td class=""bg-gray-50 font-bold"">Aprobado por:</td>
+                <td class=""bg-gray-100 px-2"">
+                    <div class=""flex justify-between items-center text-[7px] font-bold"">
+                        <div>VERSIÓN: <span id=""txt-version"">1.0</span></div>
+                        <div>FECHA: <span id=""txt-fecha""></span></div>
+                    </div>
+                </td>
+            </tr>
+            <tr class=""h-10 text-[9px]"">
+                <td colspan=""2"" id=""txt-aprobado""></td>
+            </tr>
+        </table>";
+        }
+
         public static readonly string DefaultTemplateHtml = @"
         <!-- FORMATO FDE 058 HEADER -->
         <table class=""mb-5"">
@@ -288,8 +351,8 @@ namespace MallaCurricular.Models
                 <td class=""bg-gray-50 font-bold"">Aprobado por:</td>
                 <td class=""bg-gray-100 px-2"">
                     <div class=""flex justify-between items-center text-[7px] font-bold"">
-                        <div>VERSIÓN: <span id=""txt-version"">05</span></div>
-                        <div>FECHA: <span id=""txt-fecha"">30-07-2024</span></div>
+                        <div>VERSIÓN: <span id=""txt-version"">1.0</span></div>
+                        <div>FECHA: <span id=""txt-fecha""></span></div>
                     </div>
                 </td>
             </tr>
@@ -544,15 +607,67 @@ namespace MallaCurricular.Models
             return p;
         }
 
+        /// <summary>
+        /// Imports a Word document and extracts only the BODY content (skipping the header
+        /// table and footer control table). The header and footer are reconstructed from
+        /// the canonical templates with the correct version/date.
+        /// </summary>
         public static string ImportDocxToHtml(Stream inputStream)
+        {
+            // We import only the body content, not the header or footer.
+            // Those will be rebuilt by the controller with the correct version/date.
+            return ImportDocxBodyContent(inputStream);
+        }
+
+        /// <summary>
+        /// Extracts only the body content tables/sections from the Word document,
+        /// skipping the first table (header with logo/version) and the last table
+        /// (control section with Elaborado/Revisado/Aprobado).
+        /// </summary>
+        public static string ImportDocxBodyContent(Stream inputStream)
         {
             var sb = new StringBuilder();
             
             using (var wordDoc = WordprocessingDocument.Open(inputStream, false))
             {
                 var body = wordDoc.MainDocumentPart.Document.Body;
-                foreach (var element in body.ChildElements)
+                var allElements = body.ChildElements.ToList();
+                
+                // Identify all tables in the document
+                var tableElements = allElements.Where(e => e is Table).ToList();
+                
+                // The first table is the header (logo + MICRODISEÑO CURRICULAR + Código/Versión/Fecha)
+                // The last table is the control section (Elaborado por / Revisado por / Aprobado por)
+                // We skip both of these and only process the content in between.
+                Table headerTable = tableElements.Count > 0 ? (Table)tableElements.First() : null;
+                Table controlTable = tableElements.Count > 1 ? (Table)tableElements.Last() : null;
+                
+                // Verify the header table by checking for "MICRODISEÑO" or "Código" or "FDE"
+                if (headerTable != null)
                 {
+                    string headerText = headerTable.InnerText.ToLower();
+                    if (!headerText.Contains("microdise") && !headerText.Contains("fde") && !headerText.Contains("código") && !headerText.Contains("codigo"))
+                    {
+                        headerTable = null; // Not actually the header, don't skip it
+                    }
+                }
+                
+                // Verify the control table by checking for "Elaborado" or "Aprobado" or "VERSIÓN"
+                if (controlTable != null && controlTable != headerTable)
+                {
+                    string controlText = controlTable.InnerText.ToLower();
+                    if (!controlText.Contains("elaborado") && !controlText.Contains("aprobado") && !controlText.Contains("versión") && !controlText.Contains("version"))
+                    {
+                        controlTable = null; // Not actually the control table, don't skip it
+                    }
+                }
+                
+                foreach (var element in allElements)
+                {
+                    // Skip the header and control tables
+                    if (element == headerTable) continue;
+                    if (element == controlTable && controlTable != null) continue;
+                    
                     if (element is Table wordTable)
                     {
                         // Check if it is the evaluation table

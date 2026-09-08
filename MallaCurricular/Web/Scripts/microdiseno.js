@@ -1,6 +1,11 @@
 const API_BASE_URL = 'http://localhost:49513';
 let currentMicrodiseno = { Id: 0 };
 let currentEvaluaciones = [];
+let fieldConfigMap = {}; // loaded from /api/microdisenos/plantilla-base/field-config
+let programaRa = null;
+let competenciasRaSeleccionadas = [];
+let legacyCompetencias = '';
+let legacyResultadosAprendizaje = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
@@ -30,6 +35,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error al cargar plantilla base:', err);
     }
 
+    // Paso 1.5: Cargar configuración de tipos de campo (definida por el Jefe visualmente)
+    try {
+        const cfgRes = await fetch(`${API_BASE_URL}/api/microdisenos/plantilla-base/field-config`);
+        if (cfgRes.ok) {
+            const cfgData = await cfgRes.json();
+            fieldConfigMap = cfgData.fields || {};
+            applyFieldConfigToForm();
+        }
+    } catch(e) { console.error('Error cargando field config:', e); }
+
+    // El catálogo de competencias/RA es administrado por el Jefe y se lee desde la base de datos.
+    await loadProgramaRaCatalog();
+
     // Paso 2: Ahora que el HTML del formulario existe, cargar datos del microdiseño
     if (document.getElementById('asig-codigo')) document.getElementById('asig-codigo').value = cursoCodigo || '';
     if (document.getElementById('asig-nombre')) document.getElementById('asig-nombre').value = asigNombre || '';
@@ -43,10 +61,293 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+/**
+ * Apply field type configurations set by the Jefe.
+ * This transforms cells in the loaded template according to the fieldConfigMap.
+ * - text: ensures the cell has a text input (default, no change needed usually)
+ * - number: converts input to type=number with validation
+ * - textarea: converts input to textarea
+ * - select: replaces input with a <select> element with predefined options
+ */
+function applyFieldConfigToForm() {
+    const container = document.getElementById('doc-container');
+    if (!container) return;
+
+    for (const [key, config] of Object.entries(fieldConfigMap)) {
+        // Find the element by id first
+        let targetEl = document.getElementById(key);
+        let parentCell = targetEl ? targetEl.closest('td') : null;
+
+        // If not found by id, try finding cell by positional key (cell-tX-rX-cX)
+        if (!targetEl && key.startsWith('cell-')) {
+            parentCell = findCellByPositionalKey(container, key);
+            if (parentCell) {
+                targetEl = parentCell.querySelector('input, textarea, select');
+            }
+        }
+
+        if (!targetEl && !parentCell) continue;
+
+        const fieldId = targetEl ? targetEl.id : key;
+        const existingValue = targetEl ? (targetEl.value || '') : '';
+
+        switch (config.type) {
+            case 'number':
+                if (targetEl && targetEl.tagName === 'INPUT') {
+                    targetEl.type = 'number';
+                    targetEl.setAttribute('inputmode', 'numeric');
+                    // Add validation: block non-numeric key presses
+                    targetEl.addEventListener('keypress', function(e) {
+                        const char = String.fromCharCode(e.which || e.keyCode);
+                        if (!/[\d.\-]/.test(char)) {
+                            e.preventDefault();
+                        }
+                    });
+                    targetEl.addEventListener('paste', function(e) {
+                        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                        if (!/^[\d.\-]+$/.test(pasted)) {
+                            e.preventDefault();
+                        }
+                    });
+                } else if (targetEl && targetEl.tagName === 'TEXTAREA') {
+                    // Replace textarea with number input
+                    const newInput = document.createElement('input');
+                    newInput.type = 'number';
+                    newInput.id = fieldId;
+                    newInput.className = targetEl.className;
+                    newInput.classList.add('doc-input');
+                    newInput.value = existingValue;
+                    newInput.setAttribute('inputmode', 'numeric');
+                    newInput.addEventListener('keypress', function(e) {
+                        const char = String.fromCharCode(e.which || e.keyCode);
+                        if (!/[\d.\-]/.test(char)) e.preventDefault();
+                    });
+                    targetEl.parentNode.replaceChild(newInput, targetEl);
+                }
+                break;
+
+            case 'textarea':
+                if (targetEl && targetEl.tagName === 'INPUT') {
+                    // Replace input with textarea
+                    const newTextarea = document.createElement('textarea');
+                    newTextarea.id = fieldId;
+                    newTextarea.className = targetEl.className + ' min-h-[60px]';
+                    newTextarea.classList.add('doc-input');
+                    newTextarea.value = existingValue;
+                    newTextarea.placeholder = 'Escriba aquí...';
+                    targetEl.parentNode.replaceChild(newTextarea, targetEl);
+                }
+                // If already textarea, nothing to do
+                break;
+
+            case 'select':
+                if (config.options && config.options.length > 0) {
+                    const newSelect = document.createElement('select');
+                    newSelect.id = fieldId;
+                    newSelect.className = 'input-doc doc-input';
+
+                    // Default empty option
+                    const defaultOpt = document.createElement('option');
+                    defaultOpt.value = '';
+                    defaultOpt.textContent = 'Seleccione...';
+                    newSelect.appendChild(defaultOpt);
+
+                    config.options.forEach(optVal => {
+                        const opt = document.createElement('option');
+                        opt.value = optVal;
+                        opt.textContent = optVal;
+                        newSelect.appendChild(opt);
+                    });
+
+                    // Set existing value if matches
+                    if (existingValue) {
+                        newSelect.value = existingValue;
+                    }
+
+                    if (targetEl) {
+                        targetEl.parentNode.replaceChild(newSelect, targetEl);
+                    } else if (parentCell) {
+                        parentCell.innerHTML = '';
+                        parentCell.appendChild(newSelect);
+                    }
+                }
+                break;
+
+            case 'text':
+            default:
+                // Text is the default, no transformation needed
+                break;
+        }
+    }
+}
+
+/**
+ * Given a positional key like "cell-t2-r1-c3", find the corresponding TD.
+ */
+function findCellByPositionalKey(container, key) {
+    const match = key.match(/^cell-t(\d+)-r(\d+)-c(\d+)$/);
+    if (!match) return null;
+    const tableIdx = parseInt(match[1]);
+    const rowIdx = parseInt(match[2]);
+    const cellIdx = parseInt(match[3]);
+
+    const allTables = container.querySelectorAll('table');
+    if (tableIdx >= allTables.length) return null;
+    const table = allTables[tableIdx];
+    const rows = table.querySelectorAll('tr');
+    if (rowIdx >= rows.length) return null;
+    const cells = rows[rowIdx].children;
+    if (cellIdx >= cells.length) return null;
+    return cells[cellIdx];
+}
+
+async function loadProgramaRaCatalog() {
+    const body = document.getElementById('competencias-ra-body');
+    if (!body) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/resultados-aprendizaje`);
+        if (!response.ok) throw new Error('El catálogo de competencias y resultados aún no está disponible.');
+        programaRa = await response.json();
+        renderCompetenciasRa();
+    } catch (error) {
+        console.error('No se pudo cargar el catálogo RA:', error);
+        body.innerHTML = `<tr><td colspan="3" class="text-red-600 text-[10px] p-2">${escapeRaHtml(error.message)}</td></tr>`;
+    }
+}
+
+function escapeRaHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+}
+
+function getProgramaCompetencias() {
+    return programaRa && programaRa.Competencias ? programaRa.Competencias : [];
+}
+
+function getCompetenciaRa(id) {
+    return getProgramaCompetencias().find(c => String(c.Id) === String(id));
+}
+
+function addCompetenciaRa() {
+    competenciasRaSeleccionadas.push({ competenciaId: '', resultadoIds: [] });
+    renderCompetenciasRa();
+}
+
+function removeCompetenciaRa(index) {
+    competenciasRaSeleccionadas.splice(index, 1);
+    renderCompetenciasRa();
+}
+
+function selectCompetenciaRa(index, competenciaId) {
+    competenciasRaSeleccionadas[index] = { competenciaId: competenciaId, resultadoIds: [] };
+    renderCompetenciasRa();
+}
+
+function toggleResultadoRa(index, resultadoId, checked) {
+    const selected = competenciasRaSeleccionadas[index];
+    if (!selected) return;
+    const ids = selected.resultadoIds || [];
+    const value = String(resultadoId);
+    selected.resultadoIds = checked ? Array.from(new Set(ids.concat([value]))) : ids.filter(id => String(id) !== value);
+}
+
+function renderCompetenciasRa() {
+    const body = document.getElementById('competencias-ra-body');
+    if (!body || !programaRa) return;
+
+    const competencias = getProgramaCompetencias();
+    const editable = isRaEditable();
+    if (!competencias.length) {
+        body.innerHTML = '<tr><td colspan="3" class="text-gray-500 text-[10px] p-2">No hay competencias activas configuradas por el programa.</td></tr>';
+        applyRaReadOnlyState();
+        return;
+    }
+
+    body.innerHTML = competenciasRaSeleccionadas.map((selection, index) => {
+        const competencia = getCompetenciaRa(selection.competenciaId);
+        const options = competencias.map(c => `<option value="${c.Id}" ${String(c.Id) === String(selection.competenciaId) ? 'selected' : ''}>${escapeRaHtml(c.Codigo)} — ${escapeRaHtml(c.Descripcion)}</option>`).join('');
+        const resultados = competencia ? (competencia.Resultados || []) : [];
+        const selectedResults = resultados.filter(r => ((selection.resultadoIds || []).map(String)).includes(String(r.Id)));
+        const resultsCell = editable
+            ? (resultados.length
+                ? resultados.map(r => `<label class="flex gap-1 items-start mb-1 cursor-pointer"><input type="checkbox" class="doc-input mt-0.5" ${((selection.resultadoIds || []).map(String)).includes(String(r.Id)) ? 'checked' : ''} onchange="toggleResultadoRa(${index}, '${r.Id}', this.checked)"><span><strong>${escapeRaHtml(r.Codigo)}</strong> — ${escapeRaHtml(r.Descripcion)}</span></label>`).join('')
+                : (competencia ? '<span class="text-gray-400 italic">Esta competencia no tiene RA activos.</span>' : '<span class="text-gray-400 italic">Seleccione una competencia para ver sus RA.</span>'))
+            : (selectedResults.length
+                ? selectedResults.map(r => `<p class="mb-2 leading-snug"><strong>${escapeRaHtml(r.Codigo)}</strong> — ${escapeRaHtml(r.Descripcion)}</p>`).join('')
+                : '<span class="text-gray-400 italic">No se asociaron resultados de aprendizaje.</span>');
+        const competenciaCell = editable
+            ? `<select class="input-doc doc-input" onchange="selectCompetenciaRa(${index}, this.value)"><option value="">Seleccione una competencia...</option>${options}</select>`
+            : (competencia ? `<p class="leading-snug"><strong>${escapeRaHtml(competencia.Codigo)}</strong> — ${escapeRaHtml(competencia.Descripcion)}</p>` : '<span class="text-gray-400 italic">Competencia no disponible.</span>');
+        const actionCell = editable ? `<td class="p-0 text-center align-top doc-block no-print"><button type="button" onclick="removeCompetenciaRa(${index})" class="text-red-600 font-bold px-2 py-1" title="Quitar competencia">×</button></td>` : '<td class="hidden"></td>';
+        return `<tr><td class="p-2 align-top text-[10px]">${competenciaCell}</td><td class="p-2 text-[9px] align-top">${resultsCell}</td>${actionCell}</tr>`;
+    }).join('');
+    applyRaReadOnlyState();
+}
+
+function isRaEditable() {
+    const status = (currentMicrodiseno.Estado || 'Borrador').trim();
+    // El profesor puede seleccionar las competencias y RA mientras el
+    // microdiseño sea editable. El control general de acceso de checkStateUI
+    // mantiene bloqueado el documento para quien no sea su creador.
+    return Number(userRole) === 2 && (status === 'Borrador' || status === 'Rechazado');
+}
+
+function applyRaReadOnlyState() {
+    const table = document.getElementById('competencias-ra-table');
+    if (!table) return;
+    const editable = isRaEditable();
+    table.querySelectorAll('select, input').forEach(el => el.disabled = !editable);
+    table.querySelectorAll('.doc-block').forEach(el => el.style.display = editable ? '' : 'none');
+}
+
+function restoreCompetenciasRa(content) {
+    legacyCompetencias = content.competencias || '';
+    legacyResultadosAprendizaje = content.resultadosAprendizaje || '';
+    competenciasRaSeleccionadas = Array.isArray(content.competenciasRa)
+        ? content.competenciasRa.map(item => ({ competenciaId: String(item.competenciaId || ''), resultadoIds: (item.resultadoIds || []).map(String) }))
+        : deriveCompetenciasRaFromLegacy();
+    renderCompetenciasRa();
+}
+
+// Compatibilidad con microdiseños creados antes de guardar IDs de catálogo.
+function deriveCompetenciasRaFromLegacy() {
+    if (!programaRa || (!legacyCompetencias && !legacyResultadosAprendizaje)) return [];
+    return getProgramaCompetencias().filter(c =>
+        legacyCompetencias.indexOf(c.Codigo) !== -1 || legacyCompetencias.indexOf(c.Descripcion) !== -1
+    ).map(c => ({
+        competenciaId: String(c.Id),
+        resultadoIds: (c.Resultados || []).filter(r =>
+            legacyResultadosAprendizaje.indexOf(r.Codigo) !== -1 || legacyResultadosAprendizaje.indexOf(r.Descripcion) !== -1
+        ).map(r => String(r.Id))
+    }));
+}
+
+function getCompetenciasRaForSave() {
+    return competenciasRaSeleccionadas
+        .filter(item => item && item.competenciaId && getCompetenciaRa(item.competenciaId))
+        .map(item => ({ competenciaId: String(item.competenciaId), resultadoIds: (item.resultadoIds || []).map(String) }));
+}
+
+function getCompetenciasRaText(selections) {
+    return selections.map(item => {
+        const competencia = getCompetenciaRa(item.competenciaId);
+        return competencia ? `${competencia.Codigo}: ${competencia.Descripcion}` : '';
+    }).filter(Boolean).join('\n');
+}
+
+function getResultadosRaText(selections) {
+    return selections.map(item => {
+        const competencia = getCompetenciaRa(item.competenciaId);
+        if (!competencia) return '';
+        const selected = (competencia.Resultados || []).filter(r => item.resultadoIds.map(String).includes(String(r.Id)));
+        return selected.map(r => `${competencia.Codigo} · ${r.Codigo}: ${r.Descripcion}`).join('\n');
+    }).filter(Boolean).join('\n');
+}
+
+
 function goBack() {
     const role = parseInt(localStorage.getItem('userRole'));
     if (role === 1) window.location.href = 'Jefe.html?tab=microdisenos';
-    else if (role === 3) window.location.href = 'estudiante.html';
+    else if (role === 3) window.location.href = 'Estudiante.html?tab=asignaturas';
     else window.location.href = 'profesor.html';
 }
 
@@ -158,8 +459,7 @@ function fillForm(m) {
     setVal('num-hsinc', c.hsinc);
 
     setVal('txt-justificacion', c.justificacion);
-    setVal('txt-competencias', c.competencias);
-    setVal('txt-resultados-aprendizaje', c.resultadosAprendizaje);
+    restoreCompetenciasRa(c);
 
     setVal('txt-saber-dec-crit', c.saberDecCrit);
     setVal('txt-saber-dec-evi', c.saberDecEvi);
@@ -176,7 +476,7 @@ function fillForm(m) {
     setVal('txt-bibliografia', c.bibliografia);
 
     for (let key in c) {
-        if (key !== 'evaluaciones') {
+        if (key !== 'evaluaciones' && key !== 'competenciasRa') {
             const el = document.getElementById(key);
             if (el && el.classList.contains('doc-input')) {
                 el.value = c[key] || '';
@@ -195,10 +495,10 @@ function fillForm(m) {
     if (txtRevisado) txtRevisado.textContent = m.RevisadoPor || '';
     
     const txtVersion = document.getElementById('txt-version');
-    if (txtVersion) txtVersion.textContent = m.Version || '05';
+    if (txtVersion) txtVersion.textContent = m.Version || '1.0';
     
     const txtFecha = document.getElementById('txt-fecha');
-    if (txtFecha) txtFecha.textContent = m.FechaAprobacion ? m.FechaAprobacion.substring(0, 10) : '30-07-2024';
+    if (txtFecha) txtFecha.textContent = m.FechaAprobacion ? m.FechaAprobacion.substring(0, 10) : '';
     
     const txtAprobado = document.getElementById('txt-aprobado');
     if (txtAprobado) txtAprobado.textContent = m.AprobadoPor || '';
@@ -216,7 +516,7 @@ function renderEvaluaciones() {
             <td class="p-0"><textarea class="w-full border-none outline-none p-1 text-[11px] doc-input" onchange="updateEval(${idx}, 'eval', this.value)">${ev.eval || ''}</textarea></td>
             <td class="p-0 text-center"><input type="number" class="w-full border-none outline-none text-center p-1 text-[11px] doc-input" value="${ev.porcentaje || ''}" onchange="updateEval(${idx}, 'porcentaje', this.value)"></td>
             <td class="p-0"><textarea class="w-full border-none outline-none p-1 text-[11px] doc-input" onchange="updateEval(${idx}, 'estrategia', this.value)">${ev.estrategia || ''}</textarea></td>
-            <td class="p-0 text-center doc-block no-print"><button onclick="removeEval(${idx})" class="text-red-600 font-bold px-2">X</button></td>
+            <td class="p-0 text-center doc-block no-print professor-only"><button onclick="removeEval(${idx})" class="text-red-600 font-bold px-2">X</button></td>
         `;
         tbody.appendChild(tr);
     });
@@ -258,8 +558,11 @@ function gatherData() {
     c.hsinc = getVal('num-hsinc');
 
     c.justificacion = getVal('txt-justificacion');
-    c.competencias = getVal('txt-competencias');
-    c.resultadosAprendizaje = getVal('txt-resultados-aprendizaje');
+    const competenciasRa = getCompetenciasRaForSave();
+    c.competenciasRa = competenciasRa;
+    // Se mantienen estos textos derivados para las vistas históricas de revisión.
+    c.competencias = competenciasRa.length ? getCompetenciasRaText(competenciasRa) : legacyCompetencias;
+    c.resultadosAprendizaje = competenciasRa.length ? getResultadosRaText(competenciasRa) : legacyResultadosAprendizaje;
 
     c.saberDecCrit = getVal('txt-saber-dec-crit');
     c.saberDecEvi = getVal('txt-saber-dec-evi');
@@ -340,7 +643,6 @@ function checkStateUI() {
                     <h2 class="text-xl font-bold text-gray-800">Microdiseño No Publicado</h2>
                     <p class="text-gray-500 mt-2">Este microdiseño aún no ha sido aprobado oficialmente por la coordinación para su consulta pública.</p>
                 </div>`;
-            btns.innerHTML = `<button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>`;
             return;
         }
 
@@ -350,7 +652,6 @@ function checkStateUI() {
             msg = 'El microcurrículo aún no ha sido enviado a revisión por el Creador. Podrá acceder cuando el docente lo envíe formalmente.';
         }
         document.getElementById('doc-container').innerHTML = `<div class="text-center py-20 text-red-600 font-bold text-xl">Acceso Denegado: <br><span class="text-sm font-normal text-gray-500">${msg}</span></div>`;
-        btns.innerHTML = `<button onclick="goBack()" class="bg-gray-100 text-gray-700 px-3 py-1 text-sm font-bold rounded border border-gray-300 hover:bg-gray-200">Volver</button>`;
         return;
     }
 
@@ -412,6 +713,11 @@ function checkStateUI() {
         btns.innerHTML = htmlBtns;
     } else if (readonlyMsg) {
         btns.innerHTML = `<span class="italic text-xs text-gray-400">${readonlyMsg}</span>`;
+    }
+
+    // La gestión de momentos evaluativos es exclusiva de la edición docente.
+    if (userRole !== 2) {
+        document.querySelectorAll('.professor-only').forEach(el => el.style.display = 'none');
     }
 }
 

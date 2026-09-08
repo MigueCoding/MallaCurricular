@@ -192,7 +192,33 @@
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\MallasController.cs" />
     <Compile Include="Controllers\MicrodisenosController.cs" />
+    <Compile Include="Controllers\ResultadosAprendizajeController.cs" />
+    <Compile Include="Infrastructure\Data\Microdiseno.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\MicrodisenoRole.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\MomentosEvaluativo.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\RA_Competencia.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\RA_Momento.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\RA_Programa.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\RA_Resultado.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\Data\RA_Version.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\MicrodisenoDTO.cs" />
+    <Compile Include="Models\ResultadosAprendizajeDTO.cs" />
     <Compile Include="Models\WordTemplateHelper.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

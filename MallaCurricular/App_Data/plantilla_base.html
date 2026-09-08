@@ -1,4 +1,4 @@
-﻿
+
         <!-- FORMATO FDE 058 HEADER -->
         <table class="mb-5">
             <tr>
@@ -144,21 +144,16 @@
         </div>
 
         <span class="section-num uppercase">3. COMPETENCIA(S) Y RESULTADOS DE APRENDIZAJE</span>
-        <table>
+        <table id="competencias-ra-table">
             <tr class="bg-label text-center uppercase">
                 <td class="w-1/2">Competencia del programa a la que aporta la asignatura</td>
                 <td>Resultado (s) de aprendizaje del programa asociados a la competencia</td>
+                <td class="w-[26px] doc-block no-print"></td>
             </tr>
-            <tr>
-                <td class="p-0">
-                    <textarea id="txt-competencias" class="input-doc doc-input min-h-[70px]"
-                              placeholder="Escriba la competencia..."></textarea>
-                </td>
-                <td class="p-0">
-                    <textarea id="txt-resultados-aprendizaje" class="input-doc doc-input min-h-[70px]"
-                              placeholder="- Escriba el resultado..."></textarea>
-                </td>
-            </tr>
+            <tbody id="competencias-ra-body"></tbody>
+            <tfoot class="doc-block no-print">
+                <tr><td colspan="3" class="bg-slate-50 p-1"><button type="button" onclick="addCompetenciaRa()" class="text-blue-700 font-bold text-[10px] px-2 py-1 hover:bg-blue-50 rounded">+ Agregar competencia</button></td></tr>
+            </tfoot>
         </table>
 
         <div class="orientacion-box">
@@ -239,15 +234,20 @@
             </tr>
         </table>
 
-        <span class="section-num uppercase">6. EVALUACIÓN (Se autogenerará durante edición)</span>
+        <span class="section-num uppercase">6. EVALUACIÓN</span>
         <table>
             <tr class="bg-label text-center uppercase">
                 <td class="w-[40%]">Evaluación</td>
                 <td class="w-[10%]">%</td>
                 <td>Estrategias e instrumentos para evaluar</td>
+                <td class="w-[26px] doc-block no-print"></td>
             </tr>
+            <tbody id="eval-body"></tbody>
+            <tfoot class="doc-block no-print professor-only">
+                <tr><td colspan="4" class="bg-slate-50 p-1"><button type="button" onclick="addEvalLine()" class="text-blue-700 font-bold text-[10px] px-2 py-1 hover:bg-blue-50 rounded">+ Agregar momento evaluativo</button></td></tr>
+            </tfoot>
         </table>
-        
+
         <span class="section-num uppercase">
             Bibliografía <span class="text-[9px] font-normal italic">
                 (Básica,
@@ -273,8 +273,8 @@
                 <td class="bg-gray-50 font-bold">Aprobado por:</td>
                 <td class="bg-gray-100 px-2">
                     <div class="flex justify-between items-center text-[7px] font-bold">
-                        <div>VERSIÓN: <span id="txt-version">05</span></div>
-                        <div>FECHA: <span id="txt-fecha">30-07-2024</span></div>
+                        <div>VERSIÓN: <span id="txt-version">1.0</span></div>
+                        <div>FECHA: <span id="txt-fecha"></span></div>
                     </div>
                 </td>
             </tr>
