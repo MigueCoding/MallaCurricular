@@ -11,11 +11,11 @@
             </tr>
             <tr>
                 <td class="bg-gray-50 font-bold">Versión</td>
-                <td>07</td>
+                <td>06</td>
             </tr>
             <tr>
                 <td class="bg-gray-50 font-bold">Fecha</td>
-                <td>25-08-2026</td>
+                <td>09-09-2026</td>
             </tr>
         </table>
 <span class="section-num">1. IDENTIFICACIÓN DE LA ASIGNATURA</span>
@@ -79,27 +79,103 @@
     <td colspan="3"><input type="number" id="num-hsinc" class="input-doc doc-input text-center"></td>
   </tr>
 </table>
-<span class="section-num">1. Orientaciones sobre cómo desarrollar la identificación de la asignatura:             La identificación permite comprender su contexto. Una modalidad como la virtual implica diferencias en             planificación...             Asignaturas transversales se dejan en blanco los datos del programa. Los créditos deben corresponder al             total de horas.</span>
+<span class="section-num">1. Orientaciones sobre cómo desarrollar la identificación de la asignatura:
+            La identificación permite comprender su contexto. Una modalidad como la virtual implica diferencias en
+            planificación...
+            Asignaturas transversales se dejan en blanco los datos del programa. Los créditos deben corresponder al
+            total de horas.</span>
 <span class="section-num">2. Justificación</span>
 <table>
   <tr>
     <td><textarea id="txt-justificacion" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
   </tr>
 </table>
-<div class="orientacion-box">2) Orientaciones sobre cómo escribir la justificación: Debe desarrollar la pertinencia...             ¿Qué problema o situación del contexto intenta abordar o resolver?</div>
+<div class="orientacion-box">2) Orientaciones sobre cómo escribir la justificación: Debe desarrollar la pertinencia...
+            ¿Qué problema o situación del contexto intenta abordar o resolver?</div>
 <span class="section-num">3. COMPETENCIA(S) Y RESULTADOS DE APRENDIZAJE</span>
 <table>
   <tr>
     <td>Competencia del programa a la que aporta la asignatura</td>
     <td>Resultado (s) de aprendizaje del programa asociados a la competencia</td>
+    <td></td>
   </tr>
   <tr>
-    <td><textarea id="txt-competencias" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
-    <td><textarea id="txt-resultados-aprendizaje" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+    <td colspan="3">+ Agregar competencia</td>
   </tr>
 </table>
-<div class="orientacion-box">4) Orientaciones sobre las competencias: Deben ser las definidas en el programa de             formación, NO definiremos aquí competencias de asignatura.</div>
+<div class="orientacion-box">4) Orientaciones sobre las competencias: Deben ser las definidas en el programa de
+            formación, NO definiremos aquí competencias de asignatura.</div>
+<span class="section-num">4. SABERES</span>
+<table>
+  <tr>
+    <td>Saberes</td>
+    <td>Criterios de desempeño / Resultados esperados</td>
+    <td>Evidencias</td>
+  </tr>
+  <tr>
+    <td class="bg-label">DECLARATIVOS: Escriba aquí...</td>
+    <td><textarea id="txt-saber-dec-crit" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+    <td><textarea id="txt-saber-dec-evi" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+  <tr>
+    <td class="bg-label">PROCEDIMENTALES: Escriba aquí...</td>
+    <td><textarea id="txt-saber-pro-crit" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+    <td><textarea id="txt-saber-pro-evi" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+  <tr>
+    <td class="bg-label">ACTITUDINALES: Escriba aquí...</td>
+    <td><textarea id="txt-saber-act-crit" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+    <td><textarea id="txt-saber-act-evi" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+</table>
 <span class="section-num">5. METODOLOGÍA, MATERIALES Y RECURSOS</span>
+<table>
+  <tr>
+    <td class="bg-label">Metodología</td>
+  </tr>
+  <tr>
+    <td class="bg-label">Diagnóstico aprendizajes previos</td>
+  </tr>
+  <tr>
+    <td><textarea id="txt-diagnostico" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+  <tr>
+    <td class="bg-label">Metodología</td>
+  </tr>
+  <tr>
+    <td><textarea id="txt-metodologia" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+  <tr>
+    <td class="bg-label">Materiales y Recursos</td>
+  </tr>
+  <tr>
+    <td><textarea id="txt-materiales" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+  <tr>
+    <td class="bg-label">Trabajo Independiente</td>
+  </tr>
+  <tr>
+    <td><textarea id="txt-trabajoindep" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+</table>
+<span class="section-num">6. EVALUACIÓN</span>
+<table>
+  <tr class="bg-label text-center uppercase">
+    <td class="w-[40%]">Evaluación</td>
+    <td class="w-[10%]">%</td>
+    <td>Estrategias e instrumentos para evaluar</td>
+  </tr>
+  <tbody id="eval-body"></tbody>
+</table>
+<button onclick="addEvalLine()" class="no-print mt-2 bg-slate-700 text-white text-[9px] px-2 py-1 rounded doc-block hover:bg-slate-800 transition-colors">+ Agregar Evento Evaluativo</button>
+<span class="section-num">Bibliografía 
+                (Básica,
+                complementaria y referenciada)</span>
+<table>
+  <tr>
+    <td><textarea id="txt-bibliografia" class="input-doc doc-input min-h-[60px]" placeholder="Escriba aquí..."></textarea></td>
+  </tr>
+</table>
 
 
         <!-- CONTROL DE DOCUMENTO -->
