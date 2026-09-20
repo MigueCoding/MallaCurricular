@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <script>if (!localStorage.getItem('userId')) { window.location.href = 'login.html'; }</script>
     <meta charset="UTF-8">
@@ -43,8 +44,9 @@
             margin-bottom: 12px;
             table-layout: fixed;
         }
-        
-        .a4-container td, .a4-container th {
+
+        .a4-container td,
+        .a4-container th {
             border: 1px solid #a1a1aa;
             padding: 5px 8px;
             font-size: 11px;
@@ -68,7 +70,7 @@
             color: #64748b;
             border-radius: 6px;
         }
-        
+
         .a4-container .input-doc {
             width: 100%;
             border: 1px solid #e2e8f0;
@@ -84,10 +86,12 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+
         .a4-container textarea.input-doc {
             min-height: 50px;
             pointer-events: none;
         }
+
         .a4-container input.input-doc {
             pointer-events: none;
         }
@@ -107,6 +111,7 @@
             border: 2px dashed #6366f1;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .dropzone.dragover {
             border-color: #10b981;
             background-color: #ecfdf5;
@@ -117,6 +122,7 @@
         .btn-hover-effect {
             transition: all 0.2s ease;
         }
+
         .btn-hover-effect:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
@@ -126,33 +132,44 @@
         .version-badge {
             animation: pulse-version 2s ease-in-out infinite;
         }
+
         @keyframes pulse-version {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3); }
-            50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+            }
         }
 
         /* History entry hover */
         .history-entry {
             transition: all 0.2s ease;
         }
+
         .history-entry:hover {
             transform: translateX(4px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
 
         /* ===== CELL CONFIGURATOR STYLES ===== */
-        
+
         /* Configurable cell hover effect */
         .cell-configurable {
             cursor: pointer;
             transition: all 0.15s ease;
             position: relative;
         }
+
         .cell-configurable:hover {
             outline: 2px solid #6366f1;
             outline-offset: -2px;
             background-color: #eef2ff !important;
         }
+
         .cell-configurable.cell-selected {
             outline: 2px solid #4f46e5;
             outline-offset: -2px;
@@ -173,21 +190,25 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .cell-type-badge.type-text {
             background: #dbeafe;
             color: #1d4ed8;
             border: 1px solid #93c5fd;
         }
+
         .cell-type-badge.type-number {
             background: #fef3c7;
             color: #b45309;
             border: 1px solid #fcd34d;
         }
+
         .cell-type-badge.type-textarea {
             background: #d1fae5;
             color: #047857;
             border: 1px solid #6ee7b7;
         }
+
         .cell-type-badge.type-select {
             background: #ede9fe;
             color: #6d28d9;
@@ -205,9 +226,17 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.1);
             animation: popoverIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
         @keyframes popoverIn {
-            from { opacity: 0; transform: translateY(8px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         /* Radio cards */
@@ -221,15 +250,18 @@
             align-items: center;
             gap: 10px;
         }
+
         .type-option-card:hover {
             border-color: #a5b4fc;
             background: #f5f3ff;
         }
+
         .type-option-card.selected {
             border-color: #6366f1;
             background: #eef2ff;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
         }
+
         .type-option-icon {
             width: 36px;
             height: 36px;
@@ -255,10 +287,12 @@
             color: #334155;
             transition: all 0.1s;
         }
+
         .option-chip:hover {
             background: #fee2e2;
             border-color: #fca5a5;
         }
+
         .option-chip .remove-opt {
             cursor: pointer;
             font-weight: 700;
@@ -270,6 +304,7 @@
         .mode-toggle {
             transition: all 0.3s ease;
         }
+
         .mode-toggle.active {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: white;
@@ -285,30 +320,121 @@
         }
 
         /* Results of learning administration */
-        .ra-overlay { position: fixed; inset: 0; z-index: 1500; background: rgba(15,23,42,.62); backdrop-filter: blur(3px); padding: 1rem; overflow-y: auto; }
-        .ra-dialog { max-width: 1120px; margin: 1rem auto; background: #f8fafc; border-radius: 1.25rem; overflow: hidden; box-shadow: 0 25px 65px rgba(15,23,42,.32); }
-        .ra-scroll { max-height: calc(100vh - 11rem); overflow-y: auto; }
-        .ra-matrix-wrap { overflow-x: auto; border: 1px solid #cbd5e1; border-radius: .9rem; background: white; box-shadow: 0 2px 8px rgba(15,23,42,.05); }
-        .ra-matrix { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: fixed; }
-        .ra-matrix th { background: #b7c9e8; color: #0f172a; border: 1px solid #64748b; padding: .8rem; font-size: .75rem; font-weight: 800; text-align: center; text-transform: uppercase; }
-        .ra-matrix td { border: 1px solid #94a3b8; padding: .8rem; vertical-align: top; }
-        .ra-matrix .ra-cell-competencia { width: 35%; vertical-align: middle; background: #f8fafc; }
-        .ra-matrix .ra-cell-resultado { width: 31%; }
-        .ra-matrix .ra-cell-momento { width: 34%; }
-        .ra-matrix .ra-row-resultado:hover td { background: #f8fafc; }
-        .ra-matrix .ra-cell-competencia:hover { background: #f1f5f9; }
-        .ra-cell-actions { display: flex; flex-wrap: wrap; gap: .15rem; margin-top: .65rem; }
-        .ra-momento-line + .ra-momento-line { border-top: 1px solid #dbeafe; margin-top: .55rem; padding-top: .55rem; }
-        .ra-long-text { white-space: pre-wrap; line-height: 1.55; }
-        .ra-btn-icon { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .5rem; }
+        .ra-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1500;
+            background: rgba(15, 23, 42, .62);
+            backdrop-filter: blur(3px);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .ra-dialog {
+            max-width: 1120px;
+            margin: 1rem auto;
+            background: #f8fafc;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 25px 65px rgba(15, 23, 42, .32);
+        }
+
+        .ra-scroll {
+            max-height: calc(100vh - 11rem);
+            overflow-y: auto;
+        }
+
+        .ra-matrix-wrap {
+            overflow-x: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: .9rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .05);
+        }
+
+        .ra-matrix {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .ra-matrix th {
+            background: #b7c9e8;
+            color: #0f172a;
+            border: 1px solid #64748b;
+            padding: .8rem;
+            font-size: .75rem;
+            font-weight: 800;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .ra-matrix td {
+            border: 1px solid #94a3b8;
+            padding: .8rem;
+            vertical-align: top;
+        }
+
+        .ra-matrix .ra-cell-competencia {
+            width: 35%;
+            vertical-align: middle;
+            background: #f8fafc;
+        }
+
+        .ra-matrix .ra-cell-resultado {
+            width: 31%;
+        }
+
+        .ra-matrix .ra-cell-momento {
+            width: 34%;
+        }
+
+        .ra-matrix .ra-row-resultado:hover td {
+            background: #f8fafc;
+        }
+
+        .ra-matrix .ra-cell-competencia:hover {
+            background: #f1f5f9;
+        }
+
+        .ra-cell-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .15rem;
+            margin-top: .65rem;
+        }
+
+        .ra-momento-line+.ra-momento-line {
+            border-top: 1px solid #dbeafe;
+            margin-top: .55rem;
+            padding-top: .55rem;
+        }
+
+        .ra-long-text {
+            white-space: pre-wrap;
+            line-height: 1.55;
+        }
+
+        .ra-btn-icon {
+            width: 2rem;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: .5rem;
+        }
     </style>
 </head>
+
 <body class="pb-12">
 
     <!-- Top Navigation Bar -->
-    <nav class="sticky top-0 bg-white/95 backdrop-blur-md border-bottom border-gray-100 z-50 shadow-sm py-4 px-6 md:px-12 flex justify-between items-center">
+    <nav
+        class="sticky top-0 bg-white/95 backdrop-blur-md border-bottom border-gray-100 z-50 shadow-sm py-4 px-6 md:px-12 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+            <div
+                class="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
                 <i class="fa-solid fa-file-word text-lg"></i>
             </div>
             <div>
@@ -318,20 +444,24 @@
         </div>
         <div class="flex items-center gap-3">
             <!-- Version Badge -->
-            <div id="version-badge" class="version-badge flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2">
+            <div id="version-badge"
+                class="version-badge flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2">
                 <i class="fa-solid fa-code-branch text-indigo-600"></i>
                 <div class="text-right">
                     <div class="text-xs font-bold text-indigo-700">Versión <span id="nav-version">...</span></div>
                     <div class="text-[10px] text-indigo-400" id="nav-fecha">...</div>
                 </div>
             </div>
-            <button onclick="openRaAdmin()" class="px-4 py-2 border border-indigo-200 text-indigo-700 text-sm font-semibold rounded-xl bg-indigo-50 hover:bg-indigo-100 transition">
+            <button onclick="openRaAdmin()"
+                class="px-4 py-2 border border-indigo-200 text-indigo-700 text-sm font-semibold rounded-xl bg-indigo-50 hover:bg-indigo-100 transition">
                 <i class="fa-solid fa-diagram-project mr-2"></i> RA
             </button>
-            <button onclick="window.location.href='Jefe.html'" class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
+            <button onclick="window.location.href='Jefe.html'"
+                class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Panel Jefe
             </button>
-            <button onclick="restaurarPorDefecto()" class="px-4 py-2 border border-red-200 text-red-600 text-sm font-semibold rounded-xl bg-red-50 hover:bg-red-100 transition">
+            <button onclick="restaurarPorDefecto()"
+                class="px-4 py-2 border border-red-200 text-red-600 text-sm font-semibold rounded-xl bg-red-50 hover:bg-red-100 transition">
                 <i class="fa-solid fa-rotate-left mr-2"></i> Restaurar Defecto
             </button>
         </div>
@@ -339,7 +469,7 @@
 
     <!-- Main Content Grid -->
     <div class="max-w-[1280px] mx-auto px-4 md:px-12 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         <!-- Left Side: Wizard Workflow Controls -->
         <div class="lg:col-span-4 space-y-6">
             <div class="glass-panel rounded-2xl p-6 shadow-sm">
@@ -348,15 +478,20 @@
                 </h2>
 
                 <!-- Step-by-Step Flow -->
-                <div class="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-[2px] before:bg-indigo-100">
-                    
+                <div
+                    class="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-[2px] before:bg-indigo-100">
+
                     <!-- Step 1: Export -->
                     <div class="flex gap-4 relative">
-                        <div class="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-md">1</div>
+                        <div
+                            class="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-md">
+                            1</div>
                         <div class="space-y-2">
                             <h3 class="font-bold text-gray-800 text-sm">Exportar Plantilla Base</h3>
-                            <p class="text-xs text-gray-500">Descarga la plantilla actual como archivo Word (.docx) para editar la <strong>estructura visual</strong> (tablas, textos, secciones).</p>
-                            <button onclick="exportarPlantilla()" class="btn-hover-effect w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow flex items-center justify-center gap-2">
+                            <p class="text-xs text-gray-500">Descarga la plantilla actual como archivo Word (.docx) para
+                                editar la <strong>estructura visual</strong> (tablas, textos, secciones).</p>
+                            <button onclick="exportarPlantilla()"
+                                class="btn-hover-effect w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-download"></i> Descargar Plantilla Word
                             </button>
                         </div>
@@ -364,43 +499,61 @@
 
                     <!-- Step 2: Edit Locally -->
                     <div class="flex gap-4 relative">
-                        <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">2</div>
+                        <div
+                            class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">
+                            2</div>
                         <div class="space-y-1">
                             <h3 class="font-bold text-gray-800 text-sm">Edición en Word</h3>
-                            <p class="text-xs text-gray-500">Abre el archivo Word y modifica <strong>solo la estructura</strong>: agrega tablas, elimina filas, reordena secciones. <span class="text-indigo-600 font-semibold">No necesitas escribir comandos.</span></p>
+                            <p class="text-xs text-gray-500">Abre el archivo Word y modifica <strong>solo la
+                                    estructura</strong>: agrega tablas, elimina filas, reordena secciones. <span
+                                    class="text-indigo-600 font-semibold">No necesitas escribir comandos.</span></p>
                         </div>
                     </div>
 
                     <!-- Step 3: Drag & Drop Upload -->
                     <div class="flex gap-4 relative">
-                        <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">3</div>
+                        <div
+                            class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 z-10">
+                            3</div>
                         <div class="space-y-2 w-full">
                             <h3 class="font-bold text-gray-800 text-sm">Subir Nueva Plantilla</h3>
-                            <p class="text-xs text-gray-500">Arrastra el archivo Word editado para sincronizar los cambios de estructura.</p>
-                            
+                            <p class="text-xs text-gray-500">Arrastra el archivo Word editado para sincronizar los
+                                cambios de estructura.</p>
+
                             <!-- Drag & Drop Field -->
-                            <div id="dropzone" class="dropzone rounded-2xl p-6 bg-indigo-50/50 cursor-pointer text-center flex flex-col items-center justify-center hover:bg-indigo-50/80">
+                            <div id="dropzone"
+                                class="dropzone rounded-2xl p-6 bg-indigo-50/50 cursor-pointer text-center flex flex-col items-center justify-center hover:bg-indigo-50/80">
                                 <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-500 mb-2"></i>
                                 <span class="text-xs font-semibold text-gray-700 block">Arrastra tu archivo aquí</span>
-                                <span class="text-[10px] text-gray-400 block mt-1">o haz clic para explorar (.docx)</span>
+                                <span class="text-[10px] text-gray-400 block mt-1">o haz clic para explorar
+                                    (.docx)</span>
                                 <input type="file" id="fileInput" accept=".docx" class="hidden">
                             </div>
-                            
+
                             <!-- Loading / Message Indicator -->
-                            <div id="uploadStatus" class="hidden text-xs font-semibold p-3 rounded-lg text-center mt-2"></div>
+                            <div id="uploadStatus" class="hidden text-xs font-semibold p-3 rounded-lg text-center mt-2">
+                            </div>
                         </div>
                     </div>
 
                     <!-- Step 4: Configure Fields -->
                     <div class="flex gap-4 relative">
-                        <div class="h-8 w-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-md">4</div>
+                        <div
+                            class="h-8 w-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-md">
+                            4</div>
                         <div class="space-y-2 w-full">
-                            <h3 class="font-bold text-gray-800 text-sm">Configurar Tipos de Campo <span class="text-violet-600">✨ Nuevo</span></h3>
-                            <p class="text-xs text-gray-500">Activa el <strong>modo configuración</strong> y haz clic en las celdas editables de la vista previa para definir el tipo de dato (texto, numérico o lista desplegable).</p>
-                            <button id="btn-config-mode" onclick="toggleConfigMode()" class="mode-toggle btn-hover-effect w-full font-semibold text-xs py-2.5 px-4 rounded-xl border border-violet-300 text-violet-700 bg-violet-50 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="config-mode-label">Activar Modo Configuración</span>
+                            <h3 class="font-bold text-gray-800 text-sm">Configurar Tipos de Campo <span
+                                    class="text-violet-600">✨ Nuevo</span></h3>
+                            <p class="text-xs text-gray-500">Activa el <strong>modo configuración</strong> y haz clic en
+                                las celdas editables de la vista previa para definir el tipo de dato (texto, numérico o
+                                lista desplegable).</p>
+                            <button id="btn-config-mode" onclick="toggleConfigMode()"
+                                class="mode-toggle btn-hover-effect w-full font-semibold text-xs py-2.5 px-4 rounded-xl border border-violet-300 text-violet-700 bg-violet-50 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="config-mode-label">Activar
+                                    Modo Configuración</span>
                             </button>
-                            <button id="btn-save-config" onclick="saveFieldConfig()" class="hidden btn-hover-effect w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow flex items-center justify-center gap-2">
+                            <button id="btn-save-config" onclick="saveFieldConfig()"
+                                class="hidden btn-hover-effect w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-floppy-disk"></i> Guardar Configuración de Campos
                             </button>
                         </div>
@@ -408,31 +561,36 @@
 
                 </div>
             </div>
-            
+
             <!-- History Panel -->
             <div class="glass-panel rounded-2xl p-6 shadow-sm">
                 <h2 class="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Versiones
                 </h2>
-                
+
                 <!-- Current Version Card -->
-                <div id="current-version-card" class="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl">
+                <div id="current-version-card"
+                    class="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex items-center gap-2">
-                            <span class="bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">ACTIVA</span>
-                            <span class="text-sm font-bold text-indigo-800" id="current-version-label">Versión ...</span>
+                            <span
+                                class="bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">ACTIVA</span>
+                            <span class="text-sm font-bold text-indigo-800" id="current-version-label">Versión
+                                ...</span>
                         </div>
                     </div>
                     <div class="text-[11px] text-gray-500 mt-1">
-                        <div><i class="fa-regular fa-calendar mr-1"></i> <span id="current-version-date">...</span></div>
-                        <div class="mt-0.5"><i class="fa-regular fa-file-word mr-1"></i> <span id="current-version-file">...</span></div>
+                        <div><i class="fa-regular fa-calendar mr-1"></i> <span id="current-version-date">...</span>
+                        </div>
+                        <div class="mt-0.5"><i class="fa-regular fa-file-word mr-1"></i> <span
+                                id="current-version-file">...</span></div>
                     </div>
                 </div>
-                
+
                 <div class="border-t border-gray-200 pt-3 mb-3">
                     <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Versiones Anteriores</p>
                 </div>
-                
+
                 <div class="max-h-72 overflow-y-auto pr-2 space-y-3" id="history-list">
                     <div class="text-xs text-gray-500 italic">Cargando historial...</div>
                 </div>
@@ -442,34 +600,43 @@
         <!-- Right Side: Live Template Preview -->
         <div class="lg:col-span-8 space-y-4">
             <!-- Config Mode Banner -->
-            <div id="config-mode-banner" class="hidden flex items-center justify-between bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl px-5 py-3 shadow-lg shadow-indigo-200/40">
+            <div id="config-mode-banner"
+                class="hidden flex items-center justify-between bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl px-5 py-3 shadow-lg shadow-indigo-200/40">
                 <div class="flex items-center gap-3">
                     <div class="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center">
                         <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
                     </div>
                     <div>
                         <div class="font-bold text-sm">Modo Configuración Activo</div>
-                        <div class="text-[11px] text-violet-200">Haz clic en cualquier celda editable para definir su tipo de dato</div>
+                        <div class="text-[11px] text-violet-200">Haz clic en cualquier celda editable para definir su
+                            tipo de dato</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="flex gap-2 text-[10px]">
-                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-font mr-1"></i>Texto</span>
-                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-hashtag mr-1"></i>Número</span>
-                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-align-left mr-1"></i>Área</span>
-                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-list mr-1"></i>Lista</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i
+                                class="fa-solid fa-font mr-1"></i>Texto</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i
+                                class="fa-solid fa-hashtag mr-1"></i>Número</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i
+                                class="fa-solid fa-align-left mr-1"></i>Área</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full"><i
+                                class="fa-solid fa-list mr-1"></i>Lista</span>
                     </div>
-                    <button onclick="toggleConfigMode()" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg font-semibold transition">
+                    <button onclick="toggleConfigMode()"
+                        class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg font-semibold transition">
                         <i class="fa-solid fa-xmark mr-1"></i> Salir
                     </button>
                 </div>
             </div>
 
             <!-- Normal header bar (hidden in config mode) -->
-            <div id="normal-header-bar" class="flex justify-between items-center bg-slate-800 text-white rounded-xl px-5 py-3 shadow-md">
+            <div id="normal-header-bar"
+                class="flex justify-between items-center bg-slate-800 text-white rounded-xl px-5 py-3 shadow-md">
                 <div class="flex items-center gap-2">
                     <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
                     <h2 class="font-bold text-xs uppercase tracking-wider">Vista Previa de la Plantilla Activa</h2>
@@ -526,7 +693,8 @@
                 </div>
             </div>
             <div class="type-option-card" data-type="textarea" onclick="selectType('textarea')">
-                <div class="type-option-icon bg-emerald-100 text-emerald-600"><i class="fa-solid fa-align-left"></i></div>
+                <div class="type-option-icon bg-emerald-100 text-emerald-600"><i class="fa-solid fa-align-left"></i>
+                </div>
                 <div>
                     <div class="font-semibold text-sm text-gray-800">Área de Texto</div>
                     <div class="text-[10px] text-gray-400">Campo multilínea para textos largos</div>
@@ -542,66 +710,95 @@
 
             <!-- Select options input (hidden by default) -->
             <div id="select-options-area" class="hidden mt-3 p-3 bg-violet-50 rounded-xl border border-violet-200">
-                <label class="text-xs font-bold text-violet-800 block mb-2"><i class="fa-solid fa-list-ul mr-1"></i> Opciones de la lista:</label>
+                <label class="text-xs font-bold text-violet-800 block mb-2"><i class="fa-solid fa-list-ul mr-1"></i>
+                    Opciones de la lista:</label>
                 <div id="options-list" class="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
                     <!-- Chips rendered here -->
                 </div>
                 <div class="flex gap-2">
-                    <input id="new-option-input" type="text" placeholder="Escriba una opción..." class="flex-1 border border-violet-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white" onkeydown="if(event.key==='Enter'){event.preventDefault();addOption();}">
-                    <button onclick="addOption()" class="bg-violet-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-violet-700 transition">
+                    <input id="new-option-input" type="text" placeholder="Escriba una opción..."
+                        class="flex-1 border border-violet-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();addOption();}">
+                    <button onclick="addOption()"
+                        class="bg-violet-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-violet-700 transition">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
             </div>
         </div>
         <div class="p-4 border-t border-gray-100 flex justify-between items-center">
-            <button onclick="removeFieldConfig()" class="text-xs text-red-500 hover:text-red-700 font-semibold transition">
+            <button onclick="removeFieldConfig()"
+                class="text-xs text-red-500 hover:text-red-700 font-semibold transition">
                 <i class="fa-solid fa-trash-can mr-1"></i> Quitar config
             </button>
-            <button onclick="applyFieldType()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2 rounded-lg shadow transition">
+            <button onclick="applyFieldType()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2 rounded-lg shadow transition">
                 <i class="fa-solid fa-check mr-1"></i> Aplicar
             </button>
         </div>
     </div>
 
     <!-- Administrador de perfil, competencias, RA y momentos. El contenido se carga exclusivamente desde la API. -->
-    <div id="ra-admin-overlay" class="ra-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ra-admin-title">
+    <div id="ra-admin-overlay" class="ra-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="ra-admin-title">
         <div class="ra-dialog">
-            <header class="bg-gradient-to-r from-indigo-700 to-violet-700 text-white px-5 py-4 flex flex-wrap gap-3 justify-between items-center">
+            <header
+                style="background-color: #000000; color: #ffffff;"
+                class="px-5 py-4 flex flex-wrap gap-3 justify-between items-center">
                 <div>
-                    <h2 id="ra-admin-title" class="font-bold text-lg"><i class="fa-solid fa-diagram-project mr-2"></i>Administrador de Resultados de Aprendizaje</h2>
-                    <p class="text-indigo-100 text-xs mt-1">Los cambios se guardan, versionan y permanecen disponibles para restauración.</p>
+                    <h2 id="ra-admin-title" class="font-bold text-lg"><i
+                            class="fa-solid fa-diagram-project mr-2"></i>Administrador de Resultados de Aprendizaje</h2>
+                    <p style="color: #d1d5db;" class="text-xs mt-1">Los cambios se guardan, versionan y permanecen disponibles
+                        para restauración.</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openRaHistory()" class="px-3 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Historial</button>
-                    <button onclick="closeRaAdmin()" class="ra-btn-icon bg-white/15 hover:bg-white/25" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+                    <button onclick="openRaHistory()"
+                        class="px-3 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold"><i
+                            class="fa-solid fa-clock-rotate-left mr-1"></i> Historial</button>
+                    <button onclick="closeRaAdmin()" class="ra-btn-icon bg-white/15 hover:bg-white/25"
+                        aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </header>
             <main id="ra-admin-content" class="ra-scroll p-4 md:p-6">
-                <div class="py-16 text-center text-slate-500"><i class="fa-solid fa-spinner animate-spin text-2xl text-indigo-500 mb-3"></i><p>Cargando información del programa...</p></div>
+                <div class="py-16 text-center text-slate-500"><i
+                        class="fa-solid fa-spinner animate-spin text-2xl text-indigo-500 mb-3"></i>
+                    <p>Cargando información del programa...</p>
+                </div>
             </main>
         </div>
     </div>
 
     <div id="ra-form-overlay" class="ra-overlay hidden" role="dialog" aria-modal="true">
         <div class="ra-dialog max-w-2xl">
-            <header class="bg-white px-5 py-4 border-b flex justify-between items-center"><h2 id="ra-form-title" class="font-bold text-slate-900">Editar</h2><button onclick="closeRaForm()" class="ra-btn-icon text-slate-500 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></header>
+            <header class="bg-white px-5 py-4 border-b flex justify-between items-center">
+                <h2 id="ra-form-title" class="font-bold text-slate-900">Editar</h2><button onclick="closeRaForm()"
+                    class="ra-btn-icon text-slate-500 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button>
+            </header>
             <form id="ra-form" class="p-5 space-y-4" onsubmit="saveRaEntity(event)"></form>
         </div>
     </div>
 
     <div id="ra-history-overlay" class="ra-overlay hidden" role="dialog" aria-modal="true">
         <div class="ra-dialog max-w-4xl">
-            <header class="bg-white px-5 py-4 border-b flex justify-between items-center"><div><h2 class="font-bold text-slate-900">Historial de versiones RA</h2><p class="text-xs text-slate-500">Restaurar crea una versión nueva; nunca elimina las anteriores.</p></div><button onclick="closeRaHistory()" class="ra-btn-icon text-slate-500 hover:bg-slate-100"><i class="fa-solid fa-xmark"></i></button></header>
+            <header class="bg-white px-5 py-4 border-b flex justify-between items-center">
+                <div>
+                    <h2 class="font-bold text-slate-900">Historial de versiones RA</h2>
+                    <p class="text-xs text-slate-500">Restaurar crea una versión nueva; nunca elimina las anteriores.
+                    </p>
+                </div><button onclick="closeRaHistory()" class="ra-btn-icon text-slate-500 hover:bg-slate-100"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </header>
             <div id="ra-history-content" class="ra-scroll p-5"></div>
         </div>
     </div>
 
     <!-- Modal Advertencia Descarga Word -->
-    <div id="modal-advertencia-descarga" class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div id="modal-advertencia-descarga"
+        class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-amber-100 space-y-5">
             <div class="flex items-start gap-4">
-                <div class="h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-xl shadow-inner">
+                <div
+                    class="h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-xl shadow-inner">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
                 <div class="flex-1">
@@ -613,26 +810,34 @@
                 </button>
             </div>
 
-            <div class="space-y-3 bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 text-xs text-gray-700 leading-relaxed">
+            <div
+                class="space-y-3 bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 text-xs text-gray-700 leading-relaxed">
                 <div class="flex gap-2.5 items-start">
                     <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 shrink-0"></i>
-                    <span><strong>¿Qué SÍ editar en Word?</strong> Modifique únicamente la <strong>estructura del documento</strong> (agregar o eliminar tablas, reordenar secciones o modificar títulos estáticos).</span>
+                    <span><strong>¿Qué SÍ editar en Word?</strong> Modifique únicamente la <strong>estructura del
+                            documento</strong> (agregar o eliminar tablas, reordenar secciones o modificar títulos
+                        estáticos).</span>
                 </div>
                 <div class="flex gap-2.5 items-start">
                     <i class="fa-solid fa-circle-xmark text-red-500 mt-0.5 shrink-0"></i>
-                    <span><strong>¿Qué NO editar en Word?</strong> No escriba ni edite comandos de texto como <code>[Campo:]</code> o <code>[Lista:]</code>.</span>
+                    <span><strong>¿Qué NO editar en Word?</strong> No escriba ni edite comandos de texto como
+                        <code>[Campo:]</code> o <code>[Lista:]</code>.</span>
                 </div>
                 <div class="flex gap-2.5 items-start border-t border-amber-200/60 pt-2.5">
                     <i class="fa-solid fa-wand-magic-sparkles text-indigo-600 mt-0.5 shrink-0"></i>
-                    <span><strong>Configuración de tipos de campo:</strong> La selección del tipo de dato (texto, numérico, listas con opciones) se hace haciendo clic en las celdas desde el <strong>Paso 4 en esta web</strong>.</span>
+                    <span><strong>Configuración de tipos de campo:</strong> La selección del tipo de dato (texto,
+                        numérico, listas con opciones) se hace haciendo clic en las celdas desde el <strong>Paso 4 en
+                            esta web</strong>.</span>
                 </div>
             </div>
 
             <div class="flex gap-3 justify-end pt-1">
-                <button onclick="cerrarModalAdvertenciaDescarga()" class="px-4 py-2.5 border border-gray-300 text-gray-700 text-xs font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
+                <button onclick="cerrarModalAdvertenciaDescarga()"
+                    class="px-4 py-2.5 border border-gray-300 text-gray-700 text-xs font-semibold rounded-xl bg-white hover:bg-gray-50 transition">
                     Cancelar
                 </button>
-                <button onclick="confirmarDescargaWord()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-200 flex items-center gap-2 transition">
+                <button onclick="confirmarDescargaWord()"
+                    class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-200 flex items-center gap-2 transition">
                     <i class="fa-solid fa-download"></i> Entendido, Descargar Word
                 </button>
             </div>
@@ -667,7 +872,7 @@
                 const response = await fetch(`${baseUrl}/plantilla-base`);
                 if (!response.ok) throw new Error('Error al conectar con la API.');
                 const data = await response.json();
-                
+
                 if (data.html) {
                     docContainer.innerHTML = data.html;
                     // Disable inputs and select fields in preview
@@ -686,7 +891,7 @@
                 } else {
                     docContainer.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">No se encontró contenido para la plantilla.</div>`;
                 }
-                
+
                 // Update version info in the nav
                 if (data.version) {
                     document.getElementById('nav-version').textContent = data.version;
@@ -701,7 +906,7 @@
         // =========================================
         // FIELD CONFIG LOGIC
         // =========================================
-        
+
         async function loadFieldConfig() {
             try {
                 const res = await fetch(`${baseUrl}/plantilla-base/field-config`);
@@ -710,7 +915,7 @@
                     fieldConfig = data.fields || {};
                     applyBadgesToCells();
                 }
-            } catch(e) { console.error('Error loading field config:', e); }
+            } catch (e) { console.error('Error loading field config:', e); }
         }
 
         async function saveFieldConfig() {
@@ -725,7 +930,7 @@
                 } else {
                     showStatus('Error al guardar configuración de campos.', 'error');
                 }
-            } catch(e) {
+            } catch (e) {
                 showStatus('Error de red al guardar configuración.', 'error');
             }
         }
@@ -777,7 +982,7 @@
                 cell.setAttribute('data-cell-key', cellKey);
                 cell.classList.add('cell-configurable');
                 cell.style.position = 'relative';
-                
+
                 cell.addEventListener('click', onCellClick);
             });
         }
@@ -793,7 +998,7 @@
             // Generate a stable key based on input id or position
             const input = cell.querySelector('input, textarea, select');
             if (input && input.id) return input.id;
-            
+
             // Fallback to positional key
             const row = cell.parentElement;
             const table = row.closest('table');
@@ -839,7 +1044,7 @@
             const rect = cell.getBoundingClientRect();
             let top = rect.bottom + 8;
             let left = rect.left;
-            
+
             // Ensure it doesn't go off screen
             if (top + 450 > window.innerHeight) {
                 top = rect.top - 450;
@@ -851,7 +1056,7 @@
 
             popover.style.top = top + 'px';
             popover.style.left = left + 'px';
-            
+
             // Update UI
             document.getElementById('popover-cell-id').textContent = currentPopoverKey;
             updateTypeSelection();
@@ -1079,31 +1284,31 @@
                 }
             }
         }
-        
+
         async function loadHistory() {
             try {
                 const response = await fetch(`${baseUrl}/plantilla-base/history`);
                 if (!response.ok) throw new Error('Error al conectar con la API.');
                 const data = await response.json();
-                
+
                 // Update current version card
                 document.getElementById('current-version-label').textContent = `Versión ${data.versionActual}`;
                 document.getElementById('current-version-date').textContent = data.fechaActual || 'Sin fecha';
                 document.getElementById('current-version-file').textContent = data.archivoActual || 'Plantilla base';
-                
+
                 const listEl = document.getElementById('history-list');
                 listEl.innerHTML = '';
-                
+
                 const historial = data.historial || [];
-                
+
                 if (historial.length === 0) {
                     listEl.innerHTML = '<div class="text-xs text-gray-500 italic text-center py-4"><i class="fa-regular fa-folder-open mr-1"></i> No hay versiones anteriores en el historial.</div>';
                     return;
                 }
-                
+
                 // Sort by version descending (most recent first)
                 historial.sort((a, b) => b.Version - a.Version);
-                
+
                 historial.forEach(entry => {
                     const card = document.createElement('div');
                     card.className = 'history-entry flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm cursor-default';
@@ -1133,7 +1338,7 @@
             if (!confirm(`¿Estás seguro de que deseas revertir a la Versión ${version}?\n\nLa versión actual será enviada al historial y podrás restaurarla después si es necesario.`)) {
                 return;
             }
-            
+
             showStatus('<i class="fa-solid fa-spinner animate-spin mr-2"></i> Revirtiendo a versión anterior...', 'info');
             try {
                 const response = await fetch(`${baseUrl}/plantilla-base/revertir`, {
@@ -1141,9 +1346,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ version: version })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
                     showStatus(`<i class="fa-solid fa-circle-check mr-2"></i> ¡Revertido a Versión ${version} exitosamente!`, 'success');
                     loadActiveTemplate();
@@ -1163,7 +1368,7 @@
         let raState = null;
         let raFormState = null;
 
-        const raEsc = value => String(value == null ? '' : value).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
+        const raEsc = value => String(value == null ? '' : value).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
         const raText = value => raEsc(value).replace(/\n/g, '<br>');
         const raButton = (title, icon, action, color = 'text-slate-500 hover:bg-slate-100') => `<button type="button" title="${title}" onclick="${action}" class="ra-btn-icon ${color}"><i class="fa-solid ${icon}"></i></button>`;
 
@@ -1313,4 +1518,5 @@
         async function restoreRaVersion(version) { if (!confirm(`¿Restaurar la versión ${version}? La versión vigente y todas las anteriores se conservarán; se creará una nueva versión.`)) return; try { await raRequest(`/historial/${version}/restaurar`, { method: 'POST', body: '{}' }); closeRaHistory(); await loadRaState(); } catch (error) { alert(error.message); } }
     </script>
 </body>
+
 </html>
