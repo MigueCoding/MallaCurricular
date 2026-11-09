@@ -8,6 +8,52 @@ body {
     align-items: center;
 }
 
+/* El encabezado del panel del jefe permanece visible sin superponerse al contenido. */
+body.jefe-page {
+    display: block;
+    align-items: initial;
+    padding-bottom: 2rem;
+}
+
+/* En el panel del jefe la malla debe ocupar el ancho disponible bajo la barra. */
+body.jefe-page > #malla-section {
+    width: calc(100% - 2rem);
+    max-width: none;
+    margin: 0 auto 2rem;
+}
+
+body.jefe-page .filters,
+body.jefe-page .courses {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.jefe-navbar {
+    min-height: 58px;
+}
+
+.jefe-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem 1.5rem;
+}
+
+.malla-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.malla-actions .retry-btn,
+.malla-actions .export-btn,
+.malla-actions .save-btn {
+    margin: 0;
+}
+
 .container {
     width: 90%;
     max-width: 1200px;
@@ -76,6 +122,11 @@ body {
         background: #2563eb;
     }
 
+    .export-btn:disabled {
+        background: #93c5fd;
+        cursor: wait;
+    }
+
 .filter-group, .form-group {
     margin-bottom: 1.5rem;
 }
@@ -92,6 +143,10 @@ body {
     padding: 0.5rem;
     border: 1px solid #d1d5db;
     border-radius: 6px;
+}
+
+.custom-dropdown {
+    width: min(400px, calc(100vw - 3rem));
 }
 
     .filter-select:focus, .course-select:focus, .form-input:focus, .form-select:focus {
@@ -152,6 +207,106 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Vista de consulta del jefe: misma lectura por columnas que la malla pública. */
+.jefe-malla-view {
+    grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+    align-items: start;
+}
+
+.jefe-malla-view .semester {
+    min-width: 0;
+    padding: 1rem;
+}
+
+.jefe-malla-view .semester h3 {
+    margin-bottom: 0.65rem;
+}
+
+.jefe-course-card {
+    position: relative;
+    margin-top: 0.55rem;
+    padding: 0.65rem;
+    background: #ffffff;
+    border-left-width: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.jefe-course-card:hover,
+.jefe-course-card:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(30, 64, 175, 0.2);
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+.jefe-course-card .course-title {
+    min-height: 2.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.jefe-course-card .course-code {
+    margin: 0.1rem 0 0.5rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.jefe-course-card .credit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: hidden;
+    min-height: 3.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.jefe-course-card .credit-cell {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    border-right: 1px solid #d1d5db;
+    text-align: center;
+}
+
+.jefe-course-card .credit-cell span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.jefe-course-card .credit-cell span:first-child {
+    border-bottom: 1px solid #d1d5db;
+}
+
+.jefe-course-card .credit-total {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.jefe-course-card .enabler-tag {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.35rem;
+    z-index: 1;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    background: #dffafa;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    color: #1f2937;
+    font-size: 0.55rem;
+    font-weight: 700;
+}
+
 .course-green {
     border-left-color: #10b981;
 }
@@ -206,6 +361,53 @@ body {
 }
 .summary-cell:nth-last-child(-n+3) {
     border-bottom: none;
+}
+
+.semester-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(3rem, 1.25fr);
+    grid-template-rows: repeat(2, minmax(2rem, auto));
+    overflow: hidden;
+    border: 1px solid #111827;
+    border-radius: 4px;
+    background: #f3f4f6;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.semester-summary-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 2rem;
+    padding: 0.4rem;
+    font-weight: 700;
+    border-right: 1px solid #111827;
+    border-bottom: 1px solid #111827;
+}
+
+.semester-summary-value:nth-child(2) {
+    border-right: 1px solid #111827;
+}
+
+.semester-summary-value:nth-child(3),
+.semester-summary-value:nth-child(4) {
+    border-bottom: 0;
+}
+
+.semester-summary-credits {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 0.4rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #374151;
+    background: #e5e7eb;
 }
 
 .legend { /* Para la lista de definiciones */
@@ -312,8 +514,8 @@ body {
     flex-direction: row;
     justify-content: center;
     align-items: stretch;
-    flex-wrap: nowrap; /* ❗ No permite que bajen de línea */
-    overflow-x: auto; /* Permite desplazamiento si son muchas */
+    flex-wrap: wrap;
+    overflow-x: visible;
     gap: 1rem;
     padding: 1rem 0;
 }
@@ -324,12 +526,52 @@ body {
     }
 
 @media (max-width: 768px) {
+    body.jefe-page > #malla-section {
+        width: 100%;
+        margin-bottom: 1rem;
+        border-radius: 0;
+    }
+
+    .jefe-navbar {
+        position: static;
+        padding: 1rem;
+    }
+
+    .jefe-nav-links {
+        justify-content: flex-start;
+        gap: 0.75rem 1rem;
+        width: 100%;
+    }
+
+    .jefe-nav-links .ml-8 {
+        margin-left: 0;
+    }
+
     .container {
         flex-direction: column;
     }
 
     .filters, .courses {
         width: 100%;
+    }
+
+    .jefe-group-columns {
+        flex-direction: column;
+    }
+
+    .jefe-group-columns > div {
+        width: 100%;
+        border-right: 0;
+        padding-right: 0;
+    }
+
+    .jefe-roles-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .jefe-roles-columns > div {
+        border-right: 0;
+        padding-right: 0;
     }
 
     .semester-grid {

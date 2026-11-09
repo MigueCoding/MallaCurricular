@@ -8,31 +8,33 @@
 
     <link rel="stylesheet" href="Content/tailwind.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </head>
 
-<body>
+<body class="jefe-page">
     <!-- Tabs Nav -->
-    <div class="bg-blue-900 w-full text-white p-4 flex justify-between items-center fixed top-0 z-50">
+    <div class="jefe-navbar bg-blue-900 w-full text-white p-4 flex flex-wrap justify-between items-center gap-3 sticky top-0 z-50">
         <div class="text-xl font-bold border-r pr-4 border-blue-700">Panel del Jefe</div>
-        <div class="flex space-x-6">
+        <div class="jefe-nav-links">
             <button onclick="switchJefeTab('malla')" class="hover:underline text-white font-bold" id="tab-malla">Malla Curricular</button>
             <button onclick="switchJefeTab('grupos')" class="hover:underline text-gray-300 font-bold" id="tab-grupos">Gestión de Grupos</button>
             <button onclick="switchJefeTab('microdisenos')" class="hover:underline text-gray-300 font-bold" id="tab-microdisenos">Microdiseños</button>
             <button onclick="switchJefeTab('roles')" class="hover:underline text-gray-300 font-bold" id="tab-roles">Roles Microcurrículos</button>
-            <button onclick="logout()" class="ml-8 text-red-300 hover:text-red-500 font-bold">Cerrar Sesión</button>
+            <button onclick="logout()" class="text-red-300 hover:text-red-500 font-bold">Cerrar Sesión</button>
         </div>
     </div>
-    
-    <div style="margin-top: 60px;"></div>
-
     <div id="malla-section" class="container hidden">
         <div class="filters">
             <img src="logo2020.png" alt="ITM Logo" />
             <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
             <div class="error-message" id="error-message"></div>
             <div class="success-message" id="success-message"></div>
+            <div class="filter-group">
+                <label class="filter-label" for="malla-select">Malla curricular</label>
+                <select class="filter-select" id="malla-select" onchange="loadSelectedMalla(this.value)">
+                    <option value="">Seleccione una malla</option>
+                </select>
+            </div>
             <div class="filter-group">
                 <label class="filter-label">Semestre</label>
                 <select class="filter-select" id="semester-filter" onchange="applyFilters()">
@@ -143,9 +145,11 @@
             <div class="header">
                 <h1>Malla Curricular - ITM</h1>
             </div>
-            <button class="retry-btn" onclick="fetchCourses()">Reintentar Carga de Cursos</button>
-            <button class="export-btn" onclick="exportToPDF()">Exportar Malla a PDF</button>
-            <button class="save-btn" onclick="saveMalla()">Guardar Malla</button>
+            <div class="malla-actions">
+                <button class="retry-btn" onclick="fetchCourses()">Reintentar Carga de Cursos</button>
+                <button class="export-btn" onclick="exportToPDF()">Exportar Malla a PDF</button>
+                <button class="save-btn" onclick="saveMalla()">Guardar Malla</button>
+            </div>
             <div class="semester-grid" id="semester-grid"></div>
 
 
@@ -154,7 +158,7 @@
         </div>
 
     </div>
-    <div id="grupos-section" class="container hidden p-6 bg-white shadow-xl rounded-xl mx-auto my-8 max-w-5xl flex gap-8 border-t-4 border-blue-600">
+    <div id="grupos-section" class="container jefe-group-columns hidden p-6 bg-white shadow-xl rounded-xl mx-auto my-8 max-w-5xl flex gap-8 border-t-4 border-blue-600">
         <div class="w-1/2 p-4 border-r">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Administrar Profesores</h2>
             <div class="form-group mb-4">
@@ -217,14 +221,13 @@
                     <tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Cargando microdiseños...</td></tr>
                 </tbody>
             </table>
-            </table>
         </div>
     </div>
     
     <!-- SECCIÓN ROLES -->
     <div id="roles-section" class="container hidden p-6 bg-white shadow-xl rounded-xl mx-auto my-8 max-w-5xl border-t-4 border-green-600">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Asignar Roles a Docentes (Creador y Aval)</h2>
-        <div class="grid grid-cols-2 gap-8">
+        <div class="grid grid-cols-2 gap-8 jefe-roles-columns">
             <div class="border-r pr-8">
                 <div class="form-group mb-4">
                     <label class="block text-sm font-bold text-gray-700 mb-1">Asignatura</label>
