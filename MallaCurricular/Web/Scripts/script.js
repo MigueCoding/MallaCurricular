@@ -834,6 +834,8 @@ function openUpdateCourseModal() {
     const modal = document.getElementById('update-course-modal');
     modal.classList.remove('hidden');
     document.getElementById('update-error-message').style.display = 'none';
+    const closeButton = modal.querySelector('.jefe-modal-close');
+    if (closeButton) setTimeout(() => closeButton.focus(), 0);
 
     // 1. Resetear formulario
     document.getElementById('update-course-form').reset();
@@ -1057,6 +1059,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.custom-dropdown').forEach(d => {
                 d.classList.add('hidden');
             });
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('update-course-modal');
+            if (modal && !modal.classList.contains('hidden')) closeUpdateCourseModal();
         }
     });
 });

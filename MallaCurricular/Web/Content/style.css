@@ -307,6 +307,57 @@ body.jefe-page .courses {
     font-weight: 700;
 }
 
+.jefe-update-modal {
+    overflow-y: auto;
+    align-items: flex-start;
+    padding: 1rem;
+}
+
+.jefe-update-modal-panel {
+    box-sizing: border-box;
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    overflow-y: auto;
+}
+
+.jefe-update-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.jefe-modal-close {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #4b5563;
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.jefe-modal-close:hover,
+.jefe-modal-close:focus-visible {
+    background: #e5e7eb;
+    color: #111827;
+    outline: 2px solid #2563eb;
+}
+
+.jefe-update-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.jefe-update-modal-actions button {
+    flex: 1 1 8rem;
+}
+
 .course-green {
     border-left-color: #10b981;
 }
