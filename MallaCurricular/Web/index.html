@@ -7,7 +7,6 @@
 
     <link rel="stylesheet" href="Content/tailwind.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </head>
 
@@ -19,6 +18,12 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">Filtros</h2>
             <div class="error-message" id="error-message"></div>
             <div class="success-message" id="success-message"></div>
+            <div class="filter-group">
+                <label class="filter-label" for="malla-select">Malla curricular</label>
+                <select class="filter-select" id="malla-select" onchange="loadSelectedMalla(this.value)">
+                    <option value="">Seleccione una malla</option>
+                </select>
+            </div>
             <div class="filter-group">
                 <label class="filter-label">Semestre</label>
                 <select class="filter-select" id="semester-filter" onchange="applyFilters()">

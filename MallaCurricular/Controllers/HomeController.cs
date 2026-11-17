@@ -10,9 +10,7 @@ namespace MallaCurricular.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Title = "Home Page";
-
-            return View();
+            return Redirect(Url.Content("~/Web/plana.html"));
         }
     }
 }

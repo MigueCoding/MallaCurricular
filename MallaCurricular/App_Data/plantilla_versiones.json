@@ -1,7 +1,7 @@
 ﻿{
-  "VersionActual": 5,
-  "FechaVersionActual": "30-07-2024",
-  "ArchivoVersionActual": "plantilla_base_v5.docx",
+  "VersionActual": 7,
+  "FechaVersionActual": "25-08-2026",
+  "ArchivoVersionActual": "plantilla_base_reunion.docx",
   "Historial": [
     {
       "Version": 6,
@@ -10,10 +10,22 @@
       "ArchivoBackup": "plantilla_v6_20260825_091431.html"
     },
     {
+      "Version": 5,
+      "Fecha": "30-07-2024",
+      "ArchivoWord": "plantilla_base_v5.docx",
+      "ArchivoBackup": "plantilla_v5.html"
+    },
+    {
+      "Version": 6,
+      "Fecha": "09-09-2026",
+      "ArchivoWord": "plantilla_base (1).docx",
+      "ArchivoBackup": "plantilla_v6.html"
+    },
+    {
       "Version": 7,
-      "Fecha": "25-08-2026",
-      "ArchivoWord": "plantilla_base_reunion.docx",
-      "ArchivoBackup": "plantilla_v7_20260908_084108.html"
+      "Fecha": "09-09-2026",
+      "ArchivoWord": "plantilla_base (1).docx",
+      "ArchivoBackup": "plantilla_v7_20260909_214653.html"
     }
   ]
 }

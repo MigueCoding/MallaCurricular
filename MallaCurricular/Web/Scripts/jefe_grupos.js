@@ -19,7 +19,6 @@ async function initJefeGrupos() {
     
     document.getElementById('inscribir-grupo').addEventListener('change', actualizarEstudiantesSelect);
 }
-
 async function actualizarEstudiantesSelect() {
     const grupoId = document.getElementById('inscribir-grupo').value;
     if (!grupoId) {
@@ -134,18 +133,5 @@ async function inscribirEstudiante() {
         actualizarEstudiantesSelect();
     } else alert('Error al matricular estudiante');
 }
+// La navegación entre secciones se centraliza en jefe_microdisenos.js.
 
-function switchJefeTab(tab) {
-    document.getElementById('malla-section').classList.add('hidden');
-    document.getElementById('grupos-section').classList.add('hidden');
-    document.getElementById('tab-malla').classList.remove('text-white');
-    document.getElementById('tab-malla').classList.add('text-gray-300');
-    document.getElementById('tab-grupos').classList.remove('text-white');
-    document.getElementById('tab-grupos').classList.add('text-gray-300');
-    
-    document.getElementById(tab + '-section').classList.remove('hidden');
-    document.getElementById('tab-' + tab).classList.remove('text-gray-300');
-    document.getElementById('tab-' + tab).classList.add('text-white');
-    
-    if(tab === 'grupos') initJefeGrupos();
-}

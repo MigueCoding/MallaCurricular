@@ -216,7 +216,13 @@ async function loadProgramaRaCatalog() {
 }
 
 function escapeRaHtml(value) {
-    return String(value == null ? '' : value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    return String(value == null ? '' : value).replace(/[&<>'"]/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[char]));
 }
 
 function getProgramaCompetencias() {
@@ -350,33 +356,272 @@ function goBack() {
     else if (role === 3) window.location.href = 'Estudiante.html?tab=asignaturas';
     else window.location.href = 'profesor.html';
 }
+function normalizeText(value) {
+    return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function setSelectValue(select, rawValue) {
+    if (!select || rawValue === undefined || rawValue === null) return;
+
+    const value = String(rawValue).trim();
+    if (!value) return;
+
+    const normalizedValue = normalizeText(value);
+
+    let option = Array.from(select.options).find(o => o.value === value);
+
+    if (!option) {
+        option = Array.from(select.options).find(o =>
+            normalizeText(o.value) === normalizedValue ||
+            normalizeText(o.textContent) === normalizedValue
+        );
+    }
+
+    if (option) {
+        select.value = option.value;
+    } else {
+        const newOption = document.createElement('option');
+        newOption.value = value;
+        newOption.textContent = rawValue;
+        select.appendChild(newOption);
+        select.value = value;
+    }
+}
+
+function setAutomaticField(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (el.tagName === 'SELECT') {
+        setSelectValue(el, value);
+    } else {
+        el.value = value ?? '';
+    }
+
+    el.disabled = true;
+    el.title = 'Campo automático desde base de datos';
+    el.classList.add('bg-gray-50', 'text-gray-500');
+}
+
+function getPrerrequisitosTexto(curso) {
+    const posibles = [
+        curso.Prorrequisitos,
+        curso.Prerrequisitos,
+        curso.Prerequisitos,
+        curso.Prorrequisito,
+        curso.Prerrequisito,
+        curso.Prerequisito,
+        curso.prerrequisitos,
+        curso.prerequisitos
+    ];
+
+    const dato = posibles.find(x => x !== undefined && x !== null && x !== '');
+
+    if (!dato) return '';
+
+    if (Array.isArray(dato)) {
+        return dato.map(p => {
+            if (!p) return '';
+            if (typeof p === 'string') return p;
+
+            return p.NombreAsignatura ||
+                p.Nombre ||
+                p.Asignatura ||
+                p.NombreCurso ||
+                p.CodigoAsignatura ||
+                p.CodigoCurso ||
+                p.Codigo ||
+                '';
+        }).filter(Boolean).join(', ');
+    }
+
+    return String(dato);
+}
+
+function getCreditosCurso(curso) {
+    return curso.Creditos ??
+        curso.creditos ??
+        curso.NumCreditos ??
+        curso.NumeroCreditos ??
+        curso.CreditosAcademicos ??
+        curso.CreditosAsignatura ??
+        '';
+}
+
+function getTipoAsignaturaTexto(curso) {
+    const raw = curso.TipoAsignatura ??
+        curso.TipoAsignaturaNombre ??
+        curso.Tipo ??
+        curso.TipoCurso ??
+        '';
+
+    const normalized = normalizeText(raw);
+
+    const map = {
+        't': 'Teórica',
+        'teorica': 'Teórica',
+        'teoria': 'Teórica',
+        'teorico': 'Teórica',
+
+        'tp': 'Teórico-Práctica',
+        'teoricopractica': 'Teórico-Práctica',
+        'teoricopractico': 'Teórico-Práctica',
+        'teorica practica': 'Teórico-Práctica',
+        'teorico practica': 'Teórico-Práctica',
+        'teorica-practica': 'Teórico-Práctica',
+        'teorico-practica': 'Teórico-Práctica',
+
+        'p': 'Práctica',
+        'practica': 'Práctica',
+        'practico': 'Práctica',
+
+        '1': 'Teórica',
+        '2': 'Teórico-Práctica',
+        '3': 'Práctica'
+    };
+
+    return map[normalized] || raw;
+}
+
+function normalizarTipoAsignatura(tipo) {
+    const key = String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '');
+
+    const map = {
+        't': 'Teórica',
+        'teorica': 'Teórica',
+        'teorico': 'Teórica',
+
+        'tp': 'Teórico-Práctica',
+        'teoricopractica': 'Teórico-Práctica',
+        'teoricopractico': 'Teórico-Práctica',
+
+        'p': 'Práctica',
+        'practica': 'Práctica',
+        'practico': 'Práctica'
+    };
+
+    return map[key] || (tipo || '');
+}
+
+function setSelectValue(select, rawValue) {
+    if (!select || rawValue === undefined || rawValue === null) return;
+
+    const value = String(rawValue).trim();
+    if (!value) return;
+
+    const normalize = (text) =>
+        String(text ?? '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '');
+
+    let option = Array.from(select.options).find(o => o.value === value);
+
+    if (!option) {
+        option = Array.from(select.options).find(o =>
+            normalize(o.value) === normalize(value) ||
+            normalize(o.textContent) === normalize(value)
+        );
+    }
+
+    if (option) {
+        select.value = option.value;
+    } else {
+        const newOption = document.createElement('option');
+        newOption.value = value;
+        newOption.textContent = value;
+        select.appendChild(newOption);
+        select.value = value;
+    }
+}
+
+function setAutomaticField(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (el.tagName === 'SELECT') {
+        setSelectValue(el, value);
+    } else {
+        el.value = value ?? '';
+    }
+
+    el.disabled = true;
+    el.title = 'Campo automático desde base de datos';
+    el.classList.add('bg-gray-50', 'text-gray-500');
+}
+
 
 async function fetchCourseInfo(codigo) {
     console.log('Fetching course info for:', codigo);
+
     try {
         const res = await fetch(`${API_BASE_URL}/api/cursos/${encodeURIComponent(codigo)}`);
         console.log('Fetch response status:', res.status);
-        if (res.ok) {
-            const curso = await res.json();
-            console.log('Course data received:', curso);
-            const asigInput = document.getElementById('asig-nombre');
-            if (asigInput) {
-                asigInput.value = curso.Asignatura || '';
-                asigInput.disabled = true; // Bloqueado para que el docente no lo cambie
-                asigInput.title = "Nombre automático desde base de datos";
-            }
-            if (document.getElementById('header-asig-title')) {
-                document.getElementById('header-asig-title').textContent = 'Microdiseño: ' + (curso.Asignatura || '');
-            }
-            const prereqInput = document.getElementById('txt-prereq');
-            if (prereqInput) {
-                prereqInput.value = curso.Prerequisito || 'Ninguno';
-                prereqInput.disabled = true;
-                prereqInput.title = "Campo automático desde base de datos";
-                prereqInput.classList.add('bg-gray-50', 'text-gray-500');
-            }
+
+        if (!res.ok) {
+            console.warn('No se pudo obtener la información del curso.');
+            return;
         }
-    } catch (err) { console.error('Error fetching course info:', err); }
+
+        const curso = await res.json();
+        console.log('Course data received:', curso);
+
+        // Nombre de la asignatura
+        const asigInput = document.getElementById('asig-nombre');
+        if (asigInput) {
+            asigInput.value = curso.Asignatura || '';
+            asigInput.disabled = true;
+            asigInput.title = 'Campo automático desde base de datos';
+            asigInput.classList.add('bg-gray-50', 'text-gray-500');
+        }
+
+        // Título del encabezado
+        const headerTitle = document.getElementById('header-asig-title');
+        if (headerTitle) {
+            headerTitle.textContent = 'Microdiseño: ' + (curso.Asignatura || '');
+        }
+
+        // ===============================
+        // PRERREQUISITOS
+        // ===============================
+        const prerequisitos = Array.isArray(curso.Prerequisitos)
+            ? curso.Prerequisitos
+            : [];
+
+        const prereqTexto = prerequisitos
+            .map(p => p.Asignatura || p.Codigo || '')
+            .filter(Boolean)
+            .join(', ');
+
+        setAutomaticField('txt-prereq', prereqTexto || 'Ninguno');
+
+        // ===============================
+        // CRÉDITOS
+        // ===============================
+        setAutomaticField('num-creditos', curso.Creditos ?? '');
+
+        // ===============================
+        // TIPO DE ASIGNATURA
+        // ===============================
+        const tipoAsignatura = normalizarTipoAsignatura(
+            curso.Tipo || curso.TipoAsignatura || ''
+        );
+
+        setAutomaticField('sel-tipoasignatura', tipoAsignatura);
+
+    } catch (err) {
+        console.error('Error fetching course info:', err);
+    }
 }
 
 async function loadMicrodiseno(codigo, semestre) {
@@ -661,7 +906,13 @@ function checkStateUI() {
         inputs.forEach(el => el.disabled = false);
         
         // Forzar bloqueo de campos automáticos para que no se alteren manualmente
-        const lockedFields = ['asig-nombre', 'asig-codigo', 'txt-prereq'];
+        const lockedFields = [
+            'asig-nombre',
+            'asig-codigo',
+            'txt-prereq',
+            'num-creditos',
+            'sel-tipoasignatura'
+        ];
         lockedFields.forEach(id => {
             const el = document.getElementById(id);
             if (el) {

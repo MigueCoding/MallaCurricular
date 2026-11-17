@@ -40,6 +40,7 @@ namespace MallaCurricular.Core.Application.Services
                 Prerequisitos = prerequisitos,
                 c.Color,
                 c.Creditos,
+                c.Tipo,
                 c.TIS,
                 c.TPS
             };

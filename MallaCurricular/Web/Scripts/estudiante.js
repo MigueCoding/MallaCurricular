@@ -769,7 +769,7 @@ function updateGlobalSemesterLock() {
 // --- NUEVAS FUNCIONES PARA ESTUDIANTE ---
 async function fetchMisAsignaturas() {
     const estudianteId = localStorage.getItem('userId');
-    if(!estudianteId) return;
+    if (!estudianteId) return;
     try {
         const res = await fetch('http://localhost:49513/api/grupos/mis-inscripciones?estudianteId=' + estudianteId);
         const inscripciones = await res.json();
@@ -782,7 +782,7 @@ async function fetchMisAsignaturas() {
 function parseNovedades(novedadesStr) {
     try {
         let parsed = JSON.parse(novedadesStr || "{}");
-        if(parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
             return {
                 avisos: parsed.avisos || "",
                 evaluaciones: parsed.evaluaciones || [],
@@ -790,7 +790,7 @@ function parseNovedades(novedadesStr) {
                 compromiso: parsed.compromiso || null
             };
         }
-    } catch(e) {}
+    } catch (e) { }
     return { avisos: novedadesStr || "", evaluaciones: [], respuestas: [] };
 }
 
@@ -799,14 +799,14 @@ function renderMisAsignaturas(inscripciones) {
     list.innerHTML = '';
     const estudianteId = localStorage.getItem('userId');
 
-    if(!inscripciones || inscripciones.length === 0) {
+    if (!inscripciones || inscripciones.length === 0) {
         list.innerHTML = '<p class="text-gray-500 italic">No tienes asignaturas matriculadas actualmente.</p>';
         return;
     }
     inscripciones.forEach(ins => {
         const d = document.createElement('div');
         d.className = "bg-white p-6 rounded-xl shadow border border-blue-100";
-        
+
         let data = parseNovedades(ins.Novedades);
         let myResponse = data.respuestas.find(r => String(r.estudianteId) === String(estudianteId));
         let myState = myResponse ? myResponse.estado : "En Espera";
@@ -825,16 +825,16 @@ function renderMisAsignaturas(inscripciones) {
                 </tr>
             `;
         });
-        
+
         // Actions HTML
         let actionsHtml = `
             <div class="mt-4 p-4 border rounded bg-gray-50">
                 <h4 class="font-bold mb-2 text-gray-700">Mi Respuesta al Compromiso:</h4>
                 <div class="flex gap-4 items-center flex-wrap">
                     <select id="estado-${ins.GrupoId}" class="border p-2 rounded bg-white font-bold" style="color: ${stateColor}">
-                        <option value="En Espera" ${myState==='En Espera'?'selected':''}>En Espera</option>
-                        <option value="Aceptado" ${myState==='Aceptado'?'selected':''}>Aceptado</option>
-                        <option value="Rechazado" ${myState==='Rechazado'?'selected':''}>Rechazado</option>
+                        <option value="En Espera" ${myState === 'En Espera' ? 'selected' : ''}>En Espera</option>
+                        <option value="Aceptado" ${myState === 'Aceptado' ? 'selected' : ''}>Aceptado</option>
+                        <option value="Rechazado" ${myState === 'Rechazado' ? 'selected' : ''}>Rechazado</option>
                     </select>
                     <input type="text" id="obs-${ins.GrupoId}" class="border p-2 rounded flex-1 min-w-[200px]" placeholder="Añadir observaciones al docente..." value="${myResponse ? (myResponse.observacion || '') : ''}">
                     <button onclick="responderCompromiso(${ins.GrupoId})" class="bg-blue-600 text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-700 transition">Enviar Respuesta</button>
@@ -869,7 +869,7 @@ function renderMisAsignaturas(inscripciones) {
                 </table>
             </div>
             ${actionsHtml}
-            ` : '<p class="text-gray-400 italic text-sm mt-4 text-center border p-4 rounded bg-gray-50">El docente aún no ha publicado el cuadro de compromiso académico.</p>'}
+            ` : '<p class="text-gray-400 italic text-sm mt-4 text-center border p-4 rounded bg-gray-50"></p>'}
         `;
         list.appendChild(d);
     });
@@ -886,14 +886,14 @@ async function responderCompromiso(grupoId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ GrupoId: grupoId, EstudianteId: estudianteId, Estado: estado, Observacion: observacion })
         });
-        
-        if(res.ok) {
+
+        if (res.ok) {
             alert('¡Respuesta guardada con éxito en el sistema!');
             fetchMisAsignaturas(); // refresh
         } else {
             alert('Error al enviar la respuesta al servidor.');
         }
-    } catch(e) {
+    } catch (e) {
         alert('Error de conexión con el backend.');
     }
 }
